@@ -1,0 +1,126 @@
+Section-6:Disk Management
+->Partitions:
+ *Disk can be divided into parts, called partitions.
+ *Partitions allow you to separate data
+ *partitions schemes
+  1)OS 2)Application 3)User 4)Swap
+  1)OS,2)User home directories
+  As a system administrator, you decide
+ *Can protect the overall system
+ *Keep users from creating outages by using a home directory partition
+ E.G: 
+     $ df -h      (disk space usage in human readable format)
+      Filesystem   Size  Used  Avail  Use%  Mounted on
+       /dev/sda2   100G  75G   25G     75%     /
+       /dev/sda1   488M  111M  342M    25%     /boot
+       /dev/sda3   10G    10G   0      100%    /home
+->MBR: Master Boot Record
+  *Can only address 2TB of disk space
+  *Being phased out by GPT
+  *4Primry Partitions
+  *Extented partitions allow you to create logical partitions
+   
+->GPT: GUID Partition Table
+ *GUID: Global Unique Indentifier
+ *Replacing the MBR partitioning scheme 
+ *Part of UEFI
+ *UEFI: Unified extensible firmware interface
+ *UEFI is replacing BIOS
+ *There are no primary and extended partition with GPT
+ *Supports up to 128 partitions
+ *Supports up to 9.4ZB disk sizes
+ *Not supported by older operating system
+ *May require newer or special tools
+->Mount points:
+ * A directory used to access the data on a partition 
+ * /(slash) is always a mount point 
+ * /home
+     /home/Jason is on the partition mounted on /home
+ * /export/home
+    /export/home/Jason
+->Mounting over existing directory
+  mkdir /home/sarah
+  mount /dev/sdb2 /home
+ *You will not be able to see /home/sarah now.
+ 
+  umount /home
+ *You can now see /home/sarah again
+ *Mount should be done before creating sub directory.
+-> fdisk
+ *Alternatives: gdisk, parted
+ *Earlier version of fdisk did not support GPT
+  fdisk /path/to/device
+_____________________________ __________________________________
+ *fdisk -l | less  (to display list of devices)
+ *fdisk /dev/sda    (you will enter into this partition)
+ * n  : will create a new MBR partition, g: for GPT
+ *It will ask some questions about the partitions:
+   p primary (0 primary, 0 extended, 4 free)
+   e extended
+ * p : after taking the primary p partition
+ *partition default number (1-4, default 1):  Just press enter if its your first partition
+ *first sector (2048-104857599, default 2048): press enter for default
+ *last sector,{KMG} for size: +1G (leaving it  empty will assign full space)
+ *And the partition is created
+ * t  :To change partition type 
+ * l  :for list of partitions
+ * n  :for new partition 
+ * w  :to write this in disk
+_____________________________________ _________________________________
+->File Systems :It is required before any partition
+ * ext= Extended file system
+   ext2,ext3,and ext4 are later releases
+ * Other file system
+   ReiserFS
+   JFS
+   XFS
+   ZFS
+   Btrfs
+
+->mkfs : To create a file system
+  mkfs -t TYPE DEVICE
+  mkfs -t ext3 /dev/sdb2
+  mkfs -t ext4 /dev/sbd3
+         or
+  mkfs.ext4  /dev/sdb3
+ 
+ *man mkfs.xfs   : for xfs manual
+
+->Mounting with mount:
+  mount DEVICE MOUNT_POINT
+  mount /dev/sdb3 /opt
+->Manual mounts do not persist(hold firmly)
+  In order to make mounts persist between reboots, add an entry in the /etc/fstab file
+->Unmount with the unmount command
+  umount Device_OR_MOUNT_POINT
+  
+  umount  /opt
+  umount  /de/sdb3
+___________________________________ __________________________
+->Preparing swap space
+->Instead of creating filesystem and mounting it, use swap space
+  mkswap /path/to/partition/
+ #mkswap /dev/sdb1
+ #swapon /dev/sdb1  :to enable the swap partition
+ #swapon -s         :to see swap device is in use
+->/etc/fstab :The file System Table
+ * Controls what device get mounted and where on boot
+ * Each entry is made up of 6 fields
+   device
+   mount point
+   file system type
+   mount options
+   dump
+   fsck order        (file system check order)
+*E.G:
+ # device      mount   point   FS     options   dump     fsck
+  /dev/sda2 /    /             xfs    default    0        1
+  /dev/sda1     swap           swap   default    0        0
+ *If dump has "1" it will backup the file system 
+ *file system of value 1,will be checked first then for value 2
+->Viewing Labels and UUIDs
+ # lsblk -f
+ # blkid
+->labeling a file system: each file system have a labeling utility
+ # e2label /dev/sdb3 opt   (for ext file system)
+           (path)   (label)

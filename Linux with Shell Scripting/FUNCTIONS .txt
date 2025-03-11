@@ -1,0 +1,48 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>> FUNCTIONS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+->Block of code which perform some task and run when it is called.
+->Can be rescue many times in our program which lessen our lines of code.
+->We can pass argument to the method.
+
+#!/bin/bash
+
+function welcomeNote {                          or welcomeNote() {        #can be used
+echo ".................."
+echo "welcome"
+echo ".................."
+}
+
+#To call our function
+welcomeNote
+welcomeNote
+welcomeNote               # this will print function 3 times
+
+>>>>>>>>>>>>>>>>>>HOW TO USE ARGUMENT IN FUNCTION <<<<<<<<<<<<<<<<<<<<<<
+->addition() {
+local num1=$1
+local num2=$2
+let sum=$num1+$num2
+echo " sum of $num1 and $num2 is $sum "
+}
+..........
+myfun 12 13
+
+E.G:
+#!/bin/bash
+
+function welcomeNote {                          or welcomeNote() {        #can be used
+echo ".................."
+echo "welcome $1"
+echo "welcome $2"
+echo ".................."
+}
+            ($1) ($2)
+welcomenote Raju  20
+welcomenote sham  30
+....................... 
+Result:
+welcome raju 
+age is 20
+.....................
+welcome sham
+age is 30
+.....................

@@ -1,0 +1,104 @@
+>>>>>>>>>>>>>>>>>>>>>>>>> USER INTERFACE <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-> it can be used to get value from user and then process it.
+->echo " what is your $name"
+-> read <name> or <var_name>
+-> echo "your name is $name"
+
+       OR
+-> read -p "your name is:" name
+-> echo "your name is $name"
+                
+---> E.G: READ -p "what is your Name?" name
+          echo "your name is $name"
+
+>>>>>>>>>>>>>>>>>>>>>>> ARITHMETIC OPERATION <<<<<<<<<<<<<<<<<<<<
+-> Here let command is used
+->let a++
+->let a=5*10
+
+->((a++))
+->((a=5*10))
+
+----> for E.G:
+x=5
+y=10
+let mul =$x*$y
+echo "$mul"
+    OR
+x=5
+y=10
+echo " sub is $(($x-$y))"
+
+>>>>>>>>>>>>>>>>>>>>>>>>>> conditional statement <<<<<<<<<<<<<<<<<<<<<<<<
+if [[ $marks -gt 40 ]]
+then
+echo" You are Pass"
+else
+echo" You are fail"
+fi
+---> for E.G:
+read -p "your marks are :" marks
+if [[ $marks -gt 40 ]]
+then 
+echo "You are pass"
+else
+echo " You are Fail"
+fi
+>>>>>>>>>>>>>>>>>>>>>>>>>>> OPERATORS <<<<<<<<<<<<<<<<<<<<<<<<<<
+EQUAL                                        -eq / ==
+GreaterThanOrEqualTo                         -ge
+LessThanOrEqualTo                            -le
+Not Equal                                    -ne / !=
+Greater Than                                 -gt
+Less Than                                    -lt
+
+---->
+read -p "your marks are :" marks
+if [[ $marks -ge 80 ]]
+then 
+echo" first division "
+elif [[ $marks -ge 60 ]]
+then
+echo " mar ke pass "
+else
+echo " fail "
+fi
+  
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>> CASE (JUST LIKE SWWITCH) <<<<<<<<<<<<<<<<<<
+echo " HEY! Choose an option "
+echo " a= to see the current date "
+echo " b = list all the files in the current dir "
+
+read choice
+case $choice in
+     a) echo " Today date is: "
+        date
+        echo " END!!!! "
+         ;;
+     b) ls;;
+     *) echo" A non valid input "
+esac
+
+>>>>>>>>>>>>>>>>>>>>>>>> LOGICAL OPERATOR <<<<<<<<<<<<<<<<
+-> condition1 && condition2
+If both condition are true then true else false
+->condition1 || condition2
+If any of the condition is true then true
+E.G:
+#!/bin/bash
+#And operator
+read -p "what is your age:" age
+read -p "Your country:" country
+if [[ $age -ge 18 ]] && [[ $country == "India" ]]            #For numeric value we use -eq,-ge etc and for string values we use == .
+then 
+echo "you can vote"
+else
+echo " You can't vote"
+fi
+
+-> condition1 && condition2 || condition3
+Execute condition2 only when one is true else execute condition3
+E.G:
+age=18           # It can be used without writing condition
+[[ $age -ge 18 ]] && echo "Adult" || echo "Minor"
+#in this if age is above 18 ,it will give output as adult and if its less then it will give minor.

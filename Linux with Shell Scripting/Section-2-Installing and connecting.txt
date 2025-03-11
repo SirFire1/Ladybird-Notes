@@ -1,0 +1,55 @@
+ Section-2-Installing and connecting to a Linux sysem
+*Linux is an Operating system
+*Linux OS = Linux Distribution(Debian,ubunt,redhat)
+*Distro/Flavor =Distribution
+*The kernel is the core
+ its sits btw the hardware and application like a interface.
+*Linux Kernal + Apps = Distro
+*Two most popular Linux distros: Redhat and ubuntu
+*RHEL: Redhat Enetrprise Linux
+*Almalinux, Rocky Linux are free redhat Linux deravatives 
+*Redhat :banks, Airlines, Telecom, Healthcare, Government
+*Ubuntu: startups, SaaS, Social Networks, Cloud Based
+*some other Linux versions:
+ Linux Mint, Manjaro, Pop!_os, fedora, Debian, openSUSE, Arch Linux, Slackware
+___________________________ __________________________
+*WSL= Windows Subsystem for Linux
+*Alternative to creating Virtual Machines
+*Multiple Linux Distributions are available.
+*lightweight (Less resource usage than a VM)
+*Windows 10 or newer
+*virtualization setting Enabled in Bios.
+*Internet Connection
+->Installing Linux on windows using WSL
+*wsl --install
+*restart and start ubuntu commandline interface
+*Set username and pass
+*you can change font, layout, color by righ clicking on ubuntu terminal bar
+*wsl -l -o (to get list of distro that are available online)
+*wsl --install -d Debian (just like this write any disto name)
+*wsl -l ( to list the distro that are available offline)
+->Access Linux Files and Directories from the file explorer
+*click on file explorer and there you will find below a Linux logo
+*there you can access all the files of the distros that are available 
+->Remove Linux Distributions from WSL
+*wsl --unregister Debian
+*now the files have been removed and you just need to remove the application.
+->OVA :Open Virtual Appliance File
+*It is preconfigerd Virtual Machine, packaged in a single file and ready to be imported. (like: linuxtrainingacademy.com/ova) 
+*now extract the file(7-zip)
+*then insert it into virtual box
+
+->Antivirus conflicts:
+*Error in supr3hardenedWinreSpawn
+*VERR_OPEN_FAILED
+*E_FAIL(0x80004005)
+*NTCreateFile(\Device\VBoxDrvStub)failed.
+*for this disable you antivirus soft or switch to another antivirus soft
+->This kernel requires x86-64 CPU,but only detected an i686 CPU
+*for this you need to enable the virtualization and vtx for intel and amd-v for amd processor from the bios.
+
+->This kernel requires x86-64 CPU,but only detected an i686 CPU
+  this processor is unsupported in centos 7
+* the reason behind it may be you have selected wrong virtual processor(try checking version with 64-bit)
+
+-> last is rebooting your system  

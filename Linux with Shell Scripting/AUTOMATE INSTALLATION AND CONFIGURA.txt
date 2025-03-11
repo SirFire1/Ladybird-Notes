@@ -1,0 +1,28 @@
+>>>>>>>>>>>>>>>>>>>>>AUTOMATE INSTALLATION AND CONFIGURATION OF HTTPD FOR DIFFERENT OS<<<<<<<<<<<<<<<<<<<<<<<
+->step 1: Install httpd
+---->sudo yum install httpd (as a root or root privileges)
+->step 2:Change default port to some required port let say 8080
+---->cd /etc/httpd/conf/
+---->vi httpd.conf ---> Listen 80
+->The Listen 80 directive in the Apache configuration file (httpd.conf) specifies that the web server listens for incoming requests on port 80, which is the default port for HTTP. This directive is used to configure the IP address and port number on which Apache listens for incoming requests.
+
+When changing the port number, you need to:
+
+Update the Listen directive in the httpd.conf file to specify the new port number. For example, Listen 8079 to listen on port 8079.
+Open the new port in the system’s firewall configuration (e.g., iptables in Linux). This ensures that incoming requests on the new port are allowed.
+Restart the Apache service to apply the changes.
+---->sed -i 's/80/8080/'
+->The sed command sed i 's/80/8080' is used for in-place substitution, which means it modifies the original file without creating a temporary copy. Here’s a breakdown of the command:
+
+. i is an option that enables in-place editing. It’s specific to GNU sed.
+. s is the substitution command, which searches for a pattern and replaces it with a replacement string.
+. /80/ is the pattern to be searched for (the literal string “80”).
+/8080/ is the replacement string (the literal string “8080”).
+>>>>>>>>>>>>>write custom staic info for home page<<<<<<<<<<<<<<<
+----> cd /var/www/html
+----> vi index.html
+>>>>>>>>>>>>>>>>>>>>>>start/restart httpd<<<<<<<<<<<<<<<<<<<
+----> systemctl restart httpd
+>>>>>>>>>>>>>>>>>>>>>>>finaly check the status and then display the url to access the webpage<<<<<<<<<<<<<<<<<<
+->curl httpd://loaclhost:8080
+---->https://<hostname>:port_no

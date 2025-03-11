@@ -1,0 +1,294 @@
+->Section-9 :Networking
+->TCP/IP
+  Used for network communications
+  TCP=Transmission Control Protocol 
+  TCP=Establishing & maintaining the NW conversation
+  IP =Internet Protocol
+ *TCP-controls data exchange
+ *IP- sends data from one device to another
+ *Hosts-devices on a network that have an IP address
+->IP Networking:
+  For a device on a network to communicate properly,it needs three pieces of information.
+ *IP address
+   E.G: 199.83.131.186
+ *subnet mask
+   E.G: 255.255.266.0
+ *broadcast address
+   E.G: 199.83.131.255
+ *octet.octet.octet.octet
+   E.G: octet values can be from 0 to 255
+ ->IP Networking
+  *Network Address (tells the routers what network host belongs to and thus where to route data that is destined for that host)
+  *Host Address (tells router the specific device that the data should be delivered to)
+  *Each must b unique for proper routing
+  *Address Classes
+    *Used to determine the network address and host address
+->Classful Network
+  class          Network                 Host allowed
+   A           1.0->127.0                16,777,216
+               ex:17.24.88.9               
+   
+   B           128.0->191.255             65,36
+               Ex: 183.194.46.31                   
+   
+   C           192.0.0->233.255.255        255
+               Ex: 199.83.131.186
+->Subnet Mask
+  Class                    Subnet Mask
+   A                        255.0.0.0
+   B                        255.255.0.0
+   C                        255.255.255.0
+   
+          255   255  0  0
+          183   194  46 31
+         (Nertwork)  (Host)
+
+->Broadcast Address:
+ *A broadcast address is a special logical address used to send data to all hosts on a given network.
+ *In addition to their own IP addresses all network hosts receive data sent to the broadcast address.
+ *You can quickly determine the broadcast IP address by using the value of 255 in the octets, where there are zero's in subnet mask.
+ CLASS    NETWORK       SUBNET MASK     BROADCAST
+  A       17.0.0.0      255.0.0.0       17.255.255.255
+  B       183.194.0.0   255.255.0.0     183.194.255.255
+  C       199.83.131.0  255.255.255.0   199.83.131.255
+
+->Classless Inter-Domain routing /CIDR
+  IP:127.67.198.94
+     Class A network: 121.0.0.0
+     Class A subnet: 255.0.0.0
+     Class A broadcast:121.255.255.255
+*If you specify subnet mask you can alter the portion of ip adress
+  IP:121:67.198.94 Subnet: 255.255.255.0
+     CIDR network: 121.67.198.0
+     CIDR subnet: 255.255.255.0
+     CIDR broadcast:121.67.198.255
+*It allows network to be subdivided regardless of their traditional class
+*This subdivided networks are called subnets
+->Reserved Private Address Space
+*They are ranges of IP address that are dedicated for use in private network.
+*These Private  addresses are also called non-routable IPs,since they ae not routed through the public internet.
+*Another name RFC1918 addresses
+class         Range                  Private Address Space
+ A        1.0.0.0-127.255.255.255     10.0.0.0-10.255.255.255
+ B        128.0.0.0-191.255.255.255   172.16.0.0-172.31.255.255
+ C        192.0.0.0-233.255.255.255   192.168.0.0-192.168.255.255
+*You can also subnet these networks
+_______________________________ _______________________________________
+->Networking DNS and Host Name
+ * ip address: Determining your IP Address:
+  - ip addr
+  - ip a
+  - ip address show or ip a s
+ * After typing one of them, you will get  "lo" and "eth0" 
+ * The lo device is called the loop back device, it is a special virtual networking interface that a Linux use to communicate with itself.
+ * While eth0 is actual hardware device 
+  #inet values shows the ip address 
+ * ifconfig is one of the utility tool for ip address
+ * It shows ip address, netmask, broadcast address
+->Hostnames:
+  - human-readable name for an IP address
+    webprod01 = 10.109.155.174
+->DNS hostname: translates names into IP address, also the reverse of it
+ - FQDN = fully qualified domain name
+     webprod01.mycompany.com
+ - TLD: Top Level of domain
+    .com, .net, .org, etc
+ - Domains: Mostly a company or organization name
+    below(to the left of)TLD
+ - sub-domain
+    below(to the left of) the domain
+    webprod01.ny.us.mycmpany.com
+ - ".": It is also called period
+-> Display the hostname:
+  $hostname
+   webprod01
+  $uname uname -n
+   webprod01
+  $hostname -f
+   webprod01.mycompany.com
+-> Setting the hostname 
+  # hostname webprod01
+  # echo 'webprod01' > /etc/hostname(for ubuntu and redhat edit /etc/hostname)
+  # vi /etc/sysconfig/network    (for earlier version)
+    HOSTNAME=weprod01
+-> Resolving DNS Names
+  *If you want to lookup or resolve a DNS name or an IP address use:
+  # host
+  # dig
+ $ host www.mycompany.com
+   webprod01.mycompany.com has address 1.2.1.6
+ $ host 1.2.1.6
+  6.1.2.1.in-addr.arpa domain name pointer www.mycompnay.com
+-> The /etc/hosts file: contains a list IP addresses and hostnames.
+ * You can create entries in the host file by starting a line with IP address and then the name you want to translate that IP address to.
+ * FORMAT:
+   IP FQDN alias(es)
+   10.11.12.13 webprod02.mycrop.com webprod02
+ * Now you can refer to the host by name
+   webprod02.mycorp.com OR webprod02
+ * /etc/hosts is local to your Linux system .It does not propagate to the rest of the network.
+
+ * After you created an entry in hosts file you can start communicating with that IP address by using the name listed in the host file
+ * this can be useful if you want to access computers that donot have DNS hostnames for example
+ * Also its common to use /etc/entries to override the DNS entry of a system
+  for example, if you have a cluster of web servers you could have a private network that only the web cluster members can access
+ * You can create entry for member of cluster in /etc/hosts and use their private address thus forcing network communications to go through the private network.
+ * Sample /etc/hosts file
+   127.0.0.1       localhost  (used by lopp back device)
+   1.2.1.6         webprod01.mycompany.com webprod01
+   10.11.12.14     webprod02.mycompany.com webprod02
+   10.11.13.7      dbcluster
+-> /etc/nsswitch.conf
+ * Typically the /etc/hosts file is checked first before a DNS server is queried but you can change this behavior by editing the '/etc/nsswitch.conf' file.
+ * NSS = Name Service Switch 
+ * Controls the search order for resolutions or lookup are performed.
+  hosts: file dns  (etc host file is searched first then dns)
+ * If IP address found then is used and the search stops, if not found then DNS is queried) 
+ * There are other services that can resolve hostname as well like "nis"
+  hosts: file nis dns 
+_________________________________ _______________________________________
+-> Network ports:
+ * When a service starts it binds itself to a port and listen to traffic destined for it ports.
+ * Ports 1 -1,023 are well-known ports.  (1-65535)
+ * 22 - SSh
+   25 - Smtp
+   80 - HTTP
+   143 - IMAP
+   389 - LDAP
+   443 - HTTPS
+ * https://www.mybank.com
+-> /etc/services :
+   Maps port names to port numbers
+ # ssh    22/tcp      # SSH Remote Login protocol
+ # smtp   25/tcp      # SMTP
+ # http   80/tcp      # http
+ # ldap   389/tcp     # LDAP
+ # https  443/tcp     # http protocol over TLS/SSL
+ * You can also create entries for your own custom written applications that use ports.
+->DHCP : Dynamic Host Configuration Protocol
+  DHCP servers assign IP address to DHCP clients
+* When a DHCP client wants to request an IP address, it sends a broadcast message looking for a DHCP server.
+ * The DHCP server then responds to the client and provides it with an IP address and other additional information:
+  - IP Address
+  - netmask
+  - gateway
+  - DNS servers
+ * The DHCP client configure itself with this information and begins to communicate on the network.
+-> Each IP is "leased" from the pool of IP addresses the DHCP server manages.
+ * The lease expiration time is configurable on the DHCP server.(1hr,1day,1week)
+ * The clients must renew the lease if it wants to keep using the IP address. If no renewal is received, the IP is available to other DHCP clients.
+-> Configure a DHCP Client -RHEL
+   ifconfig -a or ip link
+ * The name of the file name is :
+   /etc/sysconfig/network-scripts/ifcfg-DEVICE
+   /etc/sysconfig/network-scripts/ifcfg-eth0
+   /etc/sysconfig/network-scripts/ifcfg-enp5s2
+   BOOTPROTO=dhcp
+ * The name of the file name will be "ifcfg-Network Device" name depending on the system configuration and the underlying hardware.
+-> configure a DHCP Client -Ubuntu
+ * To configure and obtain to system as a DHCP client
+  /etc/network/interfaces
+   
+   auto eth0
+   iface eth0 inet dhcp  (where eth0: network device name)
+-> Assigning  a Static IP Address -RHEL
+  /etc/sysconfig/network-scripts/ifcf-eth0
+  
+  Device=eth0
+  BOOTPROTO=static
+  IPADDR=10.109.155.174
+  NETMASK=255.255.255.0
+  NETWORK=10.109.155.0
+  BROADCAST=10.109.155.255
+  GATEWAY=10.109.155.1
+  ONBOOT=yes          (Network device to be activated on boot-time)
+
+->Assigning  a Static IP Address -Ubuntu
+  /etc/network/interfaces
+  auto eth0
+  iface ethh0 inet static
+         address 10.109.155.174
+         netmask 255.255.255.0
+         gateway 10.109.155.1
+->You can use the IP command to manually assign an IP address to a network interface to add the IP address
+ * FORMAT :
+    ip address add IP[/NETMASK] dev NETWORK_DEVICE
+    ip address add 10.11.12.13 dev eth0
+    ip address add 10.11.12.13/255.255.255.0 dev eth0
+    ip link set eth0 up
+                 or
+    ifconfig NETWORK_DEVICE addr network SUBNET_MASK
+    
+    ifconfig eth0 10.11.12.13
+    ifconfig eth0 10.11.12.13 netmask 255.255.255.0
+
+    ifconfig eth0 up
+
+-> ifup/ifdown: An easier way to bring network interfaces up and down
+   * can be used instead of ifconfig/ip
+   * distribution dependent
+   * Uses configuration files
+   * Example:
+      ifup eth0
+      ifup enp5s2
+      ifdown eth0
+      ifdown enp5s2
+   * if you make a config change, you can test your change by if up-down.
+-> GUI/TUI Tools: Alternative of manual editing network tools
+  * RedHat
+    nmtui
+    system-config-network
+  * SUSE
+    yaST
+  * Ubuntu
+    No official tool available 
+-> Network Troubleshooting:
+ * If you are having trouble connecting a host over a network, one of the first thing is to ping the host
+ * FORMAT
+   ping HOST
+   ping -c COUNT HOST
+ * Example:
+   ping -c 3 google.com
+* The ping commands send one or more ICMP packets to a host and wait for reply.
+* if the name doesn't resolve you will get an unknown host error, in that case you should use IP address of the system, you are trying to connect
+* This also mean there is a problem with resolution of the DNS name.
+* "rrt" stands for round trip time
+* 100% packet loss means no connectivity:
+ - you can try to ping local network, if i cannot ping that then i have a problem with host.(cable disconnected, network driver not updated,forgot to start network services after updating the network)
+* If i can ping my local network, then problem lies outside of system (router is down, or firewall of google is blocking our icmp)
+->traceroute: to examine the path or route the network packets take:
+  #sudo traceroute -n google.com (-n for ip address values as outputs)
+* If response packets take much time then that indicates congestion  on that particular router.
+* If "*" is received in place of response packets, that means packet is not received.
+* Some routers are configured to block traceroute data
+ 
+->Alternative to traceroute is tracepath:
+ $ tracepath -n google.com
+  1?: [LOCALHOST]    pmtu 1500
+  1:   10.0.2.2      0.470ms
+  2:   10.0.2.2      0.649ms
+  3:   192.168.1.1   2.147ms asymm 64
+________________________________ ______________________________________
+-> The netstat Command: To collect a wide variety of network information.
+  -n  display numerical address and ports
+  -i  display a list of networks interfaces
+  -r  display the route table.(netstat -rn)
+  -p  display the PID and program used. (sudo netstat -r ) 9for ports)
+  -l  display listening sockets. (netstat -nlp) (what process are listening o what ports)
+  -t  Limit the output to TCP (netstat -ntlp)
+  -u  limit the output to UDP (netstat -nulp)
+-> Packet sniffing with tcpdump: to examine the contents of network traffic to ensure payloads are actually being deliverd.
+ #tcpdump
+   -n display numerical address and ports
+   -A display ASCII(text) output
+   -v verbose mode. Produce more output
+   -vvv Even more verbose output
+-> Telnet: can be used to initiate a TCP connection to a host on specific port.
+* If you are unable to ping google.com, telnet can be used to see if google accepting web traffic, by connecting to HTTP port.
+   telnet HOST_OR_IP PORT_NUMBER
+  $ telnet google.com 80
+ *here you can request web page by using "GET/" for home page and similarly for other pages.
+ * To exit "ctrl+]" and write exit.
+ * In case of operation timed out: could be traffic is silently getting dropped before reaching port or port is not open on that host.
+ * In case of connection refused message that means port is being blocked by the firewall.
+ 

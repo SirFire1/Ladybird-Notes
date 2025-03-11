@@ -1,0 +1,64 @@
+->SECTION-12:Advanced Command Line Skills -command line Kung Fu
+-> Tab completion:
+ *can save your typing
+ *can provide a list of choices
+ *Works with commands
+ *Works with file and directory names
+ *Works with argument to commands
+ #  ./etc/bash_completion  (to enable localy)
+ #  sudo vi /etc/bash.bashrc 
+->Repeat as root
+ * If you typed a command that required sudo permission, no need to retype that command, just type:
+ $ sudo !!
+ # "!!" : event designator
+ $ sudo !w (string of previous commands)
+ $ su -c "!!"
+->Rerun a Command Starting with a string:
+ *Synatx:
+  !<STRING>
+ *EXAMPLES:
+  !d
+  !du
+  !df
+ ->Reuse the argument of a command
+  # touch file1 file2 file3
+  # ls !*
+    ls file1 file2 file3
+->Strip out comments and blank lines
+ # grep -Ev '^#|^$' file.txt (E-extended regular expression, v for inverted matches, where "^" represents the begin. of lines, so if a line began with # or blank line,"$" represents the end of the line )
+->Reuse the last item of the previous command
+ #mkdir restore
+ #cd !$
+  cd restore
+ $ sudo useradd -m -s /bin/bash jimmy
+ $ sudo passwd !$
+ $ sudo chage -M 60 !$   (now user have to change passwd after 60 days)
+ $ sudo chage -l !$       (to listthe changes)
+__________________________ _______________________________________
+->Connect to Linux over network with SSH
+ *Connect over the network
+ *SSH: Secure Shell
+ *windows: PuTTY
+ *Mac: Terminal/ssh command line utility
+ # ps -ef| grep sshd
+ # sudo service ssh start (to start ssh if not running)
+______________________________ ________________________________________
+->Installing NGINX, MYSQL, PHP and Wordpress on Ubuntu
+ *LTS = Long Term Support
+ *Released every 2 years
+ *Supported for 5 years
+ *LTS release are even numbered versions with a minor version of .04.
+ *Version represents year and month.
+   20.04 = April, 2020
+ *Example LTS releases:
+   18.04 LTS (Also 18.04.1, 18.04.2, etc.)
+ *Example LTS releases:
+   18.04 LTS
+   20.04 LTS
+   22.04 LTS
+ *Ubuntu Developer Releases
+ *Non LTS versions are developer releases
+   20.10
+   21.04
+ *Released every 6 months
+ *Supported for just 9 months

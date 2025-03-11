@@ -1,0 +1,82 @@
+>>>>>>>>>>>>>>>> LOOPS <<<<<<<<<<<<<<<<<<<<<
+for i in 1 2 3 4 5     # or {1..5} can be used
+do
+echo "number is $i"   # This will print all the i values one by one.
+done
+for name in Raju Sham Baburao
+do
+echo "name is $name"     # output: name is Raju , name is Sham , name is baburao
+
+>>>>>>>>>>>>>>>>>>>>>>Iterate values from file<<<<<<<<<<<<<<<<<<<
+->items="home/paul/file.txt"    #Enter the path of the file you want to extract
+for item in $(cat $items)
+do
+echo " item is $item"
+done
+
+>>>>>>>>>>>>>> for loop with Array <<<<<<<<<<<<<<<
+myArray=(1 2 3 hello hi )
+length=${#myArray[*]}
+for (( i=0;i<$length;i++ ))
+do
+echo "Value of array is: ${myArray[$i]}"
+done
+
+>>>>>>>>>>>>>>>>>>>>>while loop<<<<<<<<<<<<<<<<<<<<
+count=0
+num=10
+while [[ $count -le $num ]]
+do
+echo " numbers are : $count "
+let $count++
+done
+
+>>>>>>>>>>>>>>>>>>>>>Until loop<<<<<<<<<<<<<<<<<<<<<<<<
+a=10
+until [[ $a -eq 1 ]]
+do
+echo " value of a :$a "
+let a--
+done
+
+>>>>>>>>>>>>>>>>>>>Infinite Loop<<<<<<<<<<<<<<<
+while true
+do
+echo " hi "
+sleep 2s
+done
+
+    OR
+for [[ ;; ]]
+do
+echo " hi "
+sleep 2s
+done
+>>>>>>>>>>>>>>>>>>>>> While loop to read file<<<<<<<<<<<<<<<<<
+while read myVar
+do
+echo $myVar
+done < file_name            # file name reference
+
+-> To read content from a csv file
+vi test.csv              # creating a csv file
+id,name,age
+01,paul,20
+02,nitin,30
+03,raju,40
+..............
+->while_with_csv.sh                          # creating bash file
+ 
+While IFS="," read id name age                #ifs =internal field seprator
+do
+echo $id
+echo $name
+echo $age
+done < file_name.csv
+           OR
+cat file_name.csv |awk 'NR!=1 {print}' | while IFS="," read id name age 
+ do
+echo $id
+echo $name
+echo $age
+done     

@@ -1,0 +1,158 @@
+>>>>>>>>>>>>>>>>>>>>Projects<<<<<<<<<<<<<<<<<<<<<<<<<<
+-> MONITORING FREE RAM SPACE
+->free -H : It shows how much space is available and utilized in human readable form.
+->free -mt
+->free -mt | grep "Total" : IT will grab total free space value from Megabites total.
+->free -mt | grep "Total" | awk '{print $4}' :This print us only the free value.
+
+->vi Ram_status.sh
+#!bin/bash
+FREE_SPACE=$(free -mt | grep "Total" | awk '{print $4}')
+TH=500
+
+if [[ $FREE_SPACE -lt $TH ]]
+then 
+echo " WARNING, RAM IS RUNNING LOW "
+esle
+echo " RAM SPACE IS SUFFICIENT: $FREE_SPACE MB "
+fi
+..........................................
+->MONITERING FREE DISCK SPACE AND SENT AN ALERT EMAIL
+->df :stands for diferrent file system memory
+->df -H | egrep -v "tmpfs" :this will only show needed files and remove temprary files.
+->df -H | egrep -v "tmpfs" | grep "sda2" | awk '{print $5}' : this will print our desired boot used value.
+-> df -H | egrep -v "tmpfs" | grep "sda2" | awk '{print $5}' | tr -d % : now to remove %
+
+-> vi free_space.sh
+#!bin/bash
+FU=$(df -H | egrep -v "tmpfs" | grep "sda2" | awk '{print $5}' | tr -d %)
+To="ritikharma000786@gmail.com"
+if [[ $FU -ge 80 ]]
+then
+echo " WARNING, DISCK SPACE IS LOW -$FU % " | mail -s "Dicsk space alert!" $TO
+else
+echo " ALL GOOD "
+fi
+>>>>>>>>>>>>>>>>>>>>>>>>ARCHICE OLDER FILES OR ARCHIVE LARGER FILES<<<<<<<<<<<<<<<<<<<<
+-> in the given directory, if you find files more than a given size ex:20Mb or files older than given days ex:10 days
+Compress those files and move them into archive folder.
+->STEPS FOR SCRIPTS
+>provide the path of directory
+>check if directory is present or not
+>create archive folder if not already present
+>Find all files with size more than 20MB
+>compress each file
+>Move the compress file in archive folder
+>Make a cron job to run the script every to given 
+
+---->touch archive_project.sh
+vi archive_project.sh
+#!/bin/bash
+#$REVISION:001$
+#$FRI august 16 20:02:55 IST 2024$   :just print date command output here
+
+#variables
+BASE=/home/fire/find_command
+DAYS=10
+DEPTH=1
+RUN=0
+#CHECK IF THE DIRECTORY is present or not
+if [[ ! -d $BASE ]]
+then
+echo " Directory DOESNT EXIST"
+exit 1
+fi
+#CREATE ARCHIVE FOLDER IF NOT PRESENT
+ if [[ ! -d $BASE/archive ]]
+then
+mkdir $BASE/archive
+fi
+#find the list of file larger than 20mb
+for i in 'find $BASE -maxdepth $DEPTH -type f -size +20M'             #for older files  use time 20-30 days
+do
+if [[ $RUN -eq 0 ]]
+then echo " [$(date "+%y-%m-%d %H:%M:%S")] archiving $i ===> $BASE/archive
+gzip $i || exit 1
+mv $i.gzip $BASE/archive || exit 1
+fi 
+done
+
+>>>>>>>>>>>>>>>
+$for cron job to run script
+->chmod 777 archive_project.sh
+->crontab -e
+05 01 * * * /home/fire/archive_project.sh
+->crontab -l : to check
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>CREATING LOCAL USER<<<<<<<<<<<<<<<<<<<<<<<<<<
+->Requirement:
+>Script should be run with root user else exit with status 1 and error message
+>Script will take first argument as user rest as comment
+>Auto generate password for the user
+>upon successful execution of script, display the following
+>username:<username>
+>password:<auto_generated_password>
+>host:
+----->STEPS<-----------
+->check if the script is being executed with superuser privilege
+->If the user doesn't supply at least one argument then, then give them help
+->The first parameter is the username.
+->The rest of the parameter are for the comment
+->Generate  a password
+->create the user with the password
+->Check to see if user add comment successfully
+->Set the password
+->check to see if the password command succeeded
+->force password change on first login
+->Display the username, password and the host where the user is created
+...........
+->touch user_make.sh
+->vi user_make.sh
+#!/bin/bash
+#Script should be run with root user else exit with status 1 and error message
+if [[ "${UID}" -ne 0 ]]
+then
+echo "Plz run with sudo or root"
+exit 1
+fi
+#User should provide at least one arguments user else guide him
+if [[ "$[#]" -lt 1 ]]
+then 
+echo "Usage: ${0} USERNAME_COMMENT.."
+echo 'Create a user with name USERNAME AND comments field of the comment' 
+exit
+fi
+#Store first argument as username
+USER_NAME="${1}"
+echo "USER_NAME"
+#In case of more than one argument store it as commnet
+shift
+COMMNET="${@}"       #It will include all the leftover comments
+echo $COMMNET
+#Create a password
+PASSWORD=$($date +%s+%N)       #where date will provide the date and time in Linux format, while N is for nano sec.
+
+#CREATE THE USER
+useradd -c "${COMMENT}" -m USER_NAME     # where -c is for comment
+#Check if user is successfully created or not
+if [[ $? -ne 0 ]]       # $?  stands for status
+then
+echo 'Account could not be created'
+exit
+fi
+#Set the password for user
+echo $PASSWORD | passwd --stdin $USER_NAME
+if [[ $? -ne 0 ]]
+then
+echo 'Passwrd could not be set'
+exit 1
+fi
+#Force password change on first login
+passwd -e $USER_NAME
+#Display the username, password, and the host where user was created
+echo
+echo "Username : $USER_NAME
+echo
+echo "Password: $PASSWORD
+echo
+echo "Hostname: $(hostname)"

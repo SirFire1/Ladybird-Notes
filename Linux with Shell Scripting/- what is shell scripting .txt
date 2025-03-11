@@ -1,0 +1,105 @@
+-> what is shell scripting ?
+->shell scripting is a group commands written in sequence to automate, it provides an enviournment to the user to execute commands and interacts with kernel.
+      ->your 
+             Regular boring stuff
+                    or
+              Repetitive work
+->A shell is a program that provide a interface b/w a user and operating  system kernel.
+-> An OS starts` a shell for each user when the user opens the terminal or login into the system.
+->most available shell on Linux /Unix operating  system are
+-->Bash shell
+-->ksh shell
+-->Sh shell
+-->C shell etc
+-> Shell scripting can be achieved using scripting language like
+-->shell scripting
+-->python scripting
+-->yaml scripting for ansible
+-->perl scripting
+-->ruby scriptinng
+
+-> NOTE: which $SHELL command will give the current shell and cat /etc/shells for all available shell.
+
+-> why bash shell ?
+->bash shell is advance shell
+->bash is an sh-compatible shell that incorporates useful features form the korn shell (ksh) and C shell (csh)
+->#!/bin/bash: is the interpreter line for bash shell.
+-> uname -a or cat /etc/os-release : to operating system details
+-> echo $0 or which $shell : TO KNOW THE current shell assigned
+-> cat /etc/shells : will show different shells
+>>>>>>>>>>>>>>>>>>>>>>>>>HOW TO AUTOMATE THESE TASKS ? <<<<<<<<<<<<<<<<<<<<<
+->Get all manual steps(commands)
+->Write a shells script
+->Now execute shell script
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+-> make sure script has execute permission, where ls -ltr is used see permission of the file and then chmod can be used.
+->Run using
+  ./script.sh
+  /path/script.sh
+  /bash script.sh       -->E.G: /bash 01_basic.sh
+-> crtl+c to terminate
+-> crtl+z to stop
+_____________________________________________________
+->USING # : # this is comment.
+->MULTILINE COMMENT : <<comment
+                      ........
+                      your comment here
+                      ...........
+                       comment
+-> VAR_NAME= VALUE
+-> VAR_NAME=$(hostname)
+->echo $hostname
+  E.G: name: "Ritik"
+       age:22
+ echo" MY name is $name and i am $age year old" 
+.Result: MY name is Ritik and i am 22 year old
+       name ="Ritik sharma"
+ echo" MY name is $name and i am $age year old"
+.Result: MY name is Ritik sharma and i am 22 year old
+->>>>>>> Var to store output of a command<<<<<<<<<<
+->HOSTNAME=$(hostname)
+  echo " Name of this machine is $hostname "
+-> Once you have defined the variable and dont want to change it until the end of the script:
+    . readonly var_name ="Ritik"
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ARRAYS <<<<<<<<<<<<<<<<<<<<<<<<<<
+-> How to define an array?
+-> myArray =( 1 2 "Ritik this side.")     (here space seprated values are used while in other program lng commas are used.)
+
+-> How to get values from array?
+->echo "${myArray[0]}"
+->echo "${myArray[1]}"
+->echo "${myArray[2]}"
+
+-> How to get length of array?
+->echo " Lenght of array is: ${#myArray[*]}"    (Here # is used to define length and * is used for all values.)
+
+-> how to get specific value? 
+->echo"${myArray[*]:0}"
+->echo"${myArray[*]:0:3}"   ( where first zero select the index no. ,then 2 selects the no. of values)
+----->result: 1 2 Ritik this side.
+-> how to update an array?
+-> myArray+= ( 5 6 8 )   ( this will add new index)
+------->result: 1 2 Ritik this side. 5 6 8
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>ARRAY KEY-VALUE  PAIRS<<<<<<<<<<<<<<<
+-> declare -A myArray
+->myArray=( [name]=paul [age]=20 )
+->echo "${myArray[name]}"
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>STRING OPERATIONS<<<<<<<<<<<<<<<<<<<<
+->myVar="Hey Ritik , what's up !"
+->myVarLength=${#myVar}   ( here we stored myVar char length in myVarLength)
+-> echo" my length is: $myVarLength"
+->upper=${x^^}
+->echo " upper case is: ($myVar^^)"
+->lower=${y,,}
+->echo " lower case is: ($myVar,,)"
+->replace=${myVar/World/Buddy}
+->newVar={$myVar/Ritik/Sharmaji}
+->echo=" my new name is: $newVar"
+->slice=${myVar:6:11}
+-> echo" AFETR SLICE: ${myVar:10:11}"    (note: empty space also count as variable no.)
+
+
+

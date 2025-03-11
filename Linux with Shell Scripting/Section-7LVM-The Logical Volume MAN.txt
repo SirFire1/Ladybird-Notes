@@ -1,0 +1,126 @@
+Section-7:LVM-The Logical Volume MANAGER
+->The logical volume manager introduces extra layers of abstraction between the disk or storage devices presented to the Linux system and the file system  placed on those disks or storage devices.
+->Flexible capacity:
+ *You can create file system that extends across multiple storage devices.
+ *You can aggregate multiple storages devices into a single local volume.
+ E.G: /var =150GB
+->Easily Resize Storage While Online
+  *Expand or shrink file system in real-time while the data remains online and fully accessible.
+->Online Data Relocation:
+  *Easily migrate data from one storage device to another while online
+->Convenient device Naming:
+  *You can use human-readable devices names of your choosing.
+   /dev/vg_database/lv_db_logs vs/dev/sdb3
+->Disk Striping:
+  *Increase throughput by allowing your system to read data in parallel.
+       /data
+->Data Redundancy/ Data Mirroring:
+  *Increase fault tolerance and reliability by having more than one copy of your data.
+->Snapshots:
+  *Create point-in-time snapshots of your filesystems.
+__________________________ ____________________________________________
+->Layers of Abstraction:
+  *Physical Volumes(PV):first layer of abstraction.
+   These are storage devices used by LVM
+  *Volume Groups(VG):It is made up of one or more physical volumes
+  *logical volume(LV):They are created from a volume group
+    You create file system on top of it
+->Logical Volume Creation Process
+  *Create one or more physical volumes
+  *Create a volume group from those one or more physical volumes
+  *Create one or more logical volumes from the volume group
+ -> 
+  su -
+  lvmdiskscan   (this command shows you all the storage devices that have the ability to be used with LLVM
+  lsblk  -p      (shows storage device with partition PATH)
+  df -h 
+  fdisk -l
+  pvcreate /dev/sdb             (to create a physical volume)
+   pvs                           (to see list of pv)
+  vgcreate vg_ritik /dev/sbd     (to create volume group)
+           (desired)(pv) 
+   vgs                            (to view volume groups)
+  lvcreate -L 20G -n lv_ritik vg_ritik (to create logical volume)
+            (size) (name new) (old)
+   lvs or lvdisplay                  (to view logical volume)
+
+_________________________ _______________________________________
+-> Create a file system and mount it on logical volume:
+  mkfs -t ext4 /dev/vg_ritik/lv_ritik
+  (file system)(logical volume)
+   mkdir /data       :mount point       
+   mount /dev/vg_app/lv_ritik /data :mount the path to mount point
+   df -h /data    
+ *then use rest of lvcreate to allocate rest of the space for new logical volume
+  lvcreate -L 20G -n lv_sharma vg_ritik
+  mkfs -t ext4 /dev/vg_ritik/lv_sharma
+  mkdir /sharma     (mount point)
+  vi /etc/fstab    (to mount on boot time)
+   *  /dev/vg_ritik/lv_sharma /sharma ext4 defaults 0 0
+                                      (filesystem type)
+  mount /sharma
+  df -h /sharma or lvsdisplay :will show the path to use device
+  vgs     : to see how much volume is left in volume group
+
+-> To create log files:
+   #lvcreate -L 10G -n lv_logs vg_ritik (not able to create because of reserved 4.00MiB)
+   #Each of our logical volume are divided into logical extents(LE)
+   #logical volume manager just changes the number of underlying logical extents.
+   #lvdisplay -m     (map view of logical volume and extent)
+   #Similarly PV's are divided into PE's
+   #pvdisplay -m     (map view of physical volume and extent)
+   # not usable 4.00MiB :is for of metadata and alignment disk of disk sector
+   #vgdispaly         (To check the memory that is available)
+   #lvcreate -l 100%FREE -n lv_logs vg_ritik  ("l" to assign logical extents free space)
+   #lvs                (to check all the logical volumes been created)
+-> To extend logical volume
+   #lvmdisk             (to get another disk )
+   #pvcreate /dev/sdc
+   #vgextend vg_ritik /dev/sdc
+   #vgs                  (to see we have free space )
+   #pvs              (to see that both sdb and sdc "PV's" have been assigned to vg_ritik)
+   #df -h /data      (to see space on file system)
+   #lvextend -L +5G -r /dev/vg_ritik/lv_ritik   (lv size has been extended)
+   #lvs
+   #df -h /ritik     (To see new size file system)
+  #If you resize without "-r" then it might show on lvs but not on the filesystem
+  #For this error use : resize2fs /dev/vg_app/lv_data
+  #lvdisplay -m /dev/vg_app/lv_data (view file system that expands multiple storage devices)
+  ___________________________________ _____________________________________________
+->  To create multiple Volume groups
+   #pvcreate /dev/sdd /dev/sde      (to storage devices being assigned at a time)
+   #pvs
+   vgcreate  vg_safe /dev/sdd /dev/se
+    vgs
+   #Mirrored logical volume (exact data will be stored on two devices)
+   #lvcreate -m 1 -L 5G -n lv_secrets vg_safe
+            (mirror)
+   #lvs      (you will see cpysync)
+   #It helps in repair the disk data in case of failure from copy disk
+   #It creates raid one array which creates two metadata sub vol (rwi-a-r--- 5.00g)
+   #pvdisplay
+   #mkfs -t ext4 /dev/vg_safe/lv_secrets
+   #mkdir /secrets
+   #mount /dev/vg_safe/lv_secrets /secrets
+   #df -h /secrets
+   #Now any data we will write on vg_secrets/lv_secrets will be managed by LVM
+ ___________________________________ ______________________________________________
+->Removing logical volumes, Physical volumes, and Volume Groups
+ #umount /secrets
+ #lvremove /dev/vg_safe/lv_secrets (press y and data on logical volume is gone)
+ #vgs
+ #vgreduce vg_safe /dev/sde       (Removes PV's from  VG's)
+ #pvremove /dev/sde               (Removes PV's from LVM)
+ #pvs                             (to see if "sde" is removed from PV's)
+ #vgremove                        (to remove volume group)
+ #vgs                             (to see if VG's been removed)
+ #pvremove /dev/sdd               (removing another device from LVM)
+ #pvs
+__________________________________ _______________________________________________
+->Migrating Data from one storage device to another
+ #pvcreate /dev/sde
+ #vgextend vg_ritik /dev/sde   (to assign PV's to volume group "vg_ritik")
+ #pvmove /dev/sdb /dev/sde     (to move data from one PV to another)
+ #pvs or pvdisplay /dev/sdb                         (to see that "sdb" is again free)
+ #vgreduce vg_app /dev/sdb     (PV removed from VG)
+ #pvremove /dev/sdb            (to remove PV from LVM)

@@ -1,0 +1,163 @@
+->Section 8:User Management
+->USER MANAGEMENT:
+->How to manage users and groups
+ *Accounts have a:
+  Username(or login ID) 
+  UID(user ID). This is a unique number
+  Default groups       (each user belongs to a default group)
+  Comments             (each comment for user)
+  Shell                (a shell when user logs in)
+  Home directory location
+  #All this information is stored in /etc/passwd
+   root:x:0:0:root:/root:/bin/bash
+  #The format of the /etc/passwd:
+   username:password:UID:GID:comments:home_dir:shell        (GID :Group ID)
+  #Another example:
+   joe;x:1000:1000:Joe Henderson:/home/joe:/bin/bash
+->Custom for usernames <8 characters
+ #if you use more then 8 then, it may provide error by providing UID inplace of username and viceversa
+ #E.G: ps -fu joehenderson
+       UID     PID    PPID  C   STIME   TTY    TIME     CMD
+     joehend   1182   1181  0   22:48   pts/1 00:00:00  -bash
+                         or
+      $ ps -fu joehenderson
+      UID     PID    PPID  C   STIME   TTY    TIME     CMD
+     joehend   1182   1181  0   22:48   pts/1 00:00:00  -bash
+ #less than 8 character in length by convention
+ #Case sensitive
+ #In all lowercase by convention
+ #Number are allocated in username
+ #Do not use special character
+->password are stored in /etc/shadow
+ #Encryoted password used to be stored in /etc/passwd
+ #/etc/passwd is readable by everyone
+ #Now encrypted password are stored in /etc/shadow
+ #/etc/shadow is only readable by root
+ #Prevents users trying to crack passwords.
+->UIDs
+ #The root account is always UID 0
+ #UIDs are unique numbers.
+ #System accounts have UIDs<1000
+  *configured in /etc/login.defs
+->GID
+ #The GID listed in the /etc/passwd for is the default group for an account.
+ #New files belong to a user's default group.
+ #Users can switch groups by using the "newgrp" command.
+->Comment Field
+ #Typically contains the user's full name.
+ #In the case of a system or application account, it often contains what the account is used for.
+ #May contains additional information like a phone number
+ #Also called the GECOS field.
+->Home directory:
+ #Upon login the user is placed in their home directory listed in the passwd file.
+ #If the directory doesn't exist, they are placed in "/" 
+->Shell
+ #the shell will be executed when a user logs in
+ #A list of available shells are in /etc/shells
+ #The shell doesn't have to be a shell
+ #To prevent interactive use of an account, use /usr/sbin/nologin or /bin/false as the shell.
+ #shells can be command line applications. 
+->/etc/shadow
+   root:$6$9g1IC8AYzqoZP21:16502:0:99999:7:::
+                           |     |  |    | ||(days from the pass creation)                             
+                           |     |  |    | |(days after pass has expired)
+                           |     |  |    | (days that user want to expire)
+                           |     |  |    (no of days after which pass must be changed) 
+         (username)      (passwd)| (number of days before pass can be changed)
+                                 (days since the pass was changed)
+->useradd
+   useradd[options]username
+ -c "COMMENT"  comments for the account
+ -m            creates the home directory
+ -s/shell/path The path to the user's shell
+  E.G: useradd -c "Grant Stewart" -m -s /bin/bash grant
+                                                  (username)
+->Create a password using passwd
+  # passwd grant
+  Enter new UNIX password:
+  Retype new UNIX password:
+  passwd :password updated successfully
+ #Account information for "grant"
+ # tail -1 /etc/passwd
+  grant:x:1000:1000:Grant Stewart:/home/grant:/bin/bash
+ # tail -1 /etc/shadow
+  grant:$6$iDDsgsPYtR*c2Uc.:16507:0:99999:7:::
+->More useradd options:
+  -g GROUP           Specify the default group
+  -G GROUP1,GROUPN   Additional groups
+ #E.G: 
+   # useradd -c "Edide Harris' -m -s /bin/bash -g slaes -G project eharris
+ # passwd eharris
+  Enter new UNIX password:
+  Retype new UNIX password:
+  passwd :password updated successfully
+->System or Application accounts (these accounts are not meant to be used by person)
+ # useradd -c "Apache Web Server User" -d /opt/apache -r -s /usr/sbin/nologin apache 
+ # tail -1 /etc/passwd
+   apache:x:999:999:Apache Web Server User:/opt/apache:/usr/sbin/nologin
+ # "-r" is used to create system account
+ # "-d/home/dir" to assign path of application or home directory
+->/etc/skel
+ #When using -m the home directory for the account is created
+ #The contents of /etc/skel are copied into the home directory.
+ #/etc/skel typically contains shell configuration files. (.profile,.bashrc,etc)
+ #Which are not needed for application accounts in many instances.
+->Use -u to specify the UID
+ #Creating an account to be used by MYSQL
+ # useradd -c "MySQL Server" -d /opt/MySQL -u 97 -s /usr/sbin/nologin mysql
+ # tail -1 /etc/passwd
+  mySQL:x:97;1003:MySQL Serevr: /opt/MySQL:/usr/sbin/nologin
+ #Its a common practice to use the same UID for an account across multiple system.
+ #This makes syncing data or sharing data easier to do, as Linux uses UID's to determine a file ownership.
+->userdel[-r]username
+ #ls /home
+  eharris grant
+ #userdel eharris              (to delete user account)
+ #ls /home
+  eharris grant
+ #userdel -r grant             (to delete user directory)
+ #ls /home
+  eharris                      (only eharris dir is left)
+->To update, or modify, an existing account
+   usermod [options] username
+ -c "COMMENTS"     Commnets account
+ -g GROUP          Specify the default group
+ -G GROUP1,GROUPN  Additional groups
+ -s /shell/path    Path to the user's shell
+
+ ->E.G:
+   #grep MySQL /etc/passwd 
+   mysql:x:97:1003:MySQL Server:/opt/MySQL:/usr/sbin/nologin
+   #usermod -c "MySQL User" MySQL
+   #grep mysql /etc/passwd
+    mysql:x:97:1003:MySQL Server:/opt/MySQL User:/usr/sbin/nologin
+ ->The Group details are stored in /etc/group file
+   root:x:0:
+   sales:x:1001:john,mary         (for pass "/etc/gshadow" file)
+   The format of the /etc/group file:
+   group_name:password:GiD:account1,accountN
+  #If an account GID is listed in default group in etc/passwd, it is listed in that account even if it is not in /etc/group.
+ ->To display a group member belong to:
+   groups[username]
+  #groups root
+   root
+ ->groupadd[options]group_name
+  #groupadd web
+  #tail -1 /etc/group
+   web:x;1003
+  #groundadd -g 2500 db
+  #tail -1 /etc/group
+  db:x:2500:
+  #groupdel group_name     (to delete a group)
+  #groupmod [options] group_name       (to change properties of group)
+   -g GID          change the group ID to GID
+   -n GROUP        Rename the group to GROUP
+  #E.G:
+   #grep web /etc/group
+    web:x:1003:
+   #groupmod -g 1234 web
+   #grep web /etc/group
+    web:x:1234
+   #groupmod -n http web
+   #grep http /etc/group
+    http:x:1234:

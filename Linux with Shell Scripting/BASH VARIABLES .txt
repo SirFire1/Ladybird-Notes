@@ -1,0 +1,31 @@
+>>>>>>>>>>>>>>>>>>>>>> BASH VARIABLES <<<<<<<<<<<<<<<<<<<<<<<<<
+-> Random : A random integer b/w 0 and 32767 is generated
+----> echo $RANDOM
+     or
+#generating a random no. btw 1 and 6
+N0 =$ (( $RANDOM%6 + 1 ))
+echo " Number is : "
+
+-> UID : user id of the user logged in
+----> echo $UID
+      or
+if [[ $UID -eq 0 ]]
+then
+echo " user is root"
+else
+echo " user is not-root"
+
+>>>>>>>>>>>>>>>>>>>>>> REDIRECTION IN SCRIPTS <<<<<<<<<<<<<<<<<<<<<<
+-> ls > all_file.txt : this will transfer all ls files in single file that you want.
+-> date >> all_file.txt: where single > overwrites the file on the other hand double >> is like add-ons.
+  
+>>>> 
+#!/bin/bash
+ping -c l www.google.com > redirect.log        # to store the automated script command after running
+
+>>>>>>>>>>>>>>>>>>> DEV/NULL <<<<<<<<<<<<<<<<<<<
+-> in case we dont wanna print the output of a command on terminal or write on a file,
+    we can redirect the output to  /dev/null 
+e.g : #cd /root &> /dev/null
+
+-> echo "the name of the scrit is: ${0}" : to print the name of the script

@@ -1,0 +1,244 @@
+-> Section:11-Shell Scripting
+-> Scripts:
+  *contains a series of command
+  *An interpreter executes commands in the scripts 
+  *Anything you can type at the command line, you can pt in a script.
+  *Great for automating tasks
+ *Format:script.sh
+  #!/bin/bash
+   echo "scripting is fun"
+  __________________________
+  $ chmod 755 script.sh
+  $ ./script.sh              (script should be in your path)
+  scripting is fun
+  $
+___________________________________________________
+  Shebang
+  #!/bin/csh
+  echo "this script uses csh as the interpreter."
+_______________________________________________________
+   #!/bin/ksh
+  echo "this script uses ksh as the interpreter."
+_____________________________________________________
+    #!/bin/zsh
+  echo "this script uses zsh as the interpreter."
+
+->The interpreter executes the script:
+ $ /tmp/sleepy.sh &
+  [1] 16804
+ $ ps -fp 16804
+  UID  PID    PPID   C STIME  TTY    TIME  CMD
+ Jason 16804  16725  0 22:51  pts/0  00:00:00
+  /bin/bash /tmp/sleepy.sh
+ $ ps -ef | grep 16804 | grep -v grep
+ Jason 16804  16725  0 22:51  pts/0  00:00:00
+ $ pstree -p 16804
+  sleepy.sh(16804)----sleep(16805)
+->Shebang or Not to Shebang
+ * If a script does not contain a shebang the commands are executed using your shell.
+ * You might get lucky.Maybe .hopefully
+ * Different shells have slightly varying syntax
+->More then just shell scripts 
+  #!/usr/bin/python
+   print "This is a Python script."
+ ________________________________________________
+  $ chmod 755 hi.py
+  $ ./hi.py
+  This is a Python script.
+-> Variables 
+  *Storage location that have a name
+  *Name-value pairs
+  *Syntax:
+    VARIABLE_NAME="VALUE"
+  *Variables are case sensitive 
+  *By convention variables are uppercase
+->Variable Usage
+ #!/bin/bash
+  MY_SHELL="bash"
+  echo "I like the $MY_SHELL shell."
+______________________________________________________
+ #!/bin/bash
+ MY_SHELL="bash"
+ echo "I like the ${MY_SHELL}ing shell."
+->Assign output command to a variable
+  #!/bin/bash
+  SERVER_NAME=$(hostname)
+  echo "You are running this script on ${SERVER_NAME}."
+  
+  output:
+  You are running this script on linuxsvr
+->Variable Names:
+ *Variable names can contain letters, digits, and underscores.
+ *They can start with letters or underscore nut not with digits
+Invalid:
+    3LETTERS="ABC"
+  first-three-letters="ABC"   (because of "-")
+  first@three@letters="ABC"   (because of "@")
+_________________________________________________
+->Tests:
+  Syntax:
+    [ condition-to-test-for]
+  Exmaple:
+    [ -e /etc/passwd ]
+->File operator(tests)
+  -d FILE True if file is a directory
+  -e FILE True if file exists
+  -f FILE True if file exists and is a regular file
+  -r FILE true if file is a readable by you
+  -s FILE true if file exists and is not empty
+  -w FILE true if file exists and is not empty
+  -X FILE True if the file executable by you 
+->String operators
+  -z STRING  True if string is empty
+  -n STRING  True if string is not empty
+   STRING1 = STRING2
+       True if the strings are equal
+   STRING1 != STRING2
+       True if the string are not equal
+->Making Decision- The if statement
+   if [ condition-is-true]
+   then
+      command 1
+      command 2
+      command N
+    fi
+ E.G:
+ #!/bin/bash
+ MY_SHELL="bash"
+ 
+ if [ "$MY_SHELL" = "bash"]
+ then 
+   echo "You see to like the bash shell"
+_________________________________________
+Output:
+You see to like the bash shell
+
+->if/else:
+  if [ condition-is-true ]
+  then
+    command N
+  else
+    command N
+  fi
+E.G:
+ #!/bin/bash
+ MY_SHELL="csh"
+ 
+ if [ "$MY_SHELL" = "bash"]
+ then 
+   echo "You see to like the bash shell"
+  else
+    echo "You don't seem to like the bash shell"
+   fi
+->if/elif/else
+ if [ condition-is-true ]
+  then
+    command N
+   elif [ condition-is-true ]
+   then
+     command N
+  else
+    command N
+  fi
+ E.G:
+ #!/bin/bash
+ MY_SHELL="csh"
+ 
+ if [ "$MY_SHELL" = "bash"]
+ then 
+   echo "You see to like the bash shell"
+ if [ "$MY_SHELL" = "csh"]
+ then 
+   echo "You see to like the csh shell"
+
+  else
+    echo "You don't seem to like the bash shell"
+   fi
+-> For Loop:
+  for VARIABLE_NAME in ITEM_1 ITEM_N
+  do
+    command 1
+    command 2
+    command 3
+  done
+ #!/bin/bash
+  for COLOR in red green blue
+  do 
+  echo "COLOR: $COLOR"
+  done
+ __________________________________
+ Output:
+ COLOR: red
+ COLOR: green
+ COLOR: blue
+->After storing items in variables:
+  #!/bin/bash
+  COLORS="red green blue"
+  
+  for COLOR in $COLORS
+  do
+    echo "COLOR: $COLOR"
+  done
+->This scripts rename all of the file that end in jpg by inserting todays date before the original file name.
+ #!/bin/bash
+  PICTURES=$ (ls *jpg)
+  DATE=$ (date +%F)
+ 
+  for PICTURES in $PICTURES
+  do
+    echo "Renaming ${PICTURES} to ${DATE}
+  -${PICTURES}
+    mv ${PICTURES} ${DATE}-${PICTURE]
+  done
+->Positional parameter:
+ * Positional parameters are variables that contains the content of command line
+ * The variable are $0 through $9
+ * the scrit itself is stored in $0
+$ script.sh parameter1 parameter2 parameter3
+   
+  $0 :"script"
+  $1 :"parameter1"
+  $2 :"parameter2"
+  $3 :"parameter3"
+->Crating Archive 
+ #!/bin/bash
+ 
+  echo "Executing script: $0"
+  echo "Archiving user: $1"
+  
+  # Lock the account
+   passwd -l $1
+  #Create an archive of the home directory
+   tar cf /archives/${1}.tar.gz /home/${1}
+ 
+ $ ./archive_user.sh elvis
+ Executing script: ./archive_user.sh
+ Archiving user: elvis
+ passwd: password exipry information changed
+ tar: removing leading '/' from member names
+ 
+ #!/bin/bash
+ 
+  echo "Executing script: $0"
+  for USER in $@
+  do
+   echo "Archiving user: $USER"
+  # Lock the account
+   passwd -l $USER
+  #Create an archive of the home directory
+   tar cf /archives/${USER}.tar.gz /home/${USER}
+  done
+-> Accepting User Input(STDIN)
+  The read command accepts STDIN
+  Synatx:
+        read -p "PROMPT" VARIABLE
+
+  #!/bin/bash
+ 
+  read -p "ENTER  a user name: " USER
+  echo "Archiving user: $USER"
+ 
+  # Lock the account
+   passwd -l $USER
+  #Create an archive of the home directory
+   tar cf /archives/${USER}.tar.gz /home/${USER}

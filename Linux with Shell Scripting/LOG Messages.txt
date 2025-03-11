@@ -1,0 +1,36 @@
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>LOG Messages<<<<<<<<<<<<<<<<<<<<<<<<<
+-> if you want to maintain logging for your script, you can use logger in your script.
+->You can find the logs under 
+=> sudo less var/logs/messages
+Example: #logger "Hey Buddy"
+
+>>>>>>>>>>>>>>>>>>>Debugging scripts<<<<<<<<<<<<<<<<<<<<<
+->If we can enable the debugging of the script using below in the script
+
+    set -x : just write it in top of your code and will tell user what input is required or what is wrong with the input it has provided.
+E.G:
+
+#!/bin/bash
+#to  access the arguments
+if [[ $# -eq 0 ]]
+then 
+echo " Please provide an argument"
+exit 1
+echo "first argument is: $1"
+echo "Second argument is: $2"
+
+echo " All the arguments: $@"
+echo " No of arguments are: $#"
+
+result: bash argument_file.sh   (here user has not provided any argument)
+
+[[ $# -eq 0 ]]
+echo " Please provide an argument"
+Please provide an argument
+exit 1
+..............
+-> set -e : If we want to exit our script when command fail
+
+>>>>>>>>>>>>>>>>>RUNNING SCRIPTS IN BACKGROUND<<<<<<<<<<<<<<<<<
+-> chmod +x (filename.sh)    : to change file authority to executable
+-> nohup./(filename.sh) & : it will run your filesccript in background and the output will be stored in nohup.out by default but can be changed.

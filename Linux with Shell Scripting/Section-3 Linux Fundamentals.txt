@@ -1,0 +1,442 @@
+        Section-3 Linux Fundamentals
+->The Linux directory structure
+ /   "Root", the top of file system hierarchy.
+ /bin  Binaries and other executable programs
+ /etc  system configuration files
+ /home home directories
+ /opt  optional or third party software
+ /tmp  temporary space, typically cleared on reboot
+ /usr  user related programs 
+ /var  variable data, most notable log files
+->comprehensive Linux directory listing:
+ /boot   Files needed to boot the operating system (Linux kernel)
+ /cgroup control Groups hierarchy
+ /dev    Device files, typically controlled by the operating  system and the system administrators.
+ /export  shared filed system
+ /lib     system libraries
+ /lib64   system libraries, 64 bit
+ /lost+found: used by a file system to store recovered files after system media
+ /media   used to mount removable media(CD-ROMs,USBs)
+ /mnt     used to mount external file system
+ /proc    provide info about running processes 
+ /root    home directory for the root account
+ /sbin    system administrator binaries
+ /selinux: used to display information about SELinux
+ /srv     contains data which is served by the system
+ /srv/www : web server files 
+ /srv/ftp :  ftp files
+ /sys       used to display and sometimes configure the devices known to the kernel
+ /tmp       Temporary space, typically cleared on reboot.
+ /usr       user related programs, libraries, and docs.
+ /usr/bin   Binaries and other executable programs
+ /usr/lib   libraries
+ /usr/local: locally installed software that is not part of the base operating system
+ /usr/sbin   system administration binaries
+ /var        variable data, most notably log files.
+ /var/log    log files
+->locally Installed : Application Directory Structures
+  /usr/local/crashplan/bin
+  /usr/local/crashplan/etc
+  /usr/local/crashplan/lib
+  /opt/google/chrome
+  /usr/local/bin/myapp
+  /usr/local/etc/myapp.conf
+  ________________________ ____________________________
+->What is the Shell:
+  The shell is the default interface to Linux
+  A program that accepts your commands and executes those commands
+  Also called a command line interpreter
+  The default interface to Linux
+->The command line interface vs a GUI
+  The command line is more powerful
+  There will always be a command line
+  Server distribution do not include GUIs
+  Connect over Network through ssh etc
+  Desktop distribution have GUIs and CLIs
+->tilde expansion
+ ~Jason  = /home/Jason
+ ~pat = /home/pat
+ ~root = /root
+ ~ftp = /var/ftp
+->The prompt
+[Jason@linuxsvr ~] $   :[username@linuxsevrername (home)] $
+_
+[root@linuxsvr:~]#     : root for superuser
+ Root access is given to system administrator
+_________________________ ___________________________________
+->Essential Linux Commands
+pwd        Displays the present working directory.
+cd [dir]   Changes the current directory to dir.
+ls         lists directory contents
+ls  -l     lists a detailed lists of directory
+cat        Concatenates and display the content of files
+clear      clears the screen
+man        display the online manual for command
+->man keyboard commands
+space : display the next page
+q     : quit
+exit  : Exits the shell or your current session
+g : to go to top of the page
+G : to go to bottom of the page
+_______________________ _____________________________________
+->Environment variables
+ *storage location that has a name and a value
+ *Typically uppercase 
+ *Access the contents by executing: echo $VAR_NAME
+->PATH:
+ *AN environment variable
+ *Controls the command search path
+ *Contains a list of directories
+E.G: echo $PATH
+/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/home/Jason/bin
+->which: locates a path of command
+  $ which cat
+   /bin/cat
+-> add --help or -h to get help
+-> man -k SEARCH_TERM
+_________________________________ _________________________________
+->Directories:
+ *Are Containers for other files and directories
+ *Provide a tree like structure
+ *Can be accessed by name or shortcut
+->directory shortcut:
+  .    this directory
+  ..   the parent directory
+  cd - change to the previous directory
+  /    Directory separator(forward slash)
+-> Executing Commands
+ * $PATH determines command search path
+ * You can specify a command with a full path
+   /bin/cat sales.data            (/bin/cat is path of car command find through which command)
+ * You can execute command not in $PATH 
+   /home/Jason/my-dog/cat     
+ *./command = Execute command in this dir.
+   cd my-dog    (my-dog is not in path variable)
+   ./cat        (to execute something in current dir)
+->Creating and Removing a directory:
+  mkdir[-p] directory : to create a directory
+ e.g: mkdir -p dir1/dir2 [here -p will create parent dir then the child]
+  rmdir[-p] directory : Remove a directory
+  rm -rf dir1   : recursively removes directory
+_____________________________ _________________________________
+->Decoding ls -l Output
+$ ls -l
+  -rw-rw-r-- 1 Jason users 10400 SEP 27 08:52 sales.data
+  Permissions                       -rw-rw-r--
+  Number of links                      1   (also known as hard links, added by ln, for files 1, and fo dir 2, as one is for subdir inside dir)
+  Owner name                         Jason
+  Group name                         users
+  Number of bytes in the file        10400
+  last modification time             Sep 27 08:52
+  File name                          sale.data
+->Listing all Files, Including Hidden Files
+ *Hidden files begin with a period
+  -sometimes called "dot files"
+ *Hidden files are not display by default
+ *To show hidden files with ls, use ls -a
+ *Command options can be combined.
+ - ls -l -a is the same as ls -la and ls -al
+->Listing Files by type:
+ *Use ls -F to reveal file types.
+   /   Directory
+   @   Link
+   *   Executable
+->Symbolic Links
+ *A link points to the actual file or directory
+ *Use the link as if it were the file
+ *A link can be used to create a shortcut
+   use for long file or directory names
+   use to indicate the current version of software
+ E.g: ls -F
+     current@  sale.data my-app-2.4.5  README
+      ls -lF
+     current  -> my-app-2.4.7/  
+->List Files by Time and in Reverse
+  ls -t      list files by time
+  ls -r      Reverse order
+  ls -latr   long listing including all files reversed sorted by time
+  ls -R      lists files recursively(list content of dir and subdir)
+ *Similar to ls -R, but creates visual output.
+  tree -d    list directories only
+  tree -C    Colorize output
+ *list dir, not contents
+  ls -d       list dir names
+  ls --color  colorize the output
+->Working with spaces in Names
+ *just say no to spaces
+ *Alternatives:
+     hyphens(-)
+     Underscores(_)
+     CamelCase               (it means capitalizing first words)
+  Encapsulate the entire file name in quotes
+  E.G: ls -l "my notes.txt"    (here "" or '' handled the space btw predefined names) 
+  Use a backslash(\) to escape spaces
+->Symbolic permissions
+  $ ls -l
+  -rw-rw-r-- 1 Jason users 10400 sep 27 08:52 sale.data
+ Symbol                    type
+   -                      Regular file
+   d                      Directory
+   |                      Symbolic links
+   r                      read 
+   w                      write
+   x                      execute
+__________________________ ___________________________________
+  Permission               File                        Directory
+   Read(r)          Allows a file to be read       allows file names in the directory to be read
+   Write(w)         Allows a file to modified      Allows entries to be modified within the directory
+   Execute(E)       allows the execution of a file  Allows access to contents and metadata for entries
+->Permission Categories:
+  Symbol            Category
+    u                 user
+    g                 Group
+    o                 Other
+    a                  All
+->Groups
+ *Every user is in at least one group
+ *Users can belong to many groups
+ *Groups are used to organize users
+ *The "groups" command displays a user's groups followed by user id(fire)
+ *You can also use id -Gn
+->Secret Decoding Ring
+ -rw-r--r--:
+ -     For type
+ rw-   For User
+ r--   For Group
+ r--   For other
+->Changing Permission 
+  chmod             change mode command
+  ugoa              user category user, group, other, all
+  +-=               Add, subtract, or set permission
+  rwx               Read, write, Execute
+  E.G:  chmod g+w file.txt
+        chmod g-w file.txt
+        chmod a=r file.txt
+        chmod u=rwx,g=rx,o=rw file.txt
+->Numeric based Permisiion
+ r         w         x
+ 0         0         0          Value for off
+ 1         1         1          Binary value for on
+ 4         2         1          Base 10 value for on
+->octal      Binary      string          Description
+  0          0            ---            No permission
+  1          1            --x            Execute only 
+  2          10           -w-            Write only
+  3          11           -wx            Write and Execute only
+  4          100          r--            Read only
+  5          101          r-x            Read and execute 
+  6          110          rw-            Read and write
+  7          111          rwx            Read, write, and execute(4+2+1)
+->Order Masking
+                     U          G        O
+   Symbolic         rwx        r-x      r--
+   Binary           111        101      100
+   Decimal           7          5        4
+->Working with Groups
+ *New files belong to your primary group
+ *The chgrp command changes the grp
+ E.G: chgrp [group][filename] :I can relocate file from fire to admin
+->directory Permission Revisited:
+ *Permisiion on a directory can affect the files in the directory
+ *If the file permission look correct, start checking directory permissions
+ *Work your way up to the root
+->File creation mask:
+ *File creation mask determines default permission
+ *Default permission for directories:777
+ *Default permission for files:666
+->The umask command:
+  umask [-s] [mode]
+ *Sets the file creation mask to mode, if given
+ *use -S to for symbolic notation
+->how it works:
+                        Directory         file
+Base permission           777              666
+Subtract Umask           -022             -022
+creation permission       755              644
+->octal       Binary       Dir perm        file Perms
+   0            0            rwx            rw-
+   1            1            rw-            rw-
+   2            10           r-x            r--
+   3            11           r--            r-
+   4            100          -wx            -w-
+   5            101          -w-            -w-
+   6            110          --x            ---
+   7            111          ---            ---
+ ->Special modes:
+  *umask 0022 is the same as umask 022
+  *chmod 0644 is the same as chmod 644
+  *the special modes are:
+    setuid
+    setgid
+    sticky
+  E.g: umask : 0022  (now this deault umask will be used to create file and dir)
+       umask -S       (to see symbolic notation that has been set)
+      u=rwx, g=rx,0=rx
+
+_____________________________ _________________________________________
+->The find Command:
+  find [path] [expression]
+ Recursively finds files in path that match the expression. IF no argument are supplied, it find all files in the directory.
+  -name pattern    Find files and directories that match pattern
+  -iname patten    like -name, but ignores case
+  -ls              performs an ls on each of the found files
+  -mtime days      Find files that are days old
+  -newer file      Find files that are newer than file
+  -exec command {} \;   Run command against all the files found
+ E.G find -iname sales.data -exec cat {} \;
+     find /home/adminfire -name sales.data
+     find /usr -mtime +10 -mtime -90 (files in usr dir more then 10 and less then 90 days old)
+     find /usr -name "s*" -ls (will find files that start with "s" and execute ls )
+     find . -exec command {} \; (find all the files in current dir and execute them)
+_____________________________ _________________________________________
+-> A fast Find Locate
+  Locate pattern
+ .lists files that match pattern
+ .faster than the find command
+ .Queries an index
+ .Result are not in real time. 
+ E.G : locate upt     (instead of uptime)  
+_______________________________ ____________________________________
+->Display the contents of files
+ cat file  : Display the content of file 
+ more file : Browse through a text file.
+ less file : More feature than more.
+ head file : Output the begining (or top) portion of file
+ tail file : Output the ending(or bottom) portion of file
+->Head and Tail  
+ *Display only 10 lines by default
+ *Change this behavior with -n
+   n= number of lines
+   tail -15 files.txt
+->Viewing Files in real time
+   tail -f file : Follow the file   (for log files or files changing)
+   Display data as it is being written to the file
+
+-> Nano editor
+ Nano is a simple editor
+ Easy to laern 
+ Not as advanced as vi or emacs
+ If nano isn't available,look for pico
+ ctrl+x to exit
+ ctrl+o to save
+->Vi editor
+  vi [file]    Edit file
+  vim [file]   same as vi, but more features
+  view [file]  Starts vim in read only mode
+->Vi command Mode and Navigation
+  k               Up one line
+  j               Down one line
+  h               left one character
+  l               Right one character
+  w               Right one word
+  b               left one word
+  ^               Go to the beginning of line
+  $               Go to the end of line
+* Press esc to enter command mode
+->Vi Insert Mode
+ i    Insert at the cursor position
+ I    Insert at the beginning of the line
+ a    Append after the cursor position
+ A    Append at the end of the line
+
+-> Vi line Mode
+ :w        Writes(saves) the file
+ :w!       Forces the file to be saved
+ :q        Quit
+ :q!       Quit without saving
+ :wq!      Write and quit
+ :x        same as :wq.
+ :n        Position the cursor at line n
+ :$        Position the cursor on the last line
+ :set nu   Turn on line numbering
+ :set nonu Turn off line numbering
+ :help [subcommand] Get help
+->Vi Modes:
+  Mode      Key
+  Command   esc
+  Insert    i
+  Line      :
+->Vi - Repeating Commands 
+  Repeat a command by preceding it with a number.
+  5k =Move up a line 5 times
+  80i<Text><esc>= Inssert<Text>80times
+  80i_<esc>=Insert80"_"characters
+->Vi-Deleting text
+  x       Delete a character
+  dw      Delete a word
+  dd      Delete a line
+  D       Delete from the current position
+->Vi-Changing Text
+  r       Replace the current character
+  cw      Change the current word
+  cc      Change the current line
+  c$      Change the text from the curret position
+  C       same as c$
+  ~       Reverse the case of a character
+->Vi-Copying and Pasting
+   yy        Yank (copy) the current line
+   y(position)  Yank the <position>
+   p            Paste the most recent deleted or yanked text
+->Vi-Undo/Redo
+  u       Undo
+  ctrl-R  Redo
+->Vi-Searching 
+ /<pattern>       Start a forward search
+ ?<pattern>       Start a reverse search
+
+Vim Editor: In Vim, you can search for text using the forward-slash (/) command. For example, to search for the word “article”, you would type /article and press Enter. Vim will highlight the first occurrence of the word and you can navigate to the next match by pressing N. Additionally, Vim supports the substitute command (:s) for search and replace operations. For instance, to replace “article” with “tutorial”, you can use :s/article/tutorial/g.
+Nano Editor: In Nano, you can search for text using the Ctrl+w command. This will prompt you to enter the search term, and Nano will move the cursor to the first match. To move to the next match, press Alt+w. If you want to search and replace text, you can use Ctrl+\\ (backslash), enter the search term and the text to replace it with, and then confirm the replacements.
+
+->Deleting, Copying, Moving, and Renaming Files:
+  rm file     Remove file
+  rm -r dir   remove the directory and its content
+  rm -f file  Force removal and never prompt for conformation 
+->Copying files:
+  cp source_file destination_file (copy source file to destination) 
+  
+  cp src_file [src_fileN...] dest_dir
+     copy source_files to destination_directory
+  
+-> cp options:
+   cp -i
+    Run in interactive mode.
+   cp -r source_directory destination
+     Copy src_directory recursively to destination
+
+->Moving and renaming files
+ mv     Move or rename files and directories
+ mv source destination
+ mv -i source destination
+->Sorting Data
+  sort file         Sort text in file
+  -k -F             sort by key. F is the number
+  -r                sort in reverse order
+  -u                sort unique
+  E.G :   sort -k2 sales.data (k2 for second column)
+    f : a
+    a : b
+    g : c
+->Creating a collection of files:
+  To bundle agroup of files or dir in archive.
+  tar [-] c|x|t f tarfile [pattern]
+  create,extract or list contents of a tar archive using pattern, if supplied
+  c      create a tar archive
+  x      extract files from the archive
+  t      display the table of contents
+  v      be verbose
+  z      use compression
+  f file  use this file
+ E.G: tar cf tps.tar tpsreports (tps.tar will be the file name)
+                      (dir)
+      tar tf tps.tar   (to see the dir there)
+      tar xf /home/fir/tps.tar 9to extract the files from tar)
+->Compressing Files to Save Space:
+  gzip           Compress files
+  gunzip         Uncompress files
+  gzcat          Concatenates compressed files (to see contents of archive file)
+  zcat           Concatenates compressed files
+  or tar zcf tps.tgz tpsreport (will compress tpsreport in gz format)
+->Disk usage 
+  du         Estimate file usage
+  du -k      Display sizes in kilobytes
+  du -h      Display sizes in human readable format

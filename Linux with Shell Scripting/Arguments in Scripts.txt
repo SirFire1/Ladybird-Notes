@@ -1,0 +1,50 @@
+>>>>>>>>>>>>>>Arguments in Scripts<<<<<<<<<<<<<<<<<<<<<
+#myscript.sh arg1 arg2 ....
+
+How access this arguments inside our scripts?
+
+to get no. of argument :$#
+To display all argument :$a
+To use or display a argument: $1 $2 ....
+
+E.G:
+#!/bin/bash
+#to  access the arguments
+
+echo "first argument is: $1"
+echo "Second argument is: $2"
+
+echo " All the arguments: $@"
+echo " No of arguments are: $#"
+.......................
+-> now run filename.sh Ritik sharma ji           #where Ritik is first argument and sharma is second and similarly
+
+......................
+for arg in $@
+do
+echo "Argument is $arg"
+done
+.......................
+#for loops to access values from argument
+for username in $@
+do 
+echo "copying name - $username"
+done
+->bash loops_argument.sh test.csv myfile.csv
+->result : copying file: test.csv
+           copying file: myfile.csv
+->Right now its just echo command but it can be done to copy content of files.
+ 
+.........................SHIFT.....................
+When we pass multiple arguments, we can shift.
+A  B C
+shift
+B C
+->E.G: 
+#To create a user name provide username and description
+echo "creating user"
+echo "Username is $1"
+shift
+echo "Description is $@"  #this will print whole argument after $1
+--->bash shift_argument.sh Ritik testing system as administrator
+

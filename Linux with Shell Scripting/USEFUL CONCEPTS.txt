@@ -1,0 +1,84 @@
+>>>>>>>>>>>>>>>>>>>>>USEFUL CONCEPTS<<<<<<<<<<<<<<<<<<<<<<<
+->break: to stop the loop
+#example of break
+no=6
+for i in 1 2 3 4 5 6 7 8
+do
+if [[ $no -eq $i ]]
+then
+echo "$no is found!!"
+break
+fi
+echo "Number is $i"
+done
+->continue: to stop the current iteration of loop and start next iteration
+#Suppose we only need to print odd number
+for i in 0 1 2 3 4 5 6 7 8 9 10
+do
+let r=$i%2                   # %2 is called modlus which gives 1 for even value and 0 for odd value
+if [[ $r -eq 0 ]]
+then
+continue
+fi
+echo "odd no. is $i"
+done
+
+->>>>Result<<<<<<<<
+odd no. is 1
+odd no. is 3
+odd no. is 5
+odd no. is 7
+odd no. is 9
+-> sleep : To create delay b/w to executions ex: sleep 1s/1m
+-> stop : To stop script at a point
+E.G:
+#!/bin/bash
+#to  access the arguments
+if [[ $# -eq 0 ]]
+then 
+echo " Please provide an argument"
+exit 1
+echo "first argument is: $1"
+echo "Second argument is: $2"
+
+echo " All the arguments: $@"
+echo " No of arguments are: $#"
+
+-> exit status $? : gives you status of previous command if that was successful
+-> echo $? : just write this command on terminal, if its gives 0 value then previous command was successful otherwise for 1 its unsuccessfull.
+                          or
+E.g:
+#!/bin/bash
+read -p "which site you want o check" site
+ping -c l $site
+
+if [[ $? -eq 0 ]]
+then
+echo " successfully connected  to $site"
+else 
+echo " unable to connect to $site"
+fi
+
+...............................
+basename : strip directory info and only give filename
+e.g : basename /home/fire/file.txt ----> file.txt
+dirname : strip the filename and give the directory path
+e.g : basename /home/fire/file.txt ----> /home/fire
+realname : gives you full path of a file
+e.g : realpath test.csv-----> /home/fire/test.csv
+
+>>>>>>>>>>>>>>>>>>>>>> Check if file or dir exist <<<<<<<<<<<<<<<<<<<<<
+-> if [ -d folder_name ] : if folder exist
+-> [ ! -d folder_name ] : If folder doesnt exist
+-> if [ -f file_name ] : if file exists
+-> if [ ! -f file_name ] : if file not exists
+E.g :
+#!/bin/bash
+FILEPATH="/home/fire/file.txt"
+if [[ -f $FILEPATH ]] 
+then 
+echo " File exists "
+else
+echo " file doesnt exists "
+exit 1        Or               touch $FILEPATH
+fi

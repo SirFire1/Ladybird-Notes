@@ -1,0 +1,33 @@
+>>>>>>>>>>>>>>>>>>>>>>Automate of scipts<<<<<<<<<<<<<<<<<<<<
+       at or crontab
+-> For scheduling only one time, use AT
+ at 12:09 PM
+<your_cmnd>
+crtl+D
+
+
+E.G:
+->at 23:00 31 August 2024
+->at> bash/home/myscccript/loops.sh
+-> crtl+D on your keyboard
+-> after that it will be stored in log as loops.log
+................................
+->atq to check scheduled job
+->atrm<id> to remove the schedule
+..............................
+-> crontab -l : to check existing job
+-> crontab -e :
+* * * * * cd home/fire/scripts && ./create_file.sh
+|  |  |   | |_ day of week(0-6) (Sunday=0)
+| | |  |
+| | |  |_month(1-12)
+| | |
+| | |_day of month(1-31)
+| |
+| |_hours(0-23)
+|
+|_minute(0-59)
+
+E.G:
+16 03 * * * cd home/fire/scripts && ./loops.sh  (for * it will work everday, with cd path is given and then executable file )
+-> Again the file output will be stored at log which can be seen by ls -ltr(loop.log)
