@@ -1,0 +1,43 @@
+A proxied server typically refers to a server that is used as an intermediary between clients (e.g., web browsers) and backend servers. A "proxy" in general means a system that acts on behalf of another system. In the context of web servers, this intermediary server performs various tasks such as forwarding requests, filtering traffic, and providing caching.
+
+There are two main types of proxy servers commonly used with web servers like Nginx:
+
+1. Forward Proxy:
+A forward proxy sits between clients and the internet, handling requests from the client and forwarding them to the appropriate destination server.
+It can hide client IP addresses from the destination server (used for privacy) or filter content.
+It is not typically used with Nginx directly, but sometimes Nginx can be configured to work as a forward proxy.
+2. Reverse Proxy:
+A reverse proxy is a server that sits between client requests and one or more backend servers. When a client makes a request, it sends the request to the reverse proxy, which then forwards it to an appropriate backend server and returns the response to the client.
+
+Nginx is most commonly used as a reverse proxy server.
+
+In this case, Nginx takes the client request and forwards it to one or more backend servers (like an application server or database server). The backend servers process the request, generate a response, and send it back to Nginx. Nginx then sends the final response to the client.
+
+Why Use a Reverse Proxy (Proxied Server)?
+Load Balancing: A reverse proxy can distribute client requests across multiple backend servers to balance the load, ensuring better performance and fault tolerance.
+Security: It can hide the identity and internal structure of backend servers. Clients interact with the reverse proxy only, which can provide an additional layer of security.
+Caching: It can cache content on behalf of the backend servers, reducing the load on them and speeding up response times for clients.
+SSL Termination: The reverse proxy can handle the SSL/TLS encryption and decryption for secure HTTPS communication, offloading the work from backend servers.
+Centralized Access Control: It can act as a central point to enforce access controls, monitor traffic, and apply security policies.
+Example of Reverse Proxy Setup with Nginx:
+In a typical reverse proxy setup, Nginx can be configured to receive requests from clients and forward them to a backend server (like an application server). Here's an example of how you might configure Nginx as a reverse proxy:
+
+server {
+    listen 80;
+    server_name example.com;
+
+    location / {
+        proxy_pass http://backend-server:8080;  # Forward requests to the backend server
+        proxy_set_header Host $host;            # Preserve the host header
+        proxy_set_header X-Real-IP $remote_addr;  # Pass the client's real IP
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  # Pass the forwarded IP
+    }
+}
+In this example:
+
+Nginx listens for requests on port 80 for example.com.
+When a request is made to the root path (/), Nginx forwards it to http://backend-server:8080 (which could be an application server running on port 8080).
+The proxy_set_header directives ensure that the client’s real IP address and other important headers are passed to the backend server.
+Summary:
+Nginx is a powerful web server and reverse proxy server used for serving static content, load balancing, security, caching, and more.
+A proxied server (in the context of Nginx) refers to a server acting as an intermediary, forwarding client requests to other backend servers (reverse proxy). This setup is often used to improve security, manage load, and optimize server performance.

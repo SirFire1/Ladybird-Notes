@@ -1,0 +1,172 @@
+->Nginx: Proxy vs Reverse Proxy:
+->Proxy: Sits between our clients and the internet
+  -Intermediate layer often used within organization to monitor web traffic
+ ->Reverse Proxy: Sits between internet traffic and ours servers
+   -Intermediate layer often used to load balance traffic & serve content from a cache and improves the performance of our backend server. 
+
+___________________________________________ ___________________________________
+->For node.js
+#cd /etc/nginx
+#nano conf.d/photos.example.com.conf
+  
+server {
+ listen 80;
+ server_name photos.example.com;
+ 
+ location / {
+    proxy_pass http://127.0.0.1:3000;  # (Forward requests to the app running on localhost:3000)
+    proxy_http_version 1.1;             #( Ensure the HTTP version used for proxying is 1.1)
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  # Pass the original client's IP address
+    proxy_set_header X-Real-IP $remote_addr;  #( Forward the real IP address of the client)
+    proxy_set_header Upgrade $http_upgrade;  #( Handle WebSocket connections (if any)
+    proxy_set_header Connection "upgrade";  #( Upgrade the connection for WebSocket requests)
+
+ }
+location ~* \.(js|css|png|jpe?g|gif) {     (~* :will match regular expression, \. for the extensions)
+  root /var/www/photos.example.com;
+}
+}
+
+#nginx -t
+#systemctl reload nginx
+#curl --header "Host: photos.example.com" localhost
+
+->If an error occur with 502, probably be with SElinux
+#less /var/log/nginx/error.log
+#setsebool -P httpd_can_network_connect 1
+ 
+->The command setsebool -P httpd_can_network_connect 1 is used to modify the SELinux (Security-Enhanced Linux) policy on a system that uses SELinux for access control. Specifically, this command enables the ability for the Apache HTTP server (httpd) to initiate network connections, which is typically disabled by default for security reasons.
+
+Explanation of the command:
+setsebool: This command is used to set SELinux boolean values, which control specific behaviors of the system's security policies.
+-P: The -P flag is used to make the change persistent across system reboots.
+httpd_can_network_connect: This is the SELinux boolean variable that controls whether the Apache HTTP server can make outbound network connections. Setting it to 1 (enabled) allows Apache to initiate network connections, such as connecting to a database server or external service.
+1: This value sets the boolean to "on," allowing the action
+
+_____________________________________ _____________________________
+->we will have to edit /etc/host file of our host to access the remote host on our browser
+ ip-add   photos.example.com
+->Creating the symlink for our nodejs page:
+ #ln -s /srv/www/s3photoapp/apps/web-client/public/ /var/www/photos.example.com
+#ls /var/www/photos.example.com/
+#restorecon -R -v /var/www
+#systemctl reload
+->To manage any error for selinux regarding 403 content forbidden
+->Security-Enhanced Linux (SELinux) is a security architecture for Linux systems that enhances the security of the operating system by implementing mandatory access control (MAC) policies.
+#semanage fcontext -a -t httpd_sys_content_t '/srv/www/.*/public(/.*)?'
+->After adding the file context, you need to apply it to the files and directories. Run the following command to relabel the files.
+#sudo restorecon -R -v /srv/www/
+_______________________________ ___________________________
+#cd etc/nginx/
+#nano conf.d/blog.example.com.conf
+server{
+  listen 80;
+  server_name blog.example.com;
+  root /var/www/blog.example.com; 
+  index index.php;
+
+ location / {
+  try_files $uri $uri/ /index.php?$args;
+}
+location ~ \.php {
+    fastcgi_index index.php;  # Specifies the default file to serve for PHP requests (if no specific file is requested).
+    fastcgi_pass unix:/var/run/php-fpm.sock;  # Directs PHP requests to PHP-FPM via the Unix socket.
+    include fastcgi_params;  # Includes the fastcgi_params file, which contains common FastCGI parameters required for processing PHP.
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+}
+}
+
+->Here first uri in try_files will provide file with name that is requested, uri/ for dir, if that doesn't match then index.html will be assumed with search parameters:?$args
+->Here /var/www/blog.example.com is the root to serve static applications, that are not frequently changed.
+->index.php is called dynaic page, as it is frequently changed as per user preference.
+->Location ~ \.php : states that anything followed by regular expression with .php extension, will be redirected to index.php, fastcgi_pass states that nginx should pass the request to php-fpm via unix socket, and fastcgi parameters are included to handle the requests and logs, like: query_string, request_method, content_type, remote_addr.
+__________________________________ ____________________
+->When configuring Nginx to use PHP-FPM (PHP FastCGI Process Manager) via a Unix socket, you're opting for a more efficient method of communication between Nginx and PHP-FPM compared to using a TCP/IP socket (e.g., 127.0.0.1:9000). Unix sockets are faster because they bypass the network stack, offering lower latency and better performance for local communication between Nginx and PHP-FPM on the same server.
+->Benefits of Using Unix Socket:
+Performance: Unix sockets generally provide better performance than TCP/IP connections, especially when Nginx and PHP-FPM are on the same machine.
+Security: Unix sockets can be more secure as they don't expose a network port for external connections.
+Resource Usage: Unix sockets use fewer system resources compared to TCP connections.
+->How to Configure Nginx to Use PHP-FPM via Unix Socket:
+Configure PHP-FPM to Use a Unix Socket: In the PHP-FPM configuration file (www.conf), you need to set the listen directive to a Unix socket path.
+
+Edit the php-fpm pool configuration file, typically located at /etc/php/7.x/fpm/pool.d/www.conf (replace 7.x with your PHP version).
+Find the listen directive and set it to the Unix socket.
+Example (www.conf):
+
+listen = /var/run/php/php7.x-fpm.sock
+
+This tells PHP-FPM to listen on a Unix socket located at /var/run/php/php7.x-fpm.sock. Make sure the socket file path is correct for your setup, and the PHP-FPM service has permission to write to that directory.
+
+Additional Configuration for Permissions: You may need to adjust the file permissions for the socket to ensure Nginx can read and write to it. Set the user and group under which PHP-FPM is running (usually www-data or nginx).
+
+
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+Configure Nginx to Use the Unix Socket: In the Nginx configuration file, you need to modify the fastcgi_pass directive to point to the Unix socket instead of a TCP/IP address.
+
+Example Nginx configuration:
+
+server {
+    listen 80;
+    server_name example.com;
+
+    root /var/www/html;
+    index index.php index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    # PHP processing via Unix socket
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php7.x-fpm.sock;  # Path to the PHP-FPM Unix socket
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME /var/www/html$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+In this example, Nginx is configured to pass PHP requests to PHP-FPM via the Unix socket located at /var/run/php/php7.x-fpm.sock.
+
+Restart Nginx and PHP-FPM: After making these changes, restart both Nginx and PHP-FPM to apply the new configurations.
+
+To restart PHP-FPM:
+
+sudo systemctl restart php7.x-fpm
+
+To restart Nginx:
+
+sudo systemctl restart nginx
+Troubleshooting Tips:
+Permissions: Ensure that both Nginx and PHP-FPM have proper permissions to access the Unix socket. The socket file should be readable and writable by the Nginx user (www-data or nginx, depending on your setup).
+Check PHP-FPM status: If PHP-FPM isn't responding, check its status:
+
+sudo systemctl status php7.x-fpm
+Log Files: If something goes wrong, check the error logs for both Nginx and PHP-FPM to identify the issue:
+Nginx logs: /var/log/nginx/error.log
+PHP-FPM logs: /var/log/php7.x-fpm.log
+
+->fastcgi_param:
+This directive is used to set parameters that are passed to the FastCGI backend (such as PHP-FPM). It is a way to provide the necessary environment variables for PHP or any FastCGI application to correctly handle the request.
+
+SCRIPT_FILENAME:
+This is a FastCGI parameter that tells PHP (or any FastCGI server) the full path to the PHP script that should be executed. It is essential for PHP to know where the script is located on the filesystem in order to execute it.
+
+In the context of Nginx, you need to set this variable to the absolute file path to the PHP script that corresponds to the requested URI.
+
+$document_root:
+This Nginx variable contains the root directory of the website, which is the directory where Nginx serves files from. For example, if you have the following in your Nginx configuration:
+
+root /var/www/html;
+Then, $document_root will be /var/www/html. This is the base path to the root of the website.
+
+$fastcgi_script_name:
+This variable holds the script name (the requested URI) that was passed to the FastCGI backend. For example, if the URL is http://example.com/index.php, $fastcgi_script_name will be /index.php.
+
+Full Breakdown:
+When you combine $document_root and $fastcgi_script_name, you're forming the full path to the requested PHP script that needs to be processed by PHP-FPM.
+
+$document_root gives the base directory of your website.
+$fastcgi_script_name provides the relative path of the script being requested (e.g., /index.php).
+So, if the root of your website is /var/www/html and the requested script is /index.php, the resulting value for SCRIPT_FILENAME will be /var/www/html/index.php.
+_________________________________ ___________________________

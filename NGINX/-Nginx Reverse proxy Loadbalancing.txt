@@ -1,0 +1,158 @@
+->Nginx: Reverse proxy: Loadbalancing: 
+->to utilize nginx as a reverse proxy still but utilizing it to load balance to multiple application servers these can be on the same machine or they could be on separate machines and you could access them through ip address.
+->so we are going to create separate instances of the services, as it is running on port 3000, so we also make some changes.
+#cp /etc/systemd/system/web-client{,2}.service
+#cp /etc/systemd/system/web-client{,3}.service
+#vim  /etc/system/system/web-client2.service
+Environment=Port=3100
+#vim  /etc/system/system/web-client3.service
+Environment=Port=3101
+#systemctl start web-client2
+#systemctl enable web-client2
+#systemctl start web-client3
+#systemctl enable web-client3
+
+->As our services are running now will edit conf of photos.example.com.conf to have a load balanced service.
+#nano /etc/nginx/conf.d/photos.example.com.conf
+upstream photos {
+  server 127.0.0.1:3000 weight=2; 
+  server 127.0.0.1:3001;          
+  server 127.0.0.1:3101 max_fails=3 fail_timeout=20s;
+
+server {
+        listen 80;
+        server_name photos.example.com;
+
+        location / {
+            # Nginx will proxy requests to the upstream group 'backend'
+            proxy_pass http://photos;    
+            proxy_http_version 1.1;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+        }
+       location ~* \.(js|css\png|jpe?g|gif)
+            root /var/www/photos.example.com;   
+}
+}
+
+#nginx -t
+#systemctl reload nginx
+#systemctl status web-client
+#systemctl status web-client2
+->then use curl or visting the webpages to see the get request in status. or accees log.
+
+______________________________________ ________________________________________
+->/etc/systemd/system/web-client{,2}.service: This part uses brace expansion to generate two file paths:
+The first part (web-client) refers to the original file name: /etc/systemd/system/web-client.service.
+The second part ({,2}) will expand to two variations:
+web-client.service (without the 2)
+web-client2.service (with the 2 appended)
+So, the brace expansion generates the two paths:
+/etc/systemd/system/web-client.service
+/etc/systemd/system/web-client2.service
+
+->It copies the web-client.service file from the /etc/systemd/system/ directory to the same directory but with a new name: web-client2.service.
+
+->upstream photos {}: This defines an upstream group named photos. The upstream group contains a list of servers that Nginx can forward requests to. In this case, it defines three backend servers running locally on 127.0.0.1 (localhost) but listening on different ports:
+127.0.0.1:3000
+127.0.0.1:3001
+127.0.0.1:3101
+These backend servers will receive the proxied requests from Nginx. Nginx will load balance between these servers (by default, in a round-robin fashion, where it distributes requests evenly across them).
+
+-listen 80;: This tells Nginx to listen for incoming requests on port 80, which is the standard port for HTTP traffic.
+-server_name photos.example.com;: This defines the server name or hostname for the virtual host. Nginx will respond to requests made to photos.example.com.
+-location / {}: This block handles requests made to the root URL (/), meaning it will apply to any request that doesn't match another more specific location.
+
+Inside this block:
+
+-proxy_pass http://photos;: This tells Nginx to proxy (forward) all incoming requests to the upstream group named photos that we defined earlier. This means Nginx will send the incoming requests to one of the three backend servers (127.0.0.1:3000, 127.0.0.1:3001, or 127.0.0.1:3101).
+
+-proxy_http_version 1.1;: This specifies the HTTP version to use when communicating with the backend servers. Version 1.1 is often used for supporting features like keep-alive connections, which helps improve performance.
+
+-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;: This adds the X-Forwarded-For header to the request, which is a standard way for proxy servers to pass the original client's IP address to the backend servers. $proxy_add_x_forwarded_for ensures that if there are multiple proxies in the chain, the original IP is added to the header.
+
+-proxy_set_header X-Real-IP $remote_addr;: This sets the X-Real-IP header to the client's IP address ($remote_addr), which is another common way to pass the original client IP to backend servers.
+
+-proxy_set_header Upgrade $http_upgrade;: This sets the Upgrade header (used for WebSocket upgrades) to the value of the incoming request's Upgrade header. This is important for handling WebSocket connections.
+
+-proxy_set_header Connection "upgrade";: This ensures that the connection is upgraded for WebSocket connections, if applicable. It’s part of the setup required for handling persistent WebSocket connections through the proxy.
+
+->server 127.0.0.1:3000: This specifies one of the backend servers for load balancing. The server is running on localhost (127.0.0.1) and listens on port 3000.
+
+->weight=2: This sets the weight of the server. The weight determines how much traffic this server should receive relative to other servers in the pool. A higher weight means it will receive more traffic.
+
+->In this case, the server at 127.0.0.1:3000 will get twice as much traffic as servers with a weight of 1 (if they exist in the same upstream block).
+
+->server 127.0.0.1:3101: This specifies another backend server running on localhost at port 3101.
+
+->max_fails=3: This sets the maximum number of failed attempts Nginx will allow before considering the server as "down." If this server fails 3 times in a row, Nginx will stop sending traffic to it.
+
+->fail_timeout=30s: This is the duration for which Nginx will consider a server as "down" after it has exceeded max_fails failures. In this case, the server will be marked as down for 30 seconds after 3 failed attempts.
+________________________________________ _____________________________________________
+->Other load balancing types:
+  Four load balancing methods:
+1. load balancing: default (Round Robin)
+The default load balancing method in Nginx is Round Robin.
+
+How it works: With round-robin load balancing, Nginx sends requests to each backend server in a sequential, circular manner. Once the last server is reached, it starts again at the first server.
+When to use: This is the simplest and most common method. It works well when all backend servers have roughly the same capacity and are able to handle requests equally.
+Example:
+
+nginx
+Copy
+upstream backend {
+    server 192.168.1.1;
+    server 192.168.1.2;
+    server 192.168.1.3;
+}
+With this configuration, Nginx will distribute requests to each server in a round-robin manner, one by one.
+
+2. ip_hash (IP Hash)
+The ip_hash method uses the IP address of the client to determine which backend server should handle the request. This ensures that requests from the same client (based on their IP address) are always directed to the same backend server. This is helpful for session persistence (also known as sticky sessions).
+
+How it works: When a request arrives, Nginx calculates a hash of the client's IP address and maps it to one of the backend servers. This ensures that all requests from the same client IP will go to the same backend server, which is useful if session data is stored on the server (for example, in cookies or server-side storage).
+When to use: Use ip_hash when you need session persistence (e.g., for applications that maintain session data locally on the server).
+Example:
+
+upstream backend {
+    ip_hash;
+    server 192.168.1.1;
+    server 192.168.1.2;
+    server 192.168.1.3;
+}
+This configuration ensures that requests from the same IP address will always be sent to the same server.
+
+3. hash (Custom Hash)
+The hash method in Nginx allows you to define a custom key to determine how traffic should be distributed among backend servers. This method is more flexible than ip_hash, as it allows you to hash based on other elements of the request, such as the URL or a cookie, rather than just the client’s IP address.
+
+How it works: You can specify a custom key for the hashing algorithm. The key can be based on variables like $uri, $host, $remote_addr, $cookie_name, etc. Once Nginx hashes the key, it selects the backend server accordingly.
+When to use: Use hash when you need more control over how requests are distributed (e.g., based on URL, headers, cookies, etc.), and want a custom load balancing strategy.
+Example:
+
+upstream backend {
+    hash $request_uri consistent;
+    server 192.168.1.1;
+    server 192.168.1.2;
+    server 192.168.1.3;
+}
+In this example, Nginx hashes the request URI ($request_uri), and requests with the same URI will always be routed to the same backend server. The consistent keyword ensures that the hash distribution remains balanced even if servers are added or removed.
+
+4. least_conn (Least Connections)
+The least_conn method directs traffic to the backend server with the fewest active connections. This ensures that servers that are currently less busy (with fewer connections) will handle the next incoming request.
+
+How it works: Nginx tracks the number of active connections to each backend server. When a new request arrives, it is forwarded to the server with the least number of active connections.
+When to use: This is useful when the backend servers have varying levels of load or when you want to prevent a particular server from becoming overwhelmed while others are underutilized. It works well when the backend servers have different capacities or when request load varies.
+Example:
+
+nginx
+Copy
+upstream backend {
+    least_conn;
+    server 192.168.1.1;
+    server 192.168.1.2;
+    server 192.168.1.3;
+}
+In this case, the traffic will be directed to the server with the least number of active connections, helping to balance the load based on server capacity.
+->And we can further manipulate how this individual load balancing methods are going to rout traffic by adding weights and max connection, to set wether it should prioritize one server more then another, and passive health checking through max_fails and fail_timeouts.

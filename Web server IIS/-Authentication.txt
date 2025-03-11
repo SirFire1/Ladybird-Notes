@@ -1,0 +1,107 @@
+->Authentication :
+  is a process of identify the user.
+-Authentication is simply the process of identifying the users who are trying to access the application.
+-Authorization is the process of giving each user his own roles and rights.
+-We have five authentication types:
+.Anonymous
+.Basic
+.Windows
+.Digest
+.Forms
+
+-Anonymous authentication allows users to access public area of the website asking for a username and a password.
+ And by default an authentication use the I user account(IUSR) which is build in account.
+
+-Anonymous with impersonation:
+.If Impersonation is disabled, then the application pool identify will be used within the application.
+.If Impersonation is Enabled, then IUSR will be used, but we have to change the pipeline mode to classic.
+
+->When to use application pool identity over impersonation ?
+  If you have multiple websites on your web server and you are using impersonation with IUSR then the user can access both website content, so if you want to isolate then use pool identity.
+
+->Basic and Digest authentication:
+-The user will send a request to the website, then the web server or the website will ask for credentials and the user will enter the credentials and post it to the server.
+-The credentials will send an encrypted and just coded encoded in base64, which easy to hack.
+
+->While in digest authentication in the same way the user will request the website, the web server will ask for credentials, but now the credentials will be sent as a digest, so will be hashed.
+-Both basic and digest authentication will use Windows accounts to authenticate the application.
+-For basic authentication it is recommended to use SSL to encrypt the traffic between the user and the website.
+
+->The second main diff btw digest and basic authentication is that digest authentication don't work except with active directory, so you have to implement domain on your network in order to use digests authentication.
+-----------------------------------------
+-For enabling basic and digest auth feature in windows server, you need to get features form IIS manager ->IIS-> security
+-Then to the website you want to enable, this auth follows a order, so you need to turn off above auth
+-After enabling basic auth, it will as for username and pass
+-Open computer management, under local user and groups, right click to create new user
+-And you will be able to access the website through this credentials.
+-For enabling digest feature, you need domain service, which you will install form IIS manager-> Active Directory Domain Service.
+-After configuring Active directory with the domain name and pass
+-Search for active directory in search bar, to add user to active dir or to the domain.
+-Active dir-> domain name(webserver.com)-> users-> right click on any user and copy, then fill username and pass.
+_____________________________
+
+1. Basic Authentication:
+Transmission: Basic Authentication sends the username and password as base64-encoded strings with each HTTP request. While it’s encoded, the data is not encrypted, so it is vulnerable to being intercepted in transit unless used over a secure connection (HTTPS).
+Implementation: Basic Authentication is simple and supported by many web servers and browsers. It doesn't require any special infrastructure like a domain controller or Active Directory.
+Usage: Basic Authentication can be used with a variety of authentication providers and does not require Active Directory or any domain-specific setup.
+2. Digest Authentication:
+Transmission: Digest Authentication is more secure than Basic Authentication because it hashes the password (using MD5 or a stronger hash) along with other details like the nonce (a random value provided by the server). This ensures that the actual password is never sent over the network.
+Implementation: Digest Authentication relies on a challenge-response mechanism, where the client must prove it knows the password without sending the password itself. This is more secure than Basic Authentication.
+Dependency on Active Directory: Digest Authentication does not strictly require Active Directory. While it is often used with Active Directory, Digest Authentication can also be used in non-Active Directory environments, such as those involving local accounts on a web server or a custom authentication provider. However, the primary use case for Digest Authentication often involves Windows-based environments, and it is most commonly implemented in conjunction with Active Directory in enterprise settings.
+Why Digest Authentication is Associated with Active Directory:
+Integration with Kerberos/NTLM: Digest Authentication can be integrated with Kerberos or NTLM, both of which are part of Active Directory-based environments. This integration allows seamless single sign-on (SSO) capabilities and better security within a domain.
+Windows-based environments: Microsoft’s implementation of Digest Authentication is often used in Windows Server environments, where it integrates with Active Directory for easier management of user credentials.
+__________________________________
+->Windows auth: is very similar to digest and basic auth, the user will request a website, the website will ask for credentials, and now the user will send the credentials.
+-But here the difference btw windows and basic will be that the credentials will be encrypted when sent over the network. So windows authentication is more secure and in the same way when the authentication will use the windows accounts to authenticate the application, basically when the authentication is used in the internet environments and not on a world wide schema.
+
+______________________________
+1. Internet Environment in IIS
+In the context of IIS, the Internet environment refers to the network infrastructure and services that allow IIS servers to host websites and services, making them available over the Internet (or intranet). It includes the hardware, network protocols, and servers that allow IIS to respond to HTTP requests from browsers.
+
+IIS and the Internet: IIS acts as a web server that communicates with client devices over the Internet or local networks. When a client browser makes a request for a website hosted on IIS, IIS uses HTTP/HTTPS protocols to serve web content.
+
+IIS Configuration for the Internet: To host content on the Internet, IIS needs to be set up to listen for HTTP(S) requests. You may configure IIS to handle domain names, manage server settings, and enable features such as SSL encryption for secure communication.
+
+Internet Environment Features in IIS:
+
+Binding to IP addresses and ports: IIS is configured to accept traffic on specific IPs and ports, such as port 80 for HTTP and port 443 for HTTPS.
+DNS Configuration: For the website to be accessible via the Internet, you need to configure DNS records to map a domain name to the IIS server’s IP address.
+Firewall and Network Security: IIS will often need to be set up in environments with appropriate network security measures, such as firewalls, and may be part of a load-balanced web farm.
+In essence, the Internet environment in IIS is the network setup that allows the IIS server to connect to the world wide web (or intranet), serve content to clients, and respond to HTTP/HTTPS requests.
+
+2. World Wide Web Schema in IIS
+The World Wide Web schema in IIS generally refers to the structure or organization of web content that IIS serves to clients via web browsers. In this case, schema might refer to how IIS configures, manages, and serves web applications or web pages to users.
+
+Website and Web Application Structure: IIS serves websites based on the directory structure. You can define websites, virtual directories, and web applications within IIS. This forms the schema or structure of the web content being served.
+
+World Wide Web Schema Features in IIS:
+
+Website Binding and Configuration: You define which website is served based on domain names, ports, and IP addresses. The schema of IIS involves setting up bindings (e.g., "example.com" on port 80).
+Web Application Configuration: A web application in IIS is typically associated with a folder or directory on the server and can be configured with specific settings such as application pools, authentication, and database connections.
+URL Routing and Handling: IIS allows you to configure how URLs are handled and routed to different directories or web applications. You might use URL Rewrite modules or custom routing rules to define how web requests map to particular web content.
+Security Schema: Within IIS, you can also define access control using authentication schemas (Basic Authentication, Windows Authentication, etc.), and define authorization rules for which users can access specific web resources.
+Schema in IIS Context: In web development, a schema can refer to how data is organized, such as in an XML schema or database schema. In IIS, this might also extend to how URLs, directories, or database connections are structured to serve dynamic content on the web.
+__________________________
+Windows Authentication in IIS (Internet Information Services) is a method for authenticating users based on their Windows credentials (i.e., username and password) for accessing web applications hosted on IIS. It leverages Active Directory (AD) to authenticate users and provides a seamless integration for internal enterprise applications that need to rely on Windows accounts for secure access.
+
+Key Features of Windows Authentication:
+Integrated with Active Directory (AD): Windows Authentication can use an organization's Active Directory to authenticate users. When a user attempts to access an IIS-hosted site, IIS will check the user's credentials against AD.
+Single Sign-On (SSO): Once a user is authenticated on the domain (e.g., they’ve logged into Windows or joined a domain), Windows Authentication allows them to access web applications without needing to re-enter their credentials. This is often called Integrated Windows Authentication (IWA).
+Security: Windows Authentication is typically used for internal enterprise web applications where security is important, as it doesn't rely on external user management and leverages the existing Windows security infrastructure.
+Protocol Support: It supports NTLM and Kerberos protocols, which are common in Windows-based environments for secure authentication.
+________________________
+->Form AUTH:
+The user will request the website, the website will ask for credentials for certain private parts of the application and the user will send the credentials.
+-The diff is that in form auth, the website or the web application will not check in the windows user accounts for authenticate, but it will check in a certain database or the config files, or maybe a certain Excel or access file where the developer has saved the credentials of users. And if the user exists in the database or in the place where its saved, then the website will validate the user.
+
+->Form Authentication in IIS (Internet Information Services) is a method of authenticating users by requiring them to submit their credentials (username and password) through a web-based login form. Once the credentials are verified, a session is created for the user, allowing them to access resources within the web application.
+
+This method is typically used in web applications where users do not log in using Windows authentication, but instead authenticate through a custom login page on the website itself.
+
+Key Features of Forms Authentication:
+Custom Login Page: Users are presented with a login form where they enter their username and password.
+Cookie-based Authentication: After successful authentication, IIS generates an authentication ticket (usually a cookie) that is sent back to the client. This ticket is then used for subsequent requests to verify the user's identity.
+Granular Control: Forms Authentication can be used to control access to specific resources within a web application based on user credentials.
+Customizable: You can customize the login experience and authentication logic to suit the specific needs of your application (e.g., redirecting users after login, handling failed login attempts, etc.).
+___________________

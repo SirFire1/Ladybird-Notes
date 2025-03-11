@@ -1,0 +1,61 @@
+->Application Initialization:
+Application initialization in a web server refers to the process where the web application and its components are set up and prepared for handling incoming requests. This typically occurs when the server starts or when the application is deployed or restarted.
+
+Key Steps in Application Initialization:
+Loading Configuration:
+
+Web applications often rely on configuration files (e.g., config.json, settings.ini, appsettings.yaml) that define settings such as database connections, API keys, security settings, etc. These configurations are loaded at the start of the application.
+Initializing Services:
+
+The application often depends on various services like databases, caching layers, external APIs, or background workers. During initialization, the application establishes connections or prepares these services for use.
+Routing and Middleware Setup:
+
+In many web frameworks, routes (URLs mapped to specific code) are defined during initialization. Additionally, middleware (which can intercept requests and responses, such as for logging, authentication, etc.) is often configured.
+Loading Static and Dynamic Content:
+
+Static files (e.g., images, JavaScript, CSS) are typically served directly by the web server but are configured during initialization. Dynamic content, like templates or views, is also prepared for later rendering.
+Session and Security Initialization:
+
+If the application needs to maintain user sessions, initialize security mechanisms (like JWT tokens, session cookies), or configure access controls, this step is necessary.
+Application Caching and Optimization:
+
+Initialization may include preloading of frequently accessed data, such as caching responses or loading assets that will be reused across requests. Some web apps perform optimizations like JIT (Just-In-Time) compilation.
+Event and Error Handlers:
+
+Setting up handlers for system events, error logging, and reporting are part of the initialization process. This ensures that issues during runtime are properly captured and logged.
+Dependency Injection (for frameworks that use it):
+
+Many modern web frameworks use a technique called Dependency Injection (DI), where components (like database access or authentication services) are injected into classes or functions that need them. This step occurs at initialization.
+________________________
+->To install GUI interface of Application Initialization:
+-Server manager->manage->Add roles and features->Server role->web server->Application development->Application Initialization.
+-Now to go application pool->right click on any pool: advanced setting-> Start mode :Always Running.
+-Go to our website-> manage website->Advanced setting->Preload enabled =True.
+-This settings will ensure that the website will load automatically when server runs.
+__________________
+->Setup using Config Files:
+-C:\windows\system32\inetsrv->config->applicationhost.conf-ope it in notepad ++ ,which is a text editor, and there you will search for application pool->Find what=website1.com, there you have to add startmode="AlwaysRunning" (if not available), and now search for :<sites>, and check for <applicationDefaults preloadEnabled="true" />
+
+-Now go our application folder:C:/inetpath/website1.com/web.config->edit with notepad++ ->Under <system.wenServer> add:
+ <applicationIntialization>
+<add initializationPage ="/default.aspx"/>
+ </applicationIntialization>
+
+-open powershell and restart our IIS server
+#net stop w3svc
+#net start w3svc
+
+-It will tell the preload command the page that will fire when it will load the application for the first time, This is the fakeload that the preload will use to load your website automatically. 
+_________________________
+->Setup loading page:
+-To setup a loading page so that the user will not feel that your website is stuck or in a problem.
+
+-Firstly create a simple loading and then add it in:
+folder:C:/inetpath/website1.com/web.config->edit with notepad++ ->Under <system.wenServer> add:
+ <applicationIntialization reManageRequestTo="/loading.html">
+<add initializationPage ="/default.aspx"/>
+ </applicationIntialization>
+
+-open powershell and restart our IIS server
+#net stop w3svc
+#net start w3svc

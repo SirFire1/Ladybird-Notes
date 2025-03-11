@@ -1,0 +1,176 @@
+->SSL:
+stands for secure socket layer
+-And the protocol used to encrypt data or network packets between different devices on the network using asymmetric encryption.
+-Whenever you are using SSL to protect your website, then you will be using Https protocol.
+-If you are not using security to protect your traffic, then hackers can intercept that traffic and steal certain information or data.
+___________
+->To install SSL certificate, click on server node->Server certificates
+-On right side-> Create Self Signed Certificate and just fill the desired name.
+-To install it, go to the web server, click edit bindings, select https protocol, then the ssl cert.
+_______________________
+->issued by a trusted Certificate Authority, or CA) in IIS (Internet Information Services), you need to follow a few key steps:
+
+Generate a Certificate Signing Request (CSR).
+Submit the CSR to a Certificate Authority (CA) for validation and certificate issuance.
+Install the issued SSL certificate on your IIS server.
+Bind the SSL certificate to your website in IIS.
+Here’s a step-by-step guide for each part of the process:
+
+Step 1: Generate a Certificate Signing Request (CSR) in IIS
+A Certificate Signing Request (CSR) is required when requesting an SSL certificate from a Certificate Authority (CA). IIS provides an easy way to generate a CSR.
+
+Open IIS Manager:
+
+Press Windows + R, type inetmgr, and press Enter to open IIS Manager.
+Select the Server:
+
+In the Connections pane, expand the server node (the root node), and then click on Server Certificates in the center pane (under the IIS section).
+Create a CSR:
+
+In the Actions pane on the right, click Create Certificate Request.
+Fill out the Certificate Request: You will need to enter the following details:
+
+Common Name (CN): This is typically the Fully Qualified Domain Name (FQDN) of your website (e.g., www.example.com).
+Organization: The legal name of your organization.
+Organizational Unit: The department or division within your organization (optional).
+Locality: The city where your organization is located.
+State or Province: The state or province where your organization is located.
+Country: The two-letter country code (e.g., US for the United States).
+After entering the information, click Next.
+
+Select Cryptographic Provider:
+
+For most cases, you can leave the defaults (e.g., Microsoft RSA SChannel Cryptographic Provider) and select 2048 for the bit length (recommended for strong security).
+Save the CSR:
+
+Choose a location to save the CSR file (typically a .txt file) and click Finish.
+Now you have a CSR that you can submit to a Certificate Authority (CA).
+
+Step 2: Submit the CSR to a Certificate Authority (CA)
+Choose a Certificate Authority: You can choose a trusted CA like DigiCert, GlobalSign, Comodo, Let’s Encrypt (free), GoDaddy, or any other trusted CA.
+
+Submit the CSR:
+
+Visit the CA’s website, and follow the instructions to submit your CSR.
+During the process, you will be asked to upload or paste your CSR into a form. Some CAs may also ask you to provide additional details (such as domain ownership verification).
+Verification: The CA will verify your details and domain ownership. This may involve:
+
+Email Verification: The CA may send a verification email to an administrative email address associated with the domain.
+DNS or HTTP Verification: You may be required to add a special DNS record or upload a verification file to your web server.
+Receive the SSL Certificate: After the CA has validated your request, they will issue your SSL certificate, which will be provided to you as a .crt or .zip file. The certificate will be valid for a certain period (usually 1 or 2 years).
+
+Step 3: Install the SSL Certificate on IIS
+Open IIS Manager:
+
+Press Windows + R, type inetmgr, and press Enter to open IIS Manager.
+Select the Server:
+
+In the Connections pane, expand the server node and click Server Certificates.
+Install the Certificate:
+
+In the Actions pane on the right, click Complete Certificate Request.
+Choose the Certificate File:
+
+In the Complete Certificate Request dialog, click the Browse button to select the certificate file you received from the CA (usually a .crt file).
+Provide a friendly name for the certificate. This is a name used internally to identify the certificate on the server (e.g., example.com SSL).
+Select a Certificate Store:
+
+Choose Personal as the certificate store and click OK.
+The certificate will now be installed in your IIS server's certificate store.
+
+Step 4: Bind the SSL Certificate to Your Website in IIS
+Go to the Website:
+
+In the Connections pane of IIS Manager, expand the server node, then expand Sites, and click on the site you want to secure with the SSL certificate.
+Edit Site Bindings:
+
+In the Actions pane on the right, click Bindings.
+Add an HTTPS Binding:
+
+In the Site Bindings window, click Add.
+Set the Type to https.
+Select the IP address (or set it to All Unassigned if your server hosts multiple sites).
+Set the Port to 443 (the default for HTTPS).
+In the SSL certificate dropdown, select the certificate you installed earlier.
+Click OK.
+Restart the Website:
+
+After binding the SSL certificate, you may need to restart the website. In IIS Manager, right-click on the website and click Restart.
+Step 5: Test the SSL Certificate
+Open Your Website:
+Open a web browser and navigate to your site using https:// (e.g., https://www.example.com).
+Check for SSL:
+If the certificate is installed correctly, you should see a padlock icon next to the URL in the browser’s address bar, indicating that the connection is secure.
+Click on the padlock icon to view details about the SSL certificate (such as its issuer, validity, and more).
+Additional Notes:
+Certificate Renewals: SSL certificates are typically valid for 1-2 years. After the certificate expires, you'll need to renew it by submitting a new CSR and completing the validation process again.
+Intermediate Certificates: Some CAs require you to install intermediate certificates in IIS to create a chain of trust. If your certificate provider gives you intermediate certificates (often in a .zip file), you will need to install them in Server Certificates before binding the SSL certificate.
+Redirect HTTP to HTTPS: Once your SSL certificate is active, you may want to configure your IIS site to automatically redirect all HTTP traffic to HTTPS. This can be done using URL Rewrite or by modifying HTTP headers.
+______________________
+->To backup a cert, just go to web server node, Certificates and then right click and export to your desired location.
+_________________
+->SSL certificate types:
+1. Wildcard SSL Certificate
+Purpose: Secures unlimited subdomains on a single domain.
+Example: If you have a domain example.com, a wildcard certificate for *.example.com will secure:
+www.example.com
+mail.example.com
+shop.example.com
+blog.example.com
+Features:
+One SSL certificate can cover multiple subdomains, saving time and money on purchasing individual certificates for each subdomain.
+Limitations: Wildcard SSL certificates only cover one level of subdomains (e.g., *.example.com), but not subdomains like sub.mail.example.com.
+2. Unified Communications (UCC) SSL Certificate
+Purpose: Designed to secure multiple domains and subdomains in a single certificate, typically used for Microsoft Exchange and Microsoft Office Communications Server environments.
+Example: A UCC SSL can secure:
+example.com
+mail.example.com
+intranet.example.com
+example.net
+example.org
+Features:
+Ideal for organizations with multiple domains and subdomains, enabling them to manage all SSL certificates under one UCC certificate.
+Used for: Exchange Server, Skype for Business, and other unified communication platforms.
+Limitations: The UCC certificate needs to be managed carefully to ensure that all the domain names are covered and properly configured.
+3. Organizationally Validated (OV) SSL Certificate
+Purpose: Provides an extra level of manual verification of the organization requesting the certificate.
+Features:
+Requires the certificate authority (CA) to verify the legitimacy of the organization applying for the certificate, including verifying the organization’s legal existence, location, and other business details.
+Visual Indicators: After installation, OV certificates typically show the domain and organization’s name in the browser’s certificate details.
+Security: Higher level of trust compared to Domain Validation (DV) SSL certificates, as it requires more verification of the applicant.
+Recommended for: Businesses and organizations where you want to convey additional trust to visitors, like e-commerce sites, financial services, etc.
+4. Domain Validated (DV) SSL Certificate
+Purpose: The most basic and automated SSL certificate that only requires the validation of the domain ownership.
+Features:
+Automated process: The CA simply verifies that the applicant owns the domain (typically through email or DNS records).
+No organization verification: No identity or business verification is performed.
+Fast Issuance: Since the process is automated and doesn’t require manual intervention, these certificates are usually issued very quickly (within minutes to hours).
+Visual Indicators: Browsers only show a padlock icon next to the URL and do not display the organization's name.
+Recommended for: Websites that don’t handle sensitive information and do not require organizational verification, such as personal blogs, informational sites, or small businesses.
+5. Extended Validation (EV) SSL Certificate
+Purpose: The most secure SSL certificate, requiring the highest level of verification.
+Features:
+Requires a rigorous vetting process by the Certificate Authority, which includes verifying the organization’s legal existence, physical location, and operational status.
+Highest level of trust: Once issued, an EV certificate triggers the green address bar in most browsers, and often displays the organization name alongside the padlock icon. This gives users visual confidence that the site is legitimate and secure.
+Security: EV SSL certificates are considered the most secure because they involve thorough validation, which helps to combat phishing and fraud.
+Recommended for: High-traffic websites where trust and security are paramount, such as online banking, large e-commerce platforms, and other sites handling sensitive personal or financial data.
+________________________
+->Trusting the self signed certificate:
+-To remove the warning about self-signed cert
+-open power shell as administrator and create a self signed cert by:
+New-SelfsignedCertificate -DnsName webserver1.com, localhost -CertStoreLocation cert:\localMachine\My 
+-Open mmc console, to add this cert to our trusted store, file->add,remove and edit->Certifiacte->add->certificate snap-in-> Computer account->local computer, and you will enter in certificate of our local computer. Personal-certificates->webserver1.com-> right click-> all task-> export-> export private key->Next->password->Give file name and save file.
+-Now open up trusted root certificate auth->certifiacatesall task-> import-> select ssl cert-> pass and done.
+-And we will be able to find our new SSL in server node->cert
+_________________________
+->SSL certificate authentication:
+-In this type of authentication user will not be able to access the application without a trusted certificate 
+-This type of authentication is great for accessing internal application that are available externally or can be used in addition to credentials as a two factor authentication for more security for your application.
+->we need to add a feature server roles->web server(IIS)->web server->security->IIS client Certificate Mapping Auth.
+-This is used for many to one authentication and you can also choose client certificate mapping for 1 to 1  auth.
+
+->inetmgr or IIS Manager->web server->our website->authentication disable ->our website->Configuration editor->system web server->security->auth->IISclientCertificateMappingAuth-> Enable=true->ManytoOneMapping->Add->description=website1 ssl auth->name=webtest.crt-> password and username-> close and apply->our website-> SSL setting-> Require ssl=require->apply
+
+-Now we have to import our certificate that we want to authenticate with our personal certificate on this user account.
+terminal->mmc->file->add,remove-> certificate-> my user account-> Certificate current user-> Personal-> Certificate->right click =all task=import-> add cert with pass.
+->use browser with https://website1.com and you will now be prompted you use ssl cert.

@@ -1,0 +1,54 @@
+->IIS architecture:
+ IIS components are divided into two parts:
+-kernel mode(build in with windows)
+-User mode (services and processes)
+->IIS Architecture Overview
+1. Kernel Mode (Built-in with Windows)
+Kernel mode is the lower level of the operating system where system-level processes and services are executed. IIS kernel-mode components are responsible for high-performance, low-level operations. In this mode, IIS integrates closely with the Windows operating system itself, which provides key infrastructure and performance advantages.
+
+Kernel Mode Components in IIS:
+
+HTTP.sys (Kernel-mode HTTP Listener):
+
+This is a core part of IIS in kernel mode. It acts as the HTTP listener for incoming web requests, handling the HTTP request/response protocol.
+HTTP.sys is responsible for accepting HTTP requests from clients, routing them to the appropriate worker process in user mode, and then forwarding the responses back to the clients.
+It also manages connection pooling, request queueing, and connection reuse.
+This component enables IIS to be more efficient with its resource management by performing low-level tasks like URL rewriting, SSL offloading, and request filtering.
+Windows Networking Stack:
+
+This part of the IIS architecture manages low-level network connections and communication. It provides communication between the server and the client over protocols like TCP/IP.
+Application Pool Manager (kernel-mode part):
+
+While most of the application pool management occurs in user mode, part of the process initialization and handling happens in kernel mode.
+2. User Mode (Services and Processes)
+User mode is where most of the IIS application logic, services, and processes run. The user-mode components are responsible for executing web applications, handling requests, managing processes, and serving content dynamically (e.g., ASP.NET applications).
+
+User Mode Components in IIS:
+
+w3wp.exe (Worker Process):
+
+The worker process (w3wp.exe) is a key user-mode component in IIS. It hosts and executes web applications.
+Each application pool in IIS runs its own worker process (or multiple worker processes if configured for the application pool), and the worker process executes the logic of web applications (ASP, ASP.NET, PHP, etc.).
+The worker process interacts with HTTP.sys (kernel mode) to process incoming requests, handle application logic, and return responses.
+IIS Manager:
+
+IIS Manager (inetmgr) is a graphical interface used by administrators to configure IIS settings such as application pools, site settings, and security. While not directly processing requests, IIS Manager provides essential management tools for configuring the web server.
+Application Pooling:
+
+IIS uses application pools to isolate different web applications from each other. This ensures that if one application crashes, it doesn't affect others.
+Each application pool runs in its own worker process (w3wp.exe), and each worker process can host one or more web applications.
+IIS Services:
+
+Various services run in user mode to handle specific tasks. For example:
+ASP.NET runtime: for running ASP.NET applications.
+PHP handler: for processing PHP applications.
+Static content handling: for serving static files like HTML, CSS, and images.
+Request Handler:
+
+IIS has different handlers to process specific types of requests, like:
+ISAPI extensions: for handling custom dynamic content (e.g., ASP).
+CGI: for executing CGI-based applications.
+ASP.NET: for running ASP.NET applications.
+Logging and Monitoring:
+
+IIS has logging and monitoring features in user mode that record events, errors, and other important information, such as performance counters.

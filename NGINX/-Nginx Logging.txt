@@ -1,0 +1,69 @@
+->Nginx: Logging:
+#nano nginx.conf
+user  nginx;
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
+
+events {
+    worker_connections  1024;
+
+http {
+    include	  /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+log_format  vhost  '$host $remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log  /var/log/nginx/access.log  main;
+
+->Then add the same access_log file to the other host like: notes.example.com, blog.example.com
+# nano conf.d/blog.example.com
+ 
+server{
+  listen 80;
+  server_name blog.example.com;
+  root /var/www/blog.example.com; 
+  index index.php;
+  access_log  /var/log/nginx/access.log  vhost;
+fastcgi_cache_key $schema$request_method$host$request_uri;
+
+#curl --header "Host: notes.example.com" localhost 2&>1
+#curl --header "Host: blog.example.com" localhost 2&>1
+#less /var/log/nginx/access.log  (to see access log with host name request)
+_____________________________ __________________________________________
+->For syslog:
+#nano conf.d/notes.example.com
+server{
+  listen 80;
+  server_name blog.example.com;
+  access_log  syslog:server=unix:/dev/log  vhost;
+
+___________________________
+#curl --header "Host: notes.example.com" localhost 2&>1
+#less /var/log/nginx/access.log  (to see access log with host name request)
+#tail -n 1 /var/log/messages
+->Now you will not find access.log in /var/log instead you will find it in /var/log/messages
+
+->1. syslog
+The syslog directive is used to send log messages to a syslog server. Syslog is a standard protocol for logging system messages in UNIX-like operating systems. It's often used to centralize logging and simplify log management.
+
+Syslog typically handles messages from the system and applications (e.g., Apache, Nginx, system services) and organizes them based on severity levels (e.g., info, error, critical).
+The use of syslog in web server configurations allows logs to be forwarded to the syslog daemon for centralized collection and storage.
+2. server=unix:/dev/log
+This part specifies the destination for the log messages, which in this case is a UNIX domain socket at /dev/log.
+
+/dev/log is the standard path to the local syslog socket in many Linux systems. It is where syslog daemons like rsyslog or syslog-ng listen for incoming log messages.
+The unix:/dev/log syntax indicates that the log messages will be sent to the syslog server via a UNIX domain socket, rather than over the network. This is commonly used for local logging.
+If you were to use a remote syslog server, the syntax would look more like syslog:server=hostname:port, where you specify the host and port of a remote syslog server.
+
+3. vhost
+This part is likely a tag or log facility associated with the logs.
+
+In syslog, you can categorize logs by facility. For example, you can have logs categorized as auth, cron, daemon, local0, local1, etc.
+vhost might be used here as a custom tag or identifier for logging related to virtual hosts in your web server configuration. This allows you to separate out the logs for different virtual hosts or specific services running on the web server.
+In this context, vhost would essentially be used to label the log entries related to a specific virtual host or configuration.

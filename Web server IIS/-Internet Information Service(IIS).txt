@@ -1,0 +1,93 @@
+->Internet Information Service:(IIS):
+IIS is a windows component that work as a webserver.
+-just open control panel-> program and services ->trun windows features on or off-> Internet information service.
+________________
+Key Features of IIS:
+Web Server: It allows the hosting of websites and web applications on Windows servers.
+FTP Server: IIS can be used to transfer files over the FTP (File Transfer Protocol).
+Application Pooling: Provides a way to isolate applications for better security, reliability, and performance.
+Security: Supports encryption, authentication, and authorization, ensuring secure hosting.
+Logging and Monitoring: IIS provides detailed logging and monitoring features, which are crucial for tracking traffic and diagnosing issues.
+Common Uses of IIS:
+Hosting websites and web applications.
+Running ASP.NET applications.
+Configuring FTP servers for file transfer.
+Managing API endpoints and web services.
+Setting up security configurations like SSL certificates and permissions.
+How to Install IIS on a Windows Server:
+If you're looking to set up IIS on a Windows server, here's how to do it:
+
+For Windows 10 or Windows Server:
+Open Control Panel:
+Type "Control Panel" in the Windows search bar and click on it.
+Turn Windows Features On/Off:
+In the Control Panel, go to Programs → Turn Windows features on or off.
+Enable IIS:
+In the Windows Features dialog box, check the box next to Internet Information Services. You can expand it to select additional features like FTP server or Web Management Tools if needed.
+Install:
+Click OK, and Windows will install IIS. This may take a few minutes.
+Access IIS:
+Once installed, you can open the Internet Information Services (IIS) Manager from the Start menu.
+Checking if IIS is Installed:
+After installation, open IIS Manager and you’ll see a list of your sites and server configurations.
+If you navigate to http://localhost in a browser, you should see the default IIS page indicating that the web server is working.
+Managing Websites on IIS:
+To manage websites, you’ll use the IIS Manager. Some common tasks include:
+
+Creating a new website by specifying a directory to serve the site’s content.
+Configuring bindings (e.g., setting up port numbers and domain names).
+Setting security settings for authentication (Windows, Basic, etc.).
+Enabling or disabling modules for security or functionality.____________________
+
+The process of installing IIS (Internet Information Services) varies slightly depending on the version of Windows you're using and whether you're using the GUI (Graphical User Interface) or a Core installation (command-line interface). Here's a breakdown of the differences:
+
+1. Installing IIS Feature on Windows 10
+On Windows 10, IIS is installed as a "feature," not a "role." This means it is simply a set of features you enable, and it can be done via the Control Panel or PowerShell.
+
+Steps:
+
+Using Control Panel:
+
+Open the Control Panel.
+Go to Programs > Turn Windows features on or off.
+Scroll down and check Internet Information Services.
+Click OK, and Windows will install IIS.
+Using PowerShell:
+
+Enable-WindowsOptionalFeature -Online -FeatureName IIS-ServerRole
+This will install IIS with some default features. You can customize the features from the Control Panel by selecting additional IIS components.
+
+2. Installing IIS Role on Windows Server 2012 (GUI)
+On Windows Server 2012, IIS is installed as a role. Server versions include different management tools for installing roles like IIS, and the GUI (Server Manager) simplifies the process.
+
+Steps (via GUI):
+
+Open Server Manager.
+In the Manage menu, click Add Roles and Features.
+Click Next through the wizard until you reach the Select Server Roles page.
+Select Web Server (IIS) and click Next.
+Choose any additional IIS features you need.
+Follow the prompts to complete the installation, then click Install.
+The installation wizard allows you to install not only the IIS role but also to select which IIS features to install (e.g., Web Server, FTP Server, Management Tools).
+
+Steps (via PowerShell):
+
+Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+3. Installing IIS Feature on Windows Server 2012 Core Edition
+Windows Server 2012 Core does not have a GUI, so everything must be done via command-line tools like PowerShell or Server Manager from another machine.
+
+Steps (via PowerShell):
+
+Open a PowerShell session and run:
+
+Install-WindowsFeature -Name Web-Server -IncludeManagementTools
+This command installs the Web Server (IIS) feature along with the necessary management tools to manage IIS remotely (if required).
+Additional Notes:
+
+In the Core edition, Server Manager cannot be used directly. Instead, everything is done remotely or via PowerShell commands.
+The process is essentially the same as on the GUI version of Server 2012, but it's done entirely via command-line interfaces (CLI).
+Summary of Differences:
+Windows 10 uses a feature-based installation, either via the GUI in Control Panel or PowerShell.
+Windows Server 2012 (GUI) uses the Add Roles and Features Wizard to install IIS as a "role" via the GUI (Server Manager).
+Windows Server 2012 Core installs IIS via PowerShell commands since there is no GUI interface for the Core edition.
+ 

@@ -1,0 +1,52 @@
+->Nginx :Content Compression and decompression
+
+-To modify the config of nginx to improve the performance
+
+#nano etc/nginx/nginx.conf
+
+keepalive_timeout 65;
+ 
+gzip on;
+gzip_disable msie6;
+gzip_proxied no-cache no-store private expired auth;
+gzip_types text/plain text/css application/x-javascript application/javascript text/xml application/xml application/xml+rss text/javascript image/x-icon image/bmp image/svg+xml;
+gzip_min_length 1024;
+gzip_vary on;
+gunzip on;
+
+________________________________ __________________________
+->These configuration directives are related to gzip compression in Nginx. Gzip is used to reduce the size of the data being sent from the server to the client, improving loading speeds and reducing bandwidth usage
+
+-1. gzip on;
+This enables gzip compression in Nginx, meaning the server will compress the files before sending them to the client if the client supports gzip (which most modern browsers do)
+
+2. gzip_disable msie6;
+This disables gzip compression for clients using Internet Explorer 6 (MSIE 6). IE6 had some issues with gzip compression, so this line ensures that compression is not applied for that browser version.
+
+3. gzip_proxied no-cache no-store private expired auth;
+This configures how gzip compression is applied when the request comes from a proxy (like a CDN or reverse proxy).
+no-cache: Don’t compress responses with the Cache-Control: no-cache header.
+no-store: Don’t compress responses with the Cache-Control: no-store header.
+private: Don’t compress responses with the Cache-Control: private header.
+expired: Don’t compress responses that are considered expired.
+auth: Don’t compress responses that require authentication.
+Basically, this directive helps control when gzip should or shouldn't be used when the request passes through a proxy.
+
+4. gzip_types text/plain text/css application/x-javascript application/javascript text/xml application/xml application/xml+rss text/javascript image/x-icon image/bmp image/svg+xml;
+This specifies which MIME types should be compressed with gzip.
+Common file types like plain text (text/plain), CSS (text/css), JavaScript (application/javascript), and XML (text/xml) are included.
+It also includes image types like image/svg+xml and image/x-icon.
+This ensures that files of these types will be compressed before being sent to clients.
+
+5. gzip_min_length 1024;
+This sets the minimum length (in bytes) of a response to be compressed. In this case, only responses larger than 1024 bytes (1 KB) will be compressed.
+This is done to avoid the overhead of compressing very small files that might not benefit from compression.
+
+6. gzip_vary on;
+This enables the Vary: Accept-Encoding header for compressed responses.
+The Vary header tells caches (such as CDNs or browsers) that the response varies depending on the Accept-Encoding header sent by the client.
+By setting gzip_vary to on, it ensures that caches will store both the compressed and uncompressed versions of the response when necessary.
+
+7. gunzip on;
+This enables gunzip for requests that have been compressed. It allows Nginx to decompress responses that are coming from upstream servers (like proxies or backend servers) if they are gzipped.
+In this case, it is useful if your server is acting as a reverse proxy, and the content it receives from upstream is gzipped but needs to be decompressed before being sent to the client.

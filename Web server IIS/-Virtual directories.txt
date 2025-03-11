@@ -1,0 +1,26 @@
+->Virtual directories:
+
+-We have two websites and each website has its own files and folders that are located in each website directory or path. Now suppose we have another folder that is located in different path, but it contains information or pages that are common btw the two websites, maybe like a private policy page or a contact page, the login page or even a download file or any common file btw the websites. 
+-Now instead of copying the files to each website, you can create a virtual directory, which is a diff folder and now you can point this folder from your website. In this way you will have a common folder acting as a virtual directory. So its called virtual because its not located in the same directory of the websites.
+-To do that IIS manager, right click on website1.com-> Create virtual directory->Alias=contact, Physical path->ok
+__________________________________
+->Default document:
+-Whenever you open a website, automatically the website will take you to the default page of the website.
+-You will find this pages in website node and website page as Default document, In main website this will be listed as inherited and you can change this page as your need in your website.
+_____________________________
+FTP access:
+-Server manager->manage->Add roles and features->Web Server->FTP Server->FTP service, FTP Extensibility->Next->Install->web server manager->Server node->right click on sites->Add FTP sites->FTP site name: Web1FTP, Physical Path->next->Bindings->IP address=All unassigned, Port=21, Start FTP site automatically, NO SSl ->Next-> Authentication=Basic, Allow access to: Specified users, admin, Permission: Read, Write-> Finish.
+-Now we will download ftp client: FileZilla, Open FileZilla: Host: Loaclhost, Username: Admin, Password: , Port:21-> quick connect.
+-FTP will help you if you want to update your data, your files or your website from directory synchronized from your local machine, which is the developer machine to the target website, you can synchronize directly by uploading downloading files as you can see, upload files and download files and so on.
+___________________
+->Working with power shell:
+#Run power shell as administrator-> get-website: To see list of websites.
+#Get-Webiste -Name "website1.com" | Start-Website :for starting a website, similarly Stop to stop the website.
+_To create a new website: #New-Website -Name "web" -PhysicalPath C:\inetpub\website1 ,and you can also check in IIS manager that a new website is created.
+-To add new bindings: New-WebBinding -Name "web1" -IPAddress "*" -Port 81
+-To remove a website: #get-website -Name "web1" | Remove-Website
+____________________
+-Install WordPress:
+-IIS manager->web platform Installer->Search word press->Add->install->Type of Database=MySQL, password=( of MySQL), continue-> I accept->Web site: New website, Word Press application Name: mywordpress, Web Site Name:wp, Physical path=C:\inetpub\wordpress, IP adress=All unassigned,port=80, host name=www.mywp.com ->Continue->configure* :12346789_@wordpress->Continue->Finish
+-Now edit it in host file: 127.0.0.1 www.mywp.com
+-Now search for www.mywp.com-> Continue

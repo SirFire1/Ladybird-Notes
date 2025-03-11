@@ -1,0 +1,100 @@
+->NGINX: WORKER PROCESSES:
+->NGINX: keep-alive:
+
+-To adjust the performance of our server by modifying worker processes and worker connection, and a look at keep alive.
+
+#nano nginx.conf
+user nginx;
+worker_processes auto;  it depends on cpu core, to handle load
+worker_rlimit_nofile 4096;
+
+error_log /var/log/nginx/error.log warn;
+pid       /var/run/nginx.pid;
+
+events {
+   worker_connections 1024;
+}
+keepalive_timeout 65;
+
+
+
+#su -s /bin/sh -c "ulimit -Hn"
+#su -s /bin/sh -c "ulimit -Sn"
+
+____________________________ _____________________
+
+->It is better to keep the worker connection high, it might slow the process, but it is better then hitting the limit and terminating the request.
+
+->su -s /bin/sh -c "ulimit -Hn":
+
+This command uses su (substitute user) to run the ulimit -Hn command as a different user (default is root).
+
+-s /bin/sh: This specifies the shell (/bin/sh) to use for the command execution.
+ulimit -Hn: This returns the hard limit for the number of open file descriptors (the maximum number of files a process can open simultaneously). The hard limit is a system-wide limit set by the administrator.
+
+su -s /bin/sh -c "ulimit -Sn":
+
+Similar to the first command but with ulimit -Sn.
+ulimit -Sn: This returns the soft limit for the number of open file descriptors (the limit that can be adjusted by users or processes, within the bounds of the hard limit).
+
+->Explanation:
+Hard limit: The maximum value allowed by the system, which can only be increased by the root user.
+Soft limit: The current value that can be increased or decreased by users, but cannot exceed the hard limit.
+
+->worker_rlimit_nofile 4096; 
+The worker_rlimit_nofile directive is used in the context of Nginx, a popular web server. It specifies the maximum number of open file descriptors (files, sockets, etc.) that worker processes are allowed to have. This setting is crucial for high-traffic environments where the server may need to handle a large number of simultaneous connections.
+
+->Breakdown:
+worker_rlimit_nofile: Specifies the maximum number of file descriptors that worker processes can open.
+The number 100000 is just an example; you would adjust this value based on your system's capacity and needs.
+-Why this is important:
+File Descriptors: Every time a worker process opens a file or socket (such as handling a network connection), it consumes a file descriptor.
+Limits: If the number of file descriptors is too low, Nginx may hit the limit and fail to handle new requests, resulting in errors or dropped connections.
+System limits: You may also need to adjust the system's file descriptor limits (e.g., ulimit -n) to allow Nginx to utilize the file descriptors defined by worker_rlimit_nofile.
+____________________________ ___________________________
+
+->In NGINX, the keep_alive directive (more commonly written as keepalive_timeout or keepalive_requests) is used to manage persistent connections. These directives help in controlling how long NGINX will maintain an idle connection with a client (like a browser) or to upstream servers.
+
+Here’s an overview of the relevant directives:
+
+1. keepalive_timeout:
+This directive defines the maximum time (in seconds) that NGINX will keep an idle connection open. If a connection is idle for this duration, it will be closed.
+
+Example:
+
+http {
+    keepalive_timeout  65;  # 65 seconds
+}
+This means NGINX will keep the connection alive for 65 seconds after the last request before closing it.
+
+2. keepalive_requests:
+This directive specifies the maximum number of requests that can be sent over a single keep-alive connection before NGINX will close the connection and establish a new one.
+
+Example:
+
+http {
+    keepalive_requests 100;  # Allow 100 requests per connection
+}
+This means NGINX will allow 100 requests per connection before closing it and establishing a new one.
+
+3. keepalive (for upstream servers):
+This directive is used in upstream configurations to control the maximum number of idle connections NGINX will keep open to the upstream servers.
+
+Example:
+
+upstream backend {
+    keepalive 32;  # Keep up to 32 connections open to the backend servers
+    server backend1.example.com;
+    server backend2.example.com;
+}
+This ensures that NGINX keeps a pool of idle connections to backend servers to improve performance.
+
+Summary of the most common directives:
+keepalive_timeout: Defines how long to keep a connection alive after the last request.
+keepalive_requests: Defines the maximum number of requests per connection.
+keepalive (for upstream): Defines how many idle connections to maintain to upstream servers.
+
+->For fastcgi you have to use fastcgi_keep_conn on;
+->SCGI AND uwsgi protocols dont have the concept of keepalive connections.
+->keepalive are kind of cache of tcp connections.
+___________________________________ __________________________

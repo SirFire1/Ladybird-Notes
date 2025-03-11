@@ -1,0 +1,45 @@
+NGINX: SSL: Lets Encrypt:
+
+#yum install -y certbot-nginx
+#nano conf.d/chord.tools.conf
+
+ server {
+   listen 80;
+   server_name chord.tools www.chord.tools;
+
+   location / {
+     root /usr/share/nginx/html;
+     index index.html;
+  }
+}
+
+#certbot --nginx -d chord.tools -d www.chordd.tools
+-the first thing it will ask for domain owners email address
+-then information sharing notice
+-then it will verify the owner of domain that you are pointing
+-then [1-2] for http and https
+
+->And now you will see a listen 443 ssl directive and redirect module is created by CERTBOT.
+-certbot came from the epel release repo
+
+#ls /lib/system/system/certbot-renew.*
+-here you will find certbot-renew.service and certbot-renew.timer
+-We are going add nginx reload in certbot-renew.service environment path, so that everytime certificate renews the nginx is also automatically reloaded.
+#nano /etc/sysconfig/certbot
+POST_HOOK="--post-hook 'systemctl reload nginx'"
+
+->TO renew certs, which expires after 90 days
+#systemctl start certbot-renew
+#systemctl enable certbot-renew
+#systemctl start certbot-renew.timer
+#systemctl enable certbot-renew.timer 
+
+_________________________________________
+--nginx: Tells Certbot to automatically configure Nginx to serve the SSL certificate.
+
+-d chord.tools -d www.chordd.tools: These are the domain names for which you're requesting the SSL certificate. Certbot will issue a certificate for both chord.tools and www.chordd.tools.
+Make sure of the following before running the command:
+
+DNS Setup: Ensure that both chord.tools and www.chordd.tools point to the correct IP address of your server.
+Nginx Setup: Certbot will attempt to auto-configure Nginx. It’s important that Nginx is installed and running.
+Root Access: You should have root or sudo access to run Certbot and modify Nginx configuration files.

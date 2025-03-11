@@ -1,0 +1,129 @@
+->IIS HIGH AVAILABILITY:
+High Availability (HA) and Disaster Recovery (DR) are both crucial concepts in IT infrastructure, but they serve different purposes:
+
+High Availability (HA)
+Definition: HA refers to systems or services that are designed to ensure continuous operation with minimal downtime, even in the event of failures or disruptions. The goal is to make sure that the service is always available and operational.
+Focus: Keeping services running smoothly with as little disruption as possible.
+Approach: Redundancy, failover mechanisms, load balancing, and monitoring are used to prevent downtime.
+Examples:
+Load balancing across multiple servers so if one fails, the others can take over.
+Using redundant power supplies or network connections to avoid single points of failure.
+Goal: Minimize service downtime and provide a highly reliable system for users, even during partial failures.
+Disaster Recovery (DR)
+Definition: DR is about recovering from catastrophic events that may cause significant downtime or data loss. It refers to the processes and plans in place to restore systems and data after a major failure or disaster (e.g., a data center fire, a server crash, or a cyberattack).
+Focus: Recovering from severe disruptions and getting back to normal operation.
+Approach: Backups, offsite storage, replication, and having predefined recovery plans are key aspects.
+Examples:
+A full system backup stored offsite to restore data in case of data center failure.
+Cloud-based disaster recovery solutions that replicate your critical infrastructure to a different region.
+Goal: Ensure that you can recover data and resume operations after a major disaster or failure, but it might not guarantee real-time availability during the recovery process.
+Key Differences:
+Scope: HA focuses on minimizing downtime and ensuring that services are constantly available, while DR is focused on recovering from a major disaster or significant failure.
+Timeframe: HA is a proactive approach to preventing downtime, while DR is a reactive approach, dealing with the aftermath of an outage.
+Redundancy vs. Recovery: HA uses redundancy to prevent failure in the first place, whereas DR involves having backup strategies to restore services after an event that causes major disruption.
+____________________
+->WEB FARMS:(NLB)
+-Two or more web servers that will work together in a one node, what we call a cluster node or an ELB cluster. So we will create a NLB cluster and we will add a web service to it. Now the user will access the website using the NLB cluster and not directly the web servers. 
+-So now the servers will act together so if one is down the other will handle the requests.
+
+-Server manager->Manage->Add roles and features-> Features-> Remote Server Administration tools-> Feature Administration Tools-> Network Load Balancing Tools->Next->Install
+
+-Or you can install remote server administration tool for network load balancing from Powershell: Install-WindowsFeature rsat-nlb
+
+->Now to check this : Server Manager->Tools->Network Load Balancing Manager
+
+->Similarly install load balancing features on other two IIS server:
+-Server manager->Manage->Add roles and features-> Features->Network Load Balancer
+   
+-or with power shell: Install-WindowsFeature nlb
+
+->Now we have our two server NLB installed on and we have our main server, Now lets create a new cluster, a networking load balancing cluster.
+-You need to configure a static IP if you want to work with an NLB manager.
+->Network and sharing centre-> change adapter setting->Ethernet->Properties->Internet Protocol Version 4(TCP/IPv4)-> Use the following ip address, IP address:192.168.10.134, Subnet mask:255.255.255.0    (same ip is used which was available as dynamic but is now static)
+
+->For other servers:
+->Server Manager->Tools->Network Load Balancing Manager->right click and click new cluster-> Host: IIS1 ->Next->Unique identifier-> Default state->Add-> IPv4 address: 192.168.10.200, Subnet mask: 255.255.255.0 ->Clustr IP config, Cluster operation mode: Multicast ->Next-> Define port rules-> Finish.
+->For second IIS server-> Click on Cluster network(192.168.10.200)->Add host to cluster->Host:iis2->Next->Next->Finish
+
+->To configure our DNS www record to pint to our cluster DNS, which is 192.168.10.200:
+-server manager->Tools->DNS->DSERVER->Forward Lookup Zones->iisdomain.net->right click: new host-> Name:www, Ip address: 192.168.10.200->ok
+
+____________________________
+->IIS Application request routing (ARR):
+-SSL is a point to point encryption
+-We will use dedicated LB ARP Server for SSL connection for managing traffic btw the web servers. This can be a hardware load balancer or third party software or ARR which is free roll found on Windows Server, Which allow us to create an ARR farm. Now the user will access the website by accessing the ARR server and only the server is responsible for getting the website from the appropriate server in the farm according to your configuration, So the user will not access the web server itself. It will only access the ARR server and everything will be managed by the ARR.
+->AGAIN we have three servers, two web server hosting my website and my domain controller that will be used as ARR machine. So we need to install ARR.
+-Server manager->manage-> Add roles and features-> Server roles->Web Server IIS-> Add features->next-> Install.->Tools->IIS Manger
+-Install web platform Installer from Internet explorer from official Microsoft site.
+->After that -IIS manager-> Web platform Installer->Search ARR routing 3.0->add ->install.
+->Under server node you will find a new Server farm-> Right click->create server farm , server name: HA farm-> Next ->Server address:IIS1-> add-> Server address:IIS1-> add-> Finish
+->IN this we dont need to set an IP address, because this machine is holding the farm is the machine that will be accessed by the users, users and clients will acces this machine as this machine is your website. So In DNS we are going to add a record for this machine.
+-Server manager->Tools-> DNS->DSERVER-> iisdomain.net->In www host add the ip of your current machine (cmd: ipconfig)->Finish.
+Now try to access that iisdomain.net through your local machine.
+______________________
+SSL Encryption and Load Balancing:
+
+SSL (Secure Sockets Layer) provides point-to-point encryption between the client and server.
+You'll use a dedicated load balancer (could be a hardware load balancer, third-party software, or ARR on Windows Server) to manage SSL traffic between web servers. ARR will act as the intermediary for client requests and forward them to the appropriate web server in the farm.
+ARR Setup:
+
+You're configuring a web farm with three servers:
+Two web servers hosting the website.
+One Domain Controller or dedicated server to act as the ARR load balancing server.
+Installing IIS and ARR:
+
+Step 1: Install IIS Role and ARR
+In Server Manager, go to Manage > Add Roles and Features > Server Roles > Web Server (IIS) > Add Features > Next > Install.
+After installation, go to Tools > IIS Manager.
+Step 2: Install Web Platform Installer
+Open Internet Explorer and go to the official Microsoft website to download the Web Platform Installer.
+Step 3: Install ARR Using Web Platform Installer
+In IIS Manager, open Web Platform Installer > Search for ARR (Application Request Routing) 3.0 > Click Add > Install.
+Creating a Server Farm in ARR:
+
+Once ARR is installed, in IIS Manager, under the Server node, you will find a new option for Server Farms. Right-click it and select Create Server Farm.
+Name the farm (e.g., HA farm), then proceed by adding the web servers (e.g., IIS1) to the farm.
+Add IIS2 and finish the farm creation. Now the ARR server will handle routing traffic to the appropriate server in the farm.
+DNS Configuration:
+
+Since users will access the website through the ARR server, configure DNS to point to the ARR server's IP.
+In Server Manager, go to Tools > DNS > Select the DNS Server > Find your domain (e.g., iisdomain.net).
+Add an A Record under the www subdomain, pointing to the ARR server’s IP (which you can find by running ipconfig on the ARR server).
+Testing the Setup:
+
+Once DNS is configured, try accessing iisdomain.net from a local machine. It should direct you to the ARR server, which will then load balance the traffic to the web servers based on your ARR configuration.
+_______________________
+->Shared content implementation:
+We need Data (website content) to be the same on both servers. So now to achieve this synchronization, we have several methods. 
+-The first is to simply copy the data from one server to another manually.
+-The second option is by using network share and the website data will be located on that network share and all servers in the farm will pull data from it, so data will be centralized in one place and modifications will occur in only one place.
+For network share fault tolerance, this file server or this network share must be implemented in a cluster storage.
+-Third method is by using something called DFS R, which stands for distributed file system replication, in this we are simply going to replicate content automatically between in the farm, we pick a primary server and all other server in the farm will get a replication of that server content.
+_______________
+->Web Farm Shared Content- Network Share:
+-We will create a central store for our website data, first thing is to create a user for this shared network. We will create a simple user just for this operation that the web server will use to access the network share.
+-server manager-> Tools-> Active directory users and computers->users- right click :new->user-> First name: iisshare, Userlogin Name: iisshare, password -> Next.
+-Go to  C:/ drive in central server or my domain to create a network share for our server.
+-C:/ ->New folder: shared web ->properties, sharing: advanced sharing, share this folder-> permissions->Add-> Enter the object name to select: Domain user and iisshare ->apply, Now put a sample website in this directory.
+-Now we must point to this share from both servers we have in our network.
+-server2-> iis manager->default website->basic settings->Physical path: \\dserver\Sharedwebs ->connect as ->specific user-> User name: iisdomain/iisshare, password-> ok-> Test settings ->close-> ok
+-Similarly for server2.
+-Now our servers are pointing towards central server
+->Now try iisdomain.net, even if you suspend one server the same content will be available 
+__________
+-Now to add SSL certificate:
+-IIS manager (HA farm/ domain controller machine):
+we are using adjudicate.com to generate a self or a trusted self-signed certificate.
+-Domain name: issdomain.net, path, password-> Generate-> ok
+-IIS manager-> Dserver (IISDOMAIN){you will find self signed cert}->default website-> edit bindings-> add -> https-> ssl cert->ok.
+-check it on browser as https://iisdomain.net
+-Simply copy the same cert on client or local machine-> open the cert-> local machine-> pass->Next-> finish
+-If cert did not work automatically, just go and run MSI console and go to file->Add remove snap in ->certificate->computer account->local computer -> Finish, Then go on Certificates ->Trusted root certificate -> Certificate->All task-> Import->Next->path (add your cert)->next.
+_______________________
+->Web Farm Shared content - DFS-R:
+It will replicate one sever to all other sever in the farm or in cluster, So Install DFS management console in the main server in the domain controller.
+-Server manager-> Manage-> Add roles and features ->Server roles-> Remote server administration rules-> Role administration Tools-> File server Tools-> DFS management Tools-> Next-> Install
+-Similarly for other servers-> Server manager-> Server and roles ->File and storage services-> DNS replication-> Add features -> Install.
+
+-Now go to main machine -server manager->Tools->DFS management->New replication group->Multipurpose application group->Next -> Name of application group: WebSharedContent, Domain: iisdomain.net ->Next->Replication Group Member -Add- Object Name : IIS1, add- IIS2 ->Next-> Topology: Full MEsh ->Next -> Replicate Continuously, Bandwidth: Full ->Next-> Primary member: IIS1-> Add- Local path of the folder: C:/Inetpub/wwwroot ->ok, Next -> IIS2 : local path :Enabled -path: C:/Inetpub/wwwroot ->ok-> close
+-Now under our DFS management we have two replication group, now iis1domain.net,iis2domain.net, iisdoamin.net , will show the same content.

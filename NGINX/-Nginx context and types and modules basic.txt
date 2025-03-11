@@ -1,0 +1,107 @@
+->Nginx: context and types:
+http{
+  
+ include mime.types;
+  upstream backendserver {
+   server 127.0.0.1:1111;
+   server 127.0.0.1:2222;
+   server 127.0.0.1:3333;
+   server 127.0.0.1:4444;
+}
+   server {
+    listen 8080;
+    root /User/Fire/Dekstop/mysite;
+
+ rewrite ^/number/(\w+) /count/$1; 
+ location / {
+   proxy_pass http://backendserver/;
+}
+ 
+location ~* /count/[0-9] {
+    root /User/Fire/Dekstop/mysite;
+    try_files /index.html =404;
+}
+   
+    location /fruits {
+    root /User/Fire/Dekstop/mysite;
+}
+ location /carbs {
+    alias /User/Fire/Dekstop/mysite/fruits;
+}
+location /vegetables {
+    root /User/Fire/Dekstop/mysite;
+    try_files /vegetables/veggies.html /index.html =404;
+}
+ location /crops {
+   return 307 /fruits;
+}
+}
+}
+
+->Here http, server are context types, while include, listen and root path are the derivatives.
+
+->Location block: This is going to be the second parameter, which is going to serve our page when /fruits is searched through root dir, it will automatically add /fruits at the end of root file.
+
+->Alias:  Now the alias in place of our root will create a path for /carb similar as for /fruits but without adding /fruits at end automatically.
+
+->try_files: is a derivative which is used when we need to serve another directory, here if user search for vegetables will be prompted with veggies.html page, otherwise index.html, =404 if neither of these are found.
+
+->location ~* /count/[0-9] :Location context here for any regular expression with parameter /count/and any number will provide either index.html, if found otherwise 404 error.
+___________________________ ___________________________
+
+->Redirects:
+->return 307 /fruits : is a redirect to fruits dir, and the url will also be changed to http://localhost:8080/fruits/
+ 
+->While for rewrite : the url will stay as it is specified by the client, here ^ is start sybmbol, /number/(\w+) is the dir path with variable value that the client is searching will be replaced with /count/$1 location.
+
+^/number/(\w+): This is the pattern being matched:
+^ means the beginning of the string.
+/number/ is the literal string that the URL must start with.
+(\w+) matches one or more word characters (letters, digits, or underscores). The parentheses capture this part of the URL for use later.
+/count/$1: This is the destination where the URL should be rewritten:
+/count/ is the base string of the new URL.
+$1 refers to the first captured group from the match (i.e., whatever was matched by (\w+)).
+Rewritten Explanation:
+This rule will match URLs like /number/12345 and rewrite them to /count/12345.
+
+So:
+
+Input: /number/12345
+Output: /count/12345
+___________________________________ _____________________
+->Load balancer:
+ -Here proxy_pass will manage the loadbalancing by sending requests to backendservers or the servers available in round-robin approach, the location at root will send all requests to proxy_pass.
+->Proxy_module and fastcgi_module almost does the same thing but speaks in diff protocol in fastcgi.
+->FastCGI (Fast Common Gateway Interface) 
+1. fastcgi_module
+Purpose: The fastcgi_module is used for communicating with FastCGI servers, like PHP-FPM, Python, Ruby, etc. It allows Nginx to act as a reverse proxy to pass dynamic content requests to an application server that supports the FastCGI protocol.
+Protocol: FastCGI is a more efficient alternative to CGI, as it allows persistent connections between Nginx and the backend server, reducing overhead by reusing connections.
+Typical Use Case: It's typically used for PHP, Python, or other application servers that are FastCGI-compliant (e.g., PHP-FPM for PHP scripts).
+Example Usage: Passing requests for PHP scripts to a PHP-FPM server for processing.
+Example:
+
+location ~ \.php$ {
+    fastcgi_pass 127.0.0.1:9000;   # Connect to PHP-FPM on localhost at port 9000
+    fastcgi_param SCRIPT_FILENAME /var/www/html$fastcgi_script_name;
+    include fastcgi_params;
+}
+2. proxy_module
+Purpose: The proxy_module is used for acting as a reverse proxy to forward client requests to other backend servers, which may include HTTP servers, application servers, or even other Nginx instances.
+Protocol: This module supports various protocols, including HTTP, HTTPS, WebSocket, and more. It allows for load balancing, caching, and other advanced features in a reverse proxy setup.
+Typical Use Case: It is typically used to forward HTTP requests from Nginx to another server or cluster, often as part of a load balancing or reverse proxy setup. It can be used to forward traffic to web servers like Apache or other Nginx instances or HTTP-based services.
+Example Usage: Forwarding requests to a backend application server or load balancer.
+Example:
+
+location /app/ {
+    proxy_pass http://backendserver;  # Forward to a backend server
+}
+3. cgi_module
+Purpose: The cgi_module is used for communicating with servers using the CGI protocol. CGI (Common Gateway Interface) is an older protocol for running external programs and handling dynamic content.
+Protocol: CGI is a stateless protocol, meaning each request opens a new process on the backend server to process the request, which is less efficient than FastCGI (which keeps processes alive between requests).
+Typical Use Case: It's typically used for legacy applications that still rely on the CGI protocol. CGI is slower compared to FastCGI and is often considered outdated due to performance reasons, but some legacy applications may still use it.
+Example Usage: Running scripts such as PHP in a CGI environment (though PHP-FPM with FastCGI is more common now).
+Example:
+
+location /cgi-bin/ {
+    root /usr/lib/cgi-bin;  # Path to CGI scripts
+    fastcgi_pass 127.0.0.1:9000;  # Example for using FastCGI with CGI scripts

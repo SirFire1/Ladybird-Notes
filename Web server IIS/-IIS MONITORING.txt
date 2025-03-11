@@ -1,0 +1,320 @@
+->IIS MONITORING:
+-WORKER Process monitoring: You need to install some feature.
+ Server manager-> Add roles and features->Server Roles->eb server IIS->Web server->Health and diagnostics= Request Monitor, Tracing, Logging Tools, Custom Logging->Next->Install 
+
+-Server Node->Worker process(it will give us application pool)-> Double click on one of them and then open web browser to see the req
+-Another way to monitor is Task Bar
+-IN worker Process, private bytes is the specific memory allocation to that process, while virtual bytes is the total memory consumed by this process and everything related to it.
+-By going to Application pool under sever tab, you can increase the size of private and virtual memory.
+
+->Request failed tracing:
+-Server node->Failed Request Tracing Rules-> Add ->All content->Define Trace Condition ->Status code=404 ->Time taken=5 ->next->Trace provider-> Finish.
+
+-To monitor with request tracing, navigate to the model inside the website, open it-> failed Request Tracing Rules, it will show the inherited rule from the server node-> Edit site tracing-> Enable, Directory, Maximum Number of trace files.
+-Now load the website on browser, if it takes more then 5 sec, a log will be generated.
+
+->Logging in IIS:
+ -Server tab-> Logging(its enabled by default),(here you can check format, Standard field, log file destination, Log file rollover)
+
+->For advanced logging:
+-Server tab->Web Platform Installer->search for advanced logging=Add ->Install
+-Now under server tab you will find Advanced logging feature-> Add Log definition-> Base File Name=Advance log Test->enable, Publish real time events-> Select field=Time-UTC, Time-Local, Time Taken, Status, Site Name, Server IP, Referrer, User Agent, CPU utilization-> Apply ->enable advance logging.
+-Now check that its inherited and enabled by our website and you can check advanced log that being generated in the c: drive-> inetpub->logs-> Advancedlog
+___________________
+->Performance Monitoring in windows:
+-Open performance monitor tool on windows->Monitor Tools->Performance Monitor-> Add(+)->Available counters=<local computer>, %committed bites in use, Request execution time, Request Failed, Request/sec, .Net CLR Dates(#of Exceps Thrown) -> Add >> ->ok
+
+_________________________
+->IIS Worker Process Monitoring and Logging:
+Request Monitor, Tracing, Logging Tools, Custom Logging (Add Roles and Features)
+
+Request Monitor: Provides real-time information about the worker processes, their activity, and their health. It helps in identifying issues like request queueing and worker process crashes.
+Tracing: Used for capturing detailed trace information about request processing on the server. It logs HTTP request and response details for debugging purposes.
+Logging Tools: Helps in creating logs for various activities on the web server. Logs can track requests, performance, errors, etc.
+Custom Logging: This allows you to configure and collect custom log fields for deeper insights into web server performance and usage.
+Logging in IIS (Server Tab)
+
+Enabled by Default: Logging is enabled by default in IIS. This is where you can configure how logs are captured for incoming HTTP requests.
+Standard Fields: These fields can include things like the date and time of the request, the request method (GET/POST), the response status (200, 404), bytes transferred, and client IP addresses.
+Log File Destination: You can specify the location of the log files (typically in C:\inetpub\logs\LogFiles).
+Log File Rollover: You can configure whether log files should be archived based on size or time, so they don’t grow too large or cause performance issues.
+Advanced Logging Configuration:
+
+Web Platform Installer: This is a tool that allows you to install additional features and tools for IIS. In this case, it’s used to install the Advanced Logging feature.
+Base File Name: This is the prefix for the log file name. In your case, you’re naming it "Advanced log Test". The log files will be saved with this prefix and appended with a timestamp.
+Enable/Publish Real-Time Events: This option ensures that logs are created in real-time, and events are written as soon as they occur.
+Fields to Log: You can choose what data you want to log for each request:
+Time-UTC and Time-Local: These fields log the time of the request in both UTC and the local time zone of the server.
+Time Taken: This logs the amount of time it took to process the request, which is useful for performance monitoring.
+Status: The HTTP response code (e.g., 200 for success, 404 for "Not Found").
+Site Name: The name of the site receiving the request.
+Server IP: The IP address of the server handling the request.
+Referrer: The URL of the page that referred the request to the server (for understanding traffic sources).
+User Agent: The browser or client making the request, useful for troubleshooting device/browser-related issues.
+CPU Utilization: Logs how much CPU resource was used for processing the request.
+Log Storage Location: These logs will be stored in C:\inetpub\logs\Advancedlog, which can be easily accessed for troubleshooting or analysis.
+Why Use Advanced Logging?
+
+Standard IIS logging offers basic insights into web traffic, but advanced logging lets you track additional, more granular details such as real-time events and specific custom fields. This makes troubleshooting and performance monitoring much more detailed and accurate.
+Windows Performance Monitoring:
+Performance Monitor Tool:
+
+Performance Monitor is a built-in tool in Windows that allows you to track system performance in real-time. You can monitor CPU usage, memory consumption, disk activity, network performance, and more.
+Monitor Tools -> Performance Monitor:
+
+In this part, you can add specific performance counters (metrics) that allow you to monitor how well your system or a particular application (like IIS) is performing.
+Counters in Performance Monitor: These are individual performance metrics that you can monitor to track the health and performance of your system or web server. Let’s look at the counters you’re adding:
+
+% Committed Bytes in Use: This tracks how much of the physical memory (RAM) is being used. It’s a good indicator of system memory utilization. If this value is consistently high, your system may be running out of memory.
+
+Request Execution Time: This shows how long it takes to process an incoming HTTP request. If this is high, it might indicate performance bottlenecks in your web applications or the server.
+
+Request Failed: This counter tracks how many requests to the server fail. If this is high, it indicates that the server is having trouble processing incoming requests, which could be a result of misconfigurations or server overload.
+
+Request/sec: This metric tracks how many requests per second your IIS server is handling. It’s a good indicator of web traffic and server load. High values could indicate a high traffic volume, which might require scaling the server.
+
+.NET CLR Exceptions (# of Exceptions Thrown): This counter tracks the number of exceptions thrown in a .NET application. A high number of exceptions can indicate problems in your code or the need for optimization.
+
+Why Use Performance Monitor?
+
+Performance Monitor gives you a real-time view of how well your system and server are performing. By adding counters like Request/sec or Request Failed, you can quickly identify when your web server is under heavy load or facing issues with processing requests.
+
+It allows you to proactively monitor system health and troubleshoot any performance issues before they affect users.
+
+Summary of Key Benefits:
+IIS Worker Process Monitoring (through Request Monitor and Advanced Logging) helps you track server health, diagnose problems with requests, and get deep insights into what’s happening with your web server.
+Performance Monitoring (through the Performance Monitor tool) lets you see how well your server is performing in real-time, track potential issues with resource usage, and measure the overall load on your web applications.
+_____________________
+->IIS Performance Optimization:
+-Make under sure under logging you have only the parameter that are necessary, as it also put load on server to load such req.
+-Disable debugging:
+ While you are developing your website, you may need the debugging feature, to allow you to find errors or your bugs in your application more easily and to save your time, but in production environment, it will overhead on your server performance, so just disable it.
+-server tab->.NET COMPILATION-> Debug=false
+-If you are working with tradition ASP and not .NET
+-server tab->IIS-> ASP-> Debugging properties-> Client-side and server-side debugging=False
+______________________________
+->ASP vs .NET Difference
+The user seems to be asking for the differences between ASP and .NET. However, it's important to clarify that ASP and .NET are not directly comparable as they are different components in the Microsoft web development ecosystem. ASP (Active Server Pages) is a server-side scripting environment created by Microsoft, while .NET is a framework that includes ASP.NET, which is a web application framework for building web applications.
+
+ASP is an older technology that relies on interpreted scripts like VBScript for dynamic web page generation.
+ It was introduced in 1998 by Microsoft as its first server-side scripting language.
+
+On the other hand, .NET is a framework that includes ASP.NET, which is a more modern and powerful web application framework designed for building dynamic web pages and applications.
+ ASP.NET is built on the Common Language Runtime (CLR) and supports multiple programming languages such as C# and VB.NET.
+
+In summary, ASP is a server-side scripting environment, whereas ASP.NET is a part of the .NET framework designed for building web applications and services
+______________________________
+Threads Per Processor:
+->For Asp classic website:
+-server node->ASP->Limits Properties-> Threads Per Processor Limit=50(recommended for high cpu core for more, where 100 is maximum recommended and after that monitor your performance)
+
+->For ASP.net:
+-C:drive->inetpub->websitedir->open with=Notepad -Here you can change maxConcurrentRequestsPerCPU and maxConcurrentThreadsPerCPU
+
+____________
+The difference between ASP Classic and ASP.NET is significant, as they are two different technologies used to build dynamic web applications. Here's a breakdown of the key differences:
+
+1. Technology & Framework:
+ASP Classic:
+
+What it is: ASP Classic (also known as Active Server Pages) is a server-side scripting technology used to create dynamic web pages. It was introduced by Microsoft in 1996 as part of Internet Information Services (IIS).
+Nature: ASP Classic uses scripting languages like VBScript and JScript for web page development. The code is processed on the server and generates HTML which is sent to the browser.
+Programming Model: It is based on a simple, linear request-response model. There’s minimal structure or abstraction, so developers need to manually handle most tasks.
+State Management: Limited support for state management and tools for handling session, cookies, etc.
+ASP.NET:
+
+What it is: ASP.NET is a much more advanced and modern framework, introduced by Microsoft in 2002 as part of the .NET Framework.
+Nature: ASP.NET uses languages like C# or VB.NET to write web applications. It provides a more structured, object-oriented programming model.
+Programming Model: ASP.NET is built around a Web Forms (UI-based) or MVC (Model-View-Controller) (more recent and modular) architecture, making it more flexible and powerful for building large-scale, maintainable web applications.
+State Management: ASP.NET provides a more sophisticated state management system with features like ViewState, Session, Application State, Cookies, and Query Strings, which makes it easier to handle complex user interactions.
+2. Language Support:
+ASP Classic:
+Primarily uses VBScript and JScript (similar to JavaScript). It's a scripting language-based model with minimal features compared to modern programming languages.
+ASP.NET:
+Primarily uses C# (preferred) or VB.NET. C# is a powerful, object-oriented language, which allows for a much more structured, scalable, and maintainable approach to writing code.
+3. Development Environment:
+ASP Classic:
+Typically, you write scripts in simple text files and manage them manually. It uses basic tools like Notepad or a simple text editor.
+ASP.NET:
+ASP.NET applications are typically developed using Visual Studio, a powerful integrated development environment (IDE). Visual Studio provides advanced features like debugging, code completion, refactoring tools, and integrated version control.
+4. Performance:
+ASP Classic:
+Since it is a simple scripting language, it generally lacks performance optimizations for large-scale web applications. For every request, ASP Classic code is parsed and executed on the fly, which can cause overhead.
+ASP.NET:
+ASP.NET is compiled, meaning that the code is precompiled into Intermediate Language (IL) before execution. This provides better performance, as the application doesn't need to be recompiled for each request. It also includes many optimizations that improve speed, such as caching and threading.
+5. State Management:
+ASP Classic:
+State management in ASP Classic is fairly manual. For example, you need to handle user sessions or cookies by writing your own code or using simple techniques.
+ASP.NET:
+ASP.NET offers built-in state management features such as ViewState (preserving data across postbacks), Session (for per-user state), and Application State (for application-wide data). These make it much easier to build dynamic applications that require user-specific data and better control of state.
+6. Security:
+ASP Classic:
+ASP Classic has limited security features and lacks built-in tools for handling modern authentication, authorization, or input validation.
+ASP.NET:
+ASP.NET has a comprehensive set of security features such as:
+Forms Authentication
+Windows Authentication
+Role-based authorization
+Data validation and encoding (e.g., AntiXSS, input sanitization)
+Membership and Identity management systems to manage users and permissions easily.
+7. Architecture and Modularity:
+ASP Classic:
+ASP Classic is monolithic and has a very basic architecture. All logic (business logic, data access, and UI) is typically written in the same file, making maintenance difficult for large applications.
+ASP.NET:
+ASP.NET encourages modular development. It supports a variety of design patterns like MVC (Model-View-Controller), Web API, and Web Forms, allowing you to organize code into separate layers for UI, business logic, and data access, which promotes easier maintenance and scaling.
+Additionally, ASP.NET has support for web services (WCF), RESTful APIs, and other modern architectural patterns.
+8. Page Life Cycle:
+ASP Classic:
+ASP Classic has a simple page life cycle. It just processes the request, executes the script, and sends back the response to the client. The page lifecycle is more difficult to control and lacks events for advanced control.
+ASP.NET:
+ASP.NET has a well-defined page lifecycle with multiple events like Page_Load, Page_Init, Page_PreRender, Page_Unload, etc., that allow developers to hook into different stages of the page's processing. This makes it much easier to manage complex interactions on the server side.
+9. Error Handling:
+ASP Classic:
+Error handling in ASP Classic is done using the On Error Resume Next approach or simple checks using Err objects. It’s rudimentary and lacks robust debugging tools.
+ASP.NET:
+ASP.NET has structured error handling with try-catch-finally blocks. It also provides advanced error-handling features like custom error pages, Error Logging, Global.asax, and Error Handling Middleware, which makes debugging and handling errors much easier.
+10. Development Speed and Scalability:
+ASP Classic:
+
+Due to its simplicity and limited features, ASP Classic might be quicker for small, simple applications but lacks scalability and maintainability for larger, complex systems.
+ASP.NET:
+
+ASP.NET is designed for building scalable, maintainable applications. It includes built-in libraries, controls, and pre-compiled code, making it faster and easier to develop large and complex web applications.
+________________________
+->Queue Length:
+-Application Pools-Advanced setting of any application pool-General-Queue Length= set as per your config for optimization.
+
+->General-Queue Length is the maximum number of request that this application pool will handle or the maximum number of request that will be put in the queue and handled by the application pool, SO if the queue is full, then users or the new requests will receive a 503 error, which means the server of website is available.
+_______________________________
+->Content(HTTP) Compression:
+-server node->Compression-> enable static and dynamic content, only computer files larger than (in bytes), cache directory, Per application pool disk space limit.
+
+-If not available -server manager-> Manage->server roles->Web server IIS-> Web server-> Performance-> static and dynamic compression-> Install
+_______________
+Content (HTTP) Compression in IIS:
+Content compression is a technique that reduces the size of the HTTP response sent from the server to the client, which improves the performance and speed of web applications. This is especially useful for delivering content like HTML, CSS, JavaScript, and other text-based resources over the network.
+
+In IIS (Internet Information Services), you can enable content compression for both static and dynamic content. Here's a breakdown of the options you have under Compression settings:
+
+Steps to Enable HTTP Compression in IIS:
+Open IIS Manager:
+
+Go to Server Node in IIS Manager (this is typically your server name at the top of the left panel).
+Navigate to Compression Settings:
+
+Under the Server node, find and click on Compression (found in the IIS section).
+Enable Content Compression:
+
+Enable Static Content Compression:
+
+Static content refers to resources that don't change often, like HTML, CSS, JavaScript, images, etc.
+Static content compression is applied to files that are served exactly as they are, without any dynamic content generation (like .html, .css, .js files).
+Enabling Static Compression reduces the size of these files before they are sent to the client, which improves page load times.
+Enable Dynamic Content Compression:
+
+Dynamic content refers to files that change with each request, typically generated by server-side scripts or applications, such as ASP.NET pages or PHP files.
+Enabling Dynamic Compression reduces the size of the dynamically generated content before sending it to the client.
+Configure Additional Compression Options:
+
+Only compress files larger than (in bytes):
+This setting allows you to specify a minimum file size (in bytes) that must be met for compression to be applied. Files smaller than this size will not be compressed.
+This can be helpful because compressing very small files might add overhead instead of improving performance.
+Cache Directory:
+This specifies the directory where compressed content is stored temporarily before it is sent to clients. This is useful for caching purposes.
+By default, IIS will store these compressed files in a disk cache to avoid recompressing the same files repeatedly. You can specify a location if you'd like to customize where the cache is stored.
+Per Application Pool Disk Space Limit:
+This setting limits the amount of disk space that can be used for storing compressed files by each application pool. It's important to set a limit to ensure that one application pool doesn't consume all available disk space for compression.
+This helps manage server resources efficiently and prevent any one site from consuming excessive disk space.
+_________________________
+->Output Caching:
+-If you are using dynamic pages like ASP or ESM or any kind of dynamic page, output caching will allow you to cache your data or your web pages in the memory, So if there is another request from the users, the worker processor or the application pool will not go and execute the code again and get the data again, it will automatically reply from the memory which will have a high speed response.
+-Kernel mode caching works directly in the http protocol and not inside the application pool container, So this make it more faster than the user mode caching, since its relatd to the application pool processing steps. But there are some limitation like authentication, authorization and so on.
+
+-server node-> Output Caching-> Add ->File name extension=.asp-> enable user-mode cache and kernel-mode cache monitoring-> Ok -> Edit feature setting->enable user cache and kernel cache, Maximum cache response size, Cache size limit(in MB)
+-Static pages like html, images are cached by IIS itself, there are not cached by output caching.
+
+->To monitor caching:
+-Performance Monitor->Add(+)->Available counters=<Local computer>, Web Service Cache ->Add-> ok
+
+->Another way to monitor specifically kernel cache:
+-Terminal =netsh http show cachestate
+_____________________________________
+->Performance monitoring counters. 
+Here is a list of the most important counters to monitor in your IIS server: 
+ 
+
+
+Processor\% Processor Time 
+This is the amount of time that the CPU is busy as opposed to waiting. In other words, it refers to the average percentage of processor time occupied
+Whenever this value reaches 80% or more, then this indicates very high load on your server. It may be causes by High websites load or maybe other applications on your server.
+You can check your application pool worker processor CPU consumption to check whether the websites or other applications are consuming your CPU.
+
+System\Processor Queue Length  
+The processor queue is being filled up with threads and the processors are busy servicing other threads at the moment. If this counter is usually above 2 and the % Processor Time remains on high levels, then this is considered as a bottleneck.
+ 
+Memory\Available Mbytes  
+Amount of physical memory that is free and can be used. If the free memory is equal or greater than 50%, the system is considered healthy. A value of 25% free memory indicates a potential problem.
+If the free memory is less than 5%, the performance of the system is negatively impacted
+ 
+Memory\Pages/sec  
+Amount of read and write requests from memory to disk.
+Less than 500 Pages/sec are considered normal.
+ 
+
+
+Physical Disk\% Disk Time  
+Percentage of time the disk was occupied, if this value is high then this will affect the performance of read and write on your disks which can cause low performance of your websites.
+ 
+Network Interface\Bytes Total/sec
+Amount of bytes – both sent and received – over the network.
+Consider add network cards or upgrading to higher speed if this value is very high
+ 
+System\Context Switches/sec 
+A context switch occurs when the kernel switches the processor from one thread to another—for example, when a thread with a higher priority than the running thread becomes ready. Context switching activity is important for several reasons. A program that monopolizes the processor lowers the rate of context switches because it does not allow much processor time for the other processes' threads.
+(Microsoft)
+High levels of context switching can occur when many threads share the same priority level. This often indicates that there are too many threads competing for the processors on the system. If you do not see much processor utilization and you see very low levels of context switching, it could indicate that threads are blocked)
+oHigh context switches/sec – more than 5000 context switches per second
+oVery high context switches/sec – more than 15,000 context switches per second
+
+
+
+
+
+ 
+Web Service:
+You can view performance data for all applications or for specific ones, such as the Default Web Site or your specific Web Site instances.
+
+Web Service\Bytes Total/sec 
+Helpful to track and identify potential spikes in traffic.
+ 
+Web Service\Total Method Requests/sec 
+Shows the number of all HTTP requests (counted since service startup).
+ 
+Web Service\Current Connections
+Shows the current number of connections established with the Web service.
+ 
+
+ASP.NET Applications\Requests/Sec   
+Shows the throughput of the ASP.NET application on the server, if this value is very high then your application is considered as a heavy application, so you must consider monitoring and analyzing other counters to check it your resources need to be upgraded, if other counters are normal like CPU, Memory, or network. Then you have to check your application if it is working in bad behavior or if it really needs more resources.
+ 
+ASP.NET\Application Restarts  
+If your application restarts are high, then this may indicate bugs in your application that you have to check.
+ 
+ASP.NET\Request Wait Time 
+Shows the amount of time (in milliseconds) that the last request was held in the queue. It should be close to 0 ms
+If it is greater than 1000 ms, the performance of the IIS server will be very low.
+ 
+ASP.NET\Requests Queued  
+It’s like the processor queue but here its related only to the application.
+Requests in queue are waiting to be processed. This counter should be monitored to find out when an application is overwhelmed. It must be as low as 2-3 requests.
+ 
+.NET CLR Exceptions\# of Exceps Thrown / sec 
+Shows the number of exceptions per second that the application is throwing, obviously this must be low.
+If high, then your application has many bugs and errors. And this can cause reboot of your application pools and very bad experience.
+
+ 
+.NET CLR Memory\# Total Committed Bytes  
+Amount of virtual memory reserved for the application on the paging file (page file is the file on disk that memory uses when exceed its capacity) this must be very low and monitored with other factors to check where the problem is)
+ 
+Web Service\Get Requests/sec  
+Amount of GET requests processed in a second. If the value is too high for a particular IIS server, then load balancing or clustering may be needed as a solution for large volume websites.

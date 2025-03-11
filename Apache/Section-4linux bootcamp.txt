@@ -1,0 +1,472 @@
+Section-4:linux bootcamp
+-> Wildcards:
+* A character or string used for pattern matching.
+* Globbing expands the wildcard pattern into a list of files and/or directories.(paths)
+*wildcards can be used with most commands.
+ ls, rm, cp
+*E.g: *- matches zero or more characters.
+      *.txt : to find .txt files
+      a*    : files that start with a
+      a*.txt: file that start with a and end with .txt
+      ?- matches exactly one character.
+      ?.txt
+      a?
+      a?.txt   
+ E.G: ls ?? : aa bb - will give 2 characters file
+      ls a?.txt     - ab.txt
+
+* []- A character class.
+  Matches any of the character include between the brackets.
+  Matches exactly one character.
+  [aeiou]
+  ca[nt]*-It will find charcters like
+  can, candy, cat, catch
+
+*[!]-Matches any of the character NOT included between the brackets. Matches exactly one character.
+ [!ae]*
+ cat, bat
+
+*wildcard Ranges:
+-Use two character separated by a hyphen to creae a range in a character class.
+ -[a-g]*
+ -matches all files that start with a,b,c,d,e,f or g
+ 
+*Named character classes:
+#[[:alpha:]]-matches character(lower and upper case)
+#[[:alnum:]]-matches upper lower case or any digits
+#[[:digits:]]-matches digits from 0-9
+#[[:lower:]] -matches lower case
+#[[:space:]] - matches any spaces, tabs or newline char
+#[[:upper:]] -matches upper case
+*Matching wildcard Patterns:
+. \-escape character. Use if you want to match a wildcard charcter.
+. match all files that end with a question mark:
+  *\? -E.G: done?
+
+->Input/output types:
+ I/O Name        Abbreviation     File Description     e.g:
+ standard input    stdin                0            ls -l 0< file.txt
+ standard output   stdout               1            ls -l 1> file.txt  
+ standard Error    stderr               2            ls not-here 2>file.txt
+
+->Redirection
+ > redirects standard output to a file.
+  overwrites (truncating) existing contents.
+ >>Redirects standards output to a file.
+  Appends to any existing contents.
+ < Redirects input from a file to a command.
+ E.G: sort < files.txt > sorted_files.txt -will input files.txt into sort and then output it in sorted_files.txt
+ & -used with redirection to signal that a file descriptor is being used.
+ 2>&1 -combines stderr and std output
+ E.g: ls files.txt not here > out.both 2>&1
+ 2>file -redirects standard error to a file.
+
+ *the Null device
+ >/dev/null -redirects output to nowhere.
+ E.G: ls files.txt not here 2>/dev/null
+
+->Comparing the content of files:
+ * diff file1 file2   -compare two files.
+ * sdiff file1 file2  -side-by-side comparison
+ * vimdiff file file2 -highlight differences in vim
+-> $ diff file1 file2
+   3c3
+  Output:
+  < this is a line in a file.             (from file1)
+  _ _ _ _
+  >This is a line in a file.              (from file2)
+ 
+-> $ sdiff file1 file2
+   line in file1     |      line in file2
+                     >      more in file2
+                                             
+   lineNumFile1-Action-LineNumFile2
+   Action =(A)dd(C)hange(D)elete
+-> vimdiff:
+   ctrl-w w: go to next windows
+   :q        Quit(close current windows)
+   :qa       quit all(close both files)
+   :qa!      Force quit all
+
+->How to search the contents of files:
+ * grep -Displays lines matching a pattern.
+  Format: grep pattern file
+ * grep options:
+   -i Perform a search, ignoring case.
+   -c Count the number of occurrences in a file.
+   -n precede output with line numbers.
+   -v Invert Match. Print Lines that don't match.
+ *The file command:
+  file file_name -Displays the file type.
+  E.g:$ file sales.data
+      sales.data: ASCII text
+      $file *
+      bin: directory
+      Jason.tar; POSIX tar archive
+ -> Searching for text in binary Files:
+    string       Display printable strings
+->What pipes are and how to use them:
+  | -pipe symbol
+command-output | command-input
+ * cat file | grep pattern: here cat pattern will list all the output whic will be used by grep as input to find that pattern.
+-> The cut command
+ * cut [file] cut out selected portions of file, if file is omitted use standard input
+ * -d delimiter  use delimiter as the field separator.
+ * -f N          Display the Nth field.
+  E.g: strings gaint-stepsmp3 | grep -i john |head -1
+     :John Coletrane
+       strings gaint-stepsmp3 | grep -i john |head -1 | cut -d' ' -f2
+     : Coletrane
+  *tr is used to translate
+  E.g: grep bob /etc/passwd | cut -d: -F1,5 | sort | tr":" " " | column -t
+  here cut will give output of field 1 and 5 line seprated by ":" then tr will convert that c ":" into " " (space) and "column -t" for table output
+
+->How to copy files over the network:
+ * SCP  : Secure copy
+ * SFTP : SSH file transfer protocol
+ -> Command line SCP Clients
+ *scp
+ *sftp
+ *PuTTY Secure Copy client - pscp.exe        [for        ]
+ *PuTTY Secure File Transfer client-psftp.exe[    windows]
+ -> Graphical SCP/SFTP Clients:
+ * Cyberduck :for mac and windows
+ * FileZilla :for mac,win,linux
+ * WinSCP    :only for win
+ ->Format:
+  scp source destination :copy source to destination
+  sftp host :start a secure file transfer session with host.
+  *sftp is more interactive where you can examine remote and local files.
+  ftp host :Start a file transfer session with host.
+  *E.G :sftp linuxsvr :will log you in to remote server
+        pwd :it will show that you are connected to remote directory 
+        ls
+        lpwd: it will show local directory
+        lls: for local files
+        put [file name]: to upload it to remote server
+  *E.G :scp z.txt linuxsvr:/tmp/  :in scp ":" is used to seprate path where the file is to be placed and user have to be aware of source and destination.
+       :ssh linuxsvr : to login remote server
+       :ls z.txt : to check file is transferd
+
+-> Filezilla:
+   Host:sftp://linuxsvr Username:adminuser password:adminuser and then click on quickconnect
+
+-> Customizing Shell prompt:
+  .Use an environment variable to customize.
+  .for Bash, ksh, and sh use $PS1
+  . for Csh, tch, and zsh use $prompt
+->Customizing the Prompt with PS1:
+ \d :Date in "Weekday Month Date" Format:"tue May 26"
+ \h :Hostname up to the first period
+ \H :Hostname
+ \n :Newline
+ \t :Current time in 24-hours HH:MM:SS format
+ \T :Current time in 12-hours HH:MM:SS format
+ \@ :Current time in 12-hours am/pm format
+ \A :Current time in 24-hours HH:MM format
+ \u :Username of the current user
+ \w :current working directory
+ \W :Basename of the current working directory
+ \$ :if the effective UID is 0, a#, otherwise a$
+ *one way is : $ echo 'export PS1="[\u@\h \w]\$ "' >> ~/.bash_profile
+->echo $PS1 :To check the shell prompt default commands
+ * then just write $PS1="\u@\h \$ " or "[\u@\h \W]\$"
+-> persist chages btw logins:
+            vi .bash_profile
+then add :  export PS1="[persist \u@\h \w]\$"
+__________________________________ __________________________________
+->Aliases:
+ *Shortcut
+ *Use for long commands
+ *Use for commands you type often
+ *alias [name[=value]
+ *list or create aliases
+ *Use name = value to create a new alias
+ *Fix typos
+ $ alias grpe='grep'
+ *Make Linux behave like another OS
+ $ alias cls='clear'
+->Removing Aliases
+ *unalias name         Remove the "name" alias
+ *unalias -a           Remove all aliases
+->Persisting Aliases
+ *Add aliases to your personal initialization files.
+ * .bash_profile   (this way when you log out of your system your alias will not be removed)
+->Environment Variables
+ *Name/value pairs
+ *Can change how an application behaves
+ *An Example Environment variable:
+  EDITOR=nano
+ E.G:  $ printenv
+       HOSTNAME=web01
+       TERM=xterm
+       SHELL=/bin/bash
+       PATH=/usr/bin:/usr/sbin:/sbin:/usr/sbin
+       USER=Jason
+       PWD=/home/Jason
+       HOME=/home/Jason
+-> Another way 
+        $ echo $HOME
+        /home/Jason
+->Creating Environment Variable
+ *Syntax: export VAR="value"
+ *Example: export EDITOR="vi"
+           export TZ="US/Pacific"   (timezone as us pacific)
+->Removing Environment Variable
+ *Syntax: unset VAR
+  Example: unset TZ
+->Persisting Environment Variable
+ * $ cat ~/.bash_profile
+   export TZ="US/Central"
+ * printenv | less            (will create help to show output in pages)
+->Listing Processes and Information
+ * ps                Displays process status
+   ps -e             everything, all processes
+   ps -f             Full format listing
+   ps -u username    Displays username's processes
+   ps -p pid         Display information for PID
+   ps -ef            display all processes, full
+   ps -eH            Display a process tree
+   ps -e --forest    Display a process tree
+   pstree            display processes in a tree format
+   top               Interactive process viewer
+   htop              Interactive process viewer
+->Background and Foreground Processes:
+  command &    start command in background.
+  Ctrl-c       Kill the foreground process
+  Ctrl-z       Suspend the foreground process
+  bg [%num]    Background a suspended process
+  fg [%num]    Foreground a background process
+  kill         kill a process by job number or PID
+  jobs [%num]  List jobs
+->Killing Processes:
+  ctrl-c                  kills the foreground proc
+  kill [-sig] pid         sends a signal to a process
+  kill -l                 Displays a list of signals
+ *(kill signal: kill 123, kill -15 123, kill -TERM 123  is same)
+ *if process not terminates use kill -9 123
+ *the actual kill signal is terminated for -15
+ *E.G: ./long-running-program &
+      [1]        2373
+    job number   PID number
+  :jobs %1 or ps -p 2373
+* jobs %% :current job
+* jobs %+ :current job
+* jobs %- :previous job
+* fg %1 : will bring job1 to foreground from background (%1 will also work)
+* Similarly from foreground to background (bg %1)
+_______________________________ ________________________________________
+->Cron: A time based job scheduling service
+ *crontab: A program to create, read, update, and delete your job schedules
+ *use cron to schedule and automate tasks
+->Crontab format:
+ * * * * * command
+ | | | | |
+ | | | | +--Day of the week  (0-6)
+ | | | +----Month of the year(1-12)
+ | | +------Day of the Month (1-31)
+ | +--------Hour             (0-23)
+ +----------Minute           (0-59)
+
+-E.G: 0 7 * * 1 /opt/sales/bin/weeekly-report
+  # Runs every Monday at 07:00 
+->Redirecting output
+  0 2 * * * /root/backupdb > /tmp/db.log 2>&1
+ # Run every 15 minutes
+   0,15,30,45 * * * *
+ #another way
+   */15 * * * *
+ # for first 5 minutes
+   0-4 * * * *
+->Using the Crontab command:
+  crontab file     Install a new crontab from file
+  crontab -l       List your cron jobs
+  crontab -e       Edit your cron jobs
+  crontab -r       remove all of your cron jobs
+->
+  vi my-cron
+  0 7 * * 1 /opt/sales/bin/weeekly-report( export it in my-cron)
+  crontab my-cron          (crontab will load mycron)
+  crontab -l        (will show we have a scheduled job)
+______________________________ _______________________________________
+->Switching users and running commands as other
+->The su command:
+  su [username]   Change user ID or become superuser
+  su -            A Hyphen is used to provide an environment similar to what the user would expect had the user logged in directly.
+  su -c           Command specify a command to be executed
+  whoami          Displays the effective username
+ *E.G:$ whoami
+        fire
+      $ su Ritik
+ *E.G:$ export TEST=1
+        echo $TEST      :1
+        su Ritik
+        echo $TEST      :1
+        exit
+        su - Ritik
+        echo $TEST      :   (test environment is not set in -)
+ *E.G:$ su -c 'echo $ORACLE_HOME' - oracle
+       It will first switch user to oracle then then run echo command, for ORACLE_HOME variable path
+  *sudo: execute a command as another user, typically the superuser.
+->Using sudo
+  sudo -l                list available commands
+  sudo command           run command as root
+  sudo -u root command   Same as above
+  sudo -u user command   Run as user
+  sudo su                switch to the superuser
+  sudo su -              switch to the superuser account with roots environment
+  sudo su - username     switch to the username account
+  sudo -s                start a shell
+  sudo -u root -s        same as sudo -s
+  sudo -u user -s        start a shell as user
+*E.G: sudo /etc/init.d/oracle start
+      sudo -u bob /opt/bobapp/bin/start
+->Changing sudo configuration
+  sudo visudo         Edit the /etc/sudoers file
+->Sudoers Format:
+  user host=(users)[NOPASSWORD:]commands
+  adminuser ALL=(ALL)NOPASSWD:ALL
+  Jason linuxsvr=(root)/etc/init.d/oracle
+->Shell Histroy
+ *Executed commands are added to the history
+ *Shell history can be displayed and recalled
+ *Shell history is stored in memory and on disk
+   ~/.bash_history
+   ~/.history
+   ~/.histfile
+ *history command:
+  history             display the shell history
+  HISTSIZE            Controls the number of commands to retain in history
+  export HISTSIZE=1000
+ *Syntax
+  !N             Repeat command by line number N
+  !!             Repeat the previous command line
+  !string        Repeat the most recent command starting with "string"
+ *More ! Syntax
+  !:N <Event> <Separator> <Word>
+  !             Represents a command line(or event)
+            ! = The most recent command line
+            ! = !!
+  :N            Represents a word on the command line
+                O = command, 1 = first argument, etc
+  E.G:
+     $ head files.txt sorted_files.txt notes.txt
+       <output from head command here>
+     $ !!
+       head files.txt sorted_files.txt notes.txt
+       <output from head command here>
+     $ vi !:2
+       vi sorted_files.txt
+      <vi editor starts>
+ *Even more ! Syntax
+  !^            Represents the first argument
+      !^ = !:1
+  !$            Represents the last argument
+  $ head files.txt sorted_files.txt notes.txt
+  !^ =files.txt
+  !$ =notes.txt
+ ->Searching Shell History
+   Ctrl+r            Reverse shell history search
+   Enter             Execute the command
+   Arrows            change the command
+   Ctrl-g            cancel the search
+->Tab Completion
+ *Tab   autocompletion (write half of command or file,dir then press tab 2 times then it will show the options that available then just type half of them and again press tab and it will be completed)
+    *commands
+    *Files, directories, paths
+    *environment variables
+    *Usernames(~)
+____________________________________ ____________________________________
+->Why Packages and Package manager:
+  Standards for bundling software files
+  Common interface for managing Software
+  Ease of finding, installing, and uninstalling software
+->Package:
+  A package is a collection of files
+  Data/Metadata(package description, version, Dependencies) and any steps to install that application
+->Package Manager:
+  Install, upgrade, and remove packages
+  Manages dependencies (to automatically install any dependencies)
+  keep track of what is installed 
+->Package Types:
+  RPM distro (REDHAT PACKET MANAGER)
+   RHEL, CentOS, and Oracle Linux
+  Deb distros
+   Debian, ubuntu, and Linux Mint
+->yum -RHEL 7/CentOS 7& earlier
+  yum search string               search for string
+  yum info [package]              display info about packages
+  yum info "bash*"                to retrieve info on bash
+  yum install [-y] package        install package
+  yum remove package              Remove package (remember to use sudo)
+  yum upgrade [package]           Update package
+->dnf -RHEL 8/CentOS 8& later
+  dnf search string               search for string
+  dnf info [package]              display info about packages
+  dnf info "bash*"                to retrieve info on bash
+  dnf install [-y] package        install package
+  dnf remove package              Remove package (remember to use sudo)
+  dnf upgrade [package]           Update package
+->rpm: not provide automatic dependencies install
+  rpm -qa                      list all installed packages
+  rpm -qf /path/to/file        list the file's package
+  rpm -ql package              list the package's file
+  rpm -ivh package.rpm         install the package
+  rpm -e package               erase(uninstall)the package
+->package names like: curl, nginx, bash
+->uname -m : gives you cpu architecture like:x86_64,aarch_64
+->"noarch" : means the package is not dependent on your architecture
+-> curl : is also used to download packages
+->curl-O https://mirror.linuxtrainingacademy.com/packages/example/example-1.0-1.noarch.rpm        
+-> rpm -ivh example-1.0-1.noarch.rpm (it is used to install the package)
+->exmaple-lib missing by example-1.0-1.noarch:this way rpm will tell what dependency is missing.
+->curl -O https://mirror.linuxtrainingacademy.com/packages/example/example-lib-1.0-1.noarch.rpm  (its downl and (O) saves files localy with same name through network)
+->after downloading the missing package run:rpm -ivh example-lib-1.0-1.noarch.rpm and rpm -ivh example-1.0-1.noarch.rpm
+->If we have used dnf instead of rpm then that lib dependency would have been automatically downloaded.
+->there are typing errors most of the time while manually installing packs.
+-> rpm -qa : it tells rpm to query all of the installed packages
+-> rpm -q example : for example-1.0-1.noarch
+-> rpm -ql example : /usr/local/bin/example
+-> To check if example file really exist in this: rpm -qf /usr/local/bin/example
+ * if it returns : example-1.0-1.noarch (then you are good to go)
+->Now the packages are needed to be installed in reverse order, so that they dont give error that its depending on one another:
+ * rpm -e example
+ * rpm -e example-lib
+->dnf info "*example*" (another way to find example packages)
+__________________________________ ________________________________________
+->Installing software on DEB Distros
+ *Debian   
+ *Ubuntu
+ *Linux Mint
+ *Kali Linux
+->This uses package manager called APT-Advanced Packaging Tool
+ *Earlier utilities like apt-cache and apt-get were used
+ *Now "apt" is used as combination of all
+ *apt-cache search string: search for string
+ *apt-get install [-y] package: Install package
+ *apt-get remove package: Remove package, leaving configuration
+ *apt-get purge package: remove package, deleting configuration
+ *apt-cache show package: Display information about the package
+ *apt-get update : update the local list of remote packages
+ *apt-get upgrade [-y] : Upgrade all installed packages
+->apt :combination of apt-cache and apt-get
+  apt search
+  apt install
+  apt purge
+  apt update
+  apt upgrade
+->you can also use dpkg to download packages while dpkg doesn't handle dependencies like rpm
+ *dpkg -l :list the installed packages
+ *dpkg -S /path/to/file :List the file package
+ *dpkg -L package :List all the files in package
+ *dpkg -i package.deb : install the package
+ *dpkg -r package :Remove(uninstall) the package
+ *curl -O https://mirror.linuxtrainingacademy.com/packages/example/example_1.0_all.deb
+ *dpkg -i example_1.0_all.deb (error for missing example-lib)
+ *curl -O https://mirror.linuxtrainingacademy.com/packages/example/example-lib_1.0_all.deb
+ *dpkg -i example-lib_1.0_all.deb
+ *dpkg -i example_1.0_all.deb
+ *dpkg -r example
+->If any of the dependencies are left that are not removed while removing packages you can use:
+ *apt autoremove :removes all of the unused dependencies
+ *similarly for dnf :dnf autoremove

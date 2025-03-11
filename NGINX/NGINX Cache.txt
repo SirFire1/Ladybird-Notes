@@ -1,0 +1,159 @@
+NGINX: Cache:
+->Here we are working with wordpress:
+#cd /etc/nginx
+#nano conf.d/blog.example.com.conf
+
+fastcgi_cache_path /var/cache/nginx/blog levels=1:2
+                  key_zone=blog:10m max_size=1g inactive=60m;
+
+server{
+  listen 80;
+  server_name blog.example.com;
+  root /var/www/blog.example.com; 
+  index index.php;
+fastcgi_cache_key $schema$request_method$host$request_uri;
+
+  set $skip_cache 0;
+
+  if ($request_uri ~* "/wp-admin") {
+      set $skip_cache 1;
+}
+ location / {
+  try_files $uri $uri/ /index.php?$args;
+}
+location ~ \.php {
+    add_header X-Cache-Status $upstream_cache_status;
+    fastcgi_index index.php;  
+    fastcgi_pass unix:/var/run/php-fpm.sock; 
+    fastcgi_cache_bypass $skip_cache;
+    fastcgi_no_cache $skip_cache; 
+    fastcgi_cache blog;
+    fastcgi_cache valid 60m;
+    include fastcgi_params; 
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+}
+}
+
+
+-IT needs to be http context, so we cannot use it in server block.
+
+-/var/cache/nginx/blog: This is the directory where the cached files will be stored.
+levels=1:2: This specifies the directory structure for storing cached files:
+-The first part (1) creates a subdirectory structure with 1 character (e.g., a, b, c).
+-The second part (2) creates subdirectories with 2 characters (e.g., aa, ab, ac). This ensures that the cache is organized in a hierarchical structure to avoid having too many files in a single directory, which can impact performance.
+-keys_zone=blog_cache:10m: Defines a shared memory zone (blog_cache) with 10MB allocated for storing cache keys.
+-inactive=60m: This means that cached content will be considered inactive (and eligible for removal) if it hasn't been accessed for 60 minutes.
+->Breakdown of Components:
+$schema: This variable represents the protocol used for the request, either http or https. It ensures that the cache distinguishes between HTTP and HTTPS traffic, as they might have different content.
+
+$request_method: This is the HTTP method used in the request, such as GET, POST, PUT, etc. This helps create unique cache entries based on the type of HTTP request.
+
+$host: This variable represents the host (domain) of the request. If your site is hosted under different subdomains or domains, this ensures the cache is specific to each one.
+
+$request_uri: This includes the full request URI, which includes the path and query string. It is critical for distinguishing between different resources or pages on your website, as URLs with different query parameters or paths should not share the same cache.
+
+Example:
+If a user accesses the following URLs:
+
+http://example.com/page1
+http://example.com/page2
+https://example.com/page1?sort=desc
+The cache keys generated would be:
+
+For http://example.com/page1: httpGETexample.com/page1
+For http://example.com/page2: httpGETexample.com/page2
+For https://example.com/page1?sort=desc: httpsGETexample.com/page1?sort=desc
+As you can see, the cache keys are unique based on the schema (HTTP vs. HTTPS), request method (GET, POST), host (example.com), and the request URI (/page1, /page2, etc.). This ensures that the cached content is accurately matched to the right request.
+
+Why is this important?
+The fastcgi_cache_key ensures that the correct version of the cached content is served, especially when you have:
+
+Multiple domains or subdomains
+Different HTTP methods (GET vs. POST)
+Variations in the request URI (like query parameters)
+
+->The location ~ \.php block in your Nginx configuration is used to define how PHP files should be processed. You've combined it with FastCGI caching to improve the performance of dynamic PHP content by storing the results of PHP requests in the cache. Here's an explanation of the directive:
+->Breakdown:
+location ~ \.php:
+This is a regular expression match (~) for requests ending with .php, meaning the configuration applies to all PHP files. For example, it would match index.php, contact.php, etc.
+fastcgi_cache blog:
+This directive tells Nginx to use the blog cache zone (which you've likely defined earlier with fastcgi_cache_path) for PHP requests.
+The cache zone (blog) holds the cached FastCGI content. This zone was set up earlier with the fastcgi_cache_path directive.
+fastcgi_cache_valid 60m:
+This specifies how long the cached content should be considered valid.
+In this case, the content cached for PHP requests will be valid for 60 minutes (60m).
+After 60 minutes, Nginx will revalidate the cache and regenerate it if necessary.
+Example Flow:
+A client makes a request for a PHP page (e.g., example.com/index.php).
+Nginx checks if the response is cached in the blog cache zone.
+If the content is cached and still valid (within 60 minutes), Nginx serves the cached content directly, speeding up the response time.
+If the content isn't cached or has expired (after 60 minutes), Nginx processes the PHP script (usually via PHP-FPM) and stores the response in the cache for future requests.
+
+->add_header X-Cache-Status $upstream_cache_status:
+
+X-Cache-Status is the custom HTTP header that you’re adding to the response.
+$upstream_cache_status is a special Nginx variable that tells you the cache status of the request when it was handled by an upstream server (such as PHP-FPM or a FastCGI backend).
+
+->The value of $upstream_cache_status can be:
+HIT: The response was served from the cache.
+MISS: The response was not found in the cache, so it was generated by the upstream server (e.g., PHP-FPM).
+EXPIRED: The cached response expired and was regenerated by the upstream server.
+BYPASS: The request bypassed the cache for some reason (for example, due to a Cache-Control header).
+STALE: The cache was served despite being considered stale (e.g., due to a failure in revalidating the cache).
+Example:
+Cache HIT: If the requested PHP file was already cached and served directly from the cache, the response would have an X-Cache-Status: HIT header.
+Cache MISS: If the requested PHP file was not in the cache and had to be generated by PHP-FPM, the response would have an X-Cache-Status: MISS header.
+Cache EXPIRED: If the cached version of the file had expired and was refreshed, the response would have an X-Cache-Status: EXPIRED header.
+Why Use This Header?
+Adding the X-Cache-Status header to your PHP responses can be very helpful for:
+
+Debugging: You can easily see if your caching is working as expected.
+Monitoring: You can track how often content is served from the cache versus how often it’s regenerated.
+Optimizing Cache Settings: If you notice a high number of cache misses, you may want to adjust the cache duration or caching rules.
+Example Response Headers:
+For example, when inspecting the response headers (using curl -I or in browser developer tools), you might see:
+
+HTTP/1.1 200 OK
+Server: nginx/1.18.0
+Date: Wed, 07 Feb 2025 12:34:56 GMT
+X-Cache-Status: HIT
+Content-Type: text/html; charset=UTF-8
+...
+This indicates that the response was served from the cache.
+
+Additional Consideration:
+Make sure the add_header directive is used correctly, and keep in mind that by default, add_header does not work on error responses unless you use always:
+
+# add_header X-Cache-Status $upstream_cache_status always;
+
+-This ensures that the header is added even for error responses like 404s or 500s.
+
+->Set $skip_cache variable to 0 by default:
+
+-This means caching is enabled for most requests unless specified otherwise.
+Condition to check for /wp-admin:
+
+-The if block checks if the request URI matches /wp-admin (case-insensitive).
+-If the request is to the WordPress admin area (/wp-admin), the $skip_cache variable is set to 1, meaning that caching will be bypassed for this request.
+PHP location block (location ~ \.php):
+
+-This block handles requests to PHP files (e.g., index.php, contact.php, etc.).
+fastcgi_cache_bypass $skip_cache:
+
+-If $skip_cache is 1, this directive tells Nginx to bypass the cache (i.e., it won’t serve cached content).
+fastcgi_no_cache $skip_cache:
+
+-If $skip_cache is 1, this ensures that Nginx won’t even store the response in the cache in the first place. This prevents caching the response for requests like /wp-admin.
+Optional add_header:
+
+-The add_header X-Cache-Status $upstream_cache_status; is helpful for debugging and checking the cache status (whether the response was served from the cache, a cache miss, etc.).
+Why This Configuration is Important:
+-Bypass caching for admin areas: You’re effectively excluding certain pages from being cached (in this case, the WordPress admin section /wp-admin). Admin pages are dynamic, often with user-specific data, so caching them wouldn't be appropriate.
+Cache other PHP content: For all other PHP files (outside /wp-admin), the content will be cached for 60 minutes (fastcgi_cache_valid 60m), improving performance by serving cached responses to non-admin users.
+-Example of Cache Flow:
+-When a user accesses a page like example.com/index.php, Nginx will:
+Check if the page is in the cache.
+-If cached, serve it directly (cache HIT).
+-If not cached, process the PHP request and cache the result (cache MISS).
+When an admin accesses example.com/wp-admin, Nginx will:
+Skip caching entirely due to $skip_cache being set to 1.

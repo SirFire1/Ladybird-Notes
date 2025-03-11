@@ -1,0 +1,99 @@
+->Nginx: ssl_module:
+
+#cd /etc/nginx/
+#conf.d/default.conf
+server {
+ listen 80 default_server;
+ server_name _;
+return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name  _ ;
+
+        root   /usr/share/nginx/html;
+ 
+     ssl_certificate /etc/nginx/ssl/public.pem;
+     ssl_certificate_key /etc/nginx/ssl/private.key;
+
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:50m;
+    ssl_session_tickets off;
+    ssl_protocols TLSv1.2;
+    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
+     ssl_prefer_server_cipher on;
+     add_header Strict-Transport_Security max-age=15768000;
+     ssl_stapling on;
+
+rewrite ^(/.*)\.html(\?.*)?$ $1$2 redirect;
+      rewrite ^/(.*)/$ /$1 redirect;
+
+         location / {
+         try_files $uri/index.html $uri.html $uri/ $uri =404;
+          }
+
+      location = /admin {
+        auth_basic "Login Required";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        try_files $uri/index.html $uri.html $uri/ $uri =404;
+ssl_certificate_key /etc/nginx/ssl/private.key;
+}
+}
+
+_______________________________________ _____________________________
+->Transport Layer Security (TLS) and Secure Sockets Layer (SSL) are both cryptographic protocols designed to provide secure communication over the internet. TLS is the updated, more secure version of SSL. 
+
+->listen 80 default_server;: This listens on port 80 (HTTP) and sets it as the default server.
+->server_name _;: This wildcard server name catches all requests not specifically handled by other server blocks.
+->return 301 https://$host$request_uri;: This ensures any HTTP request is redirected to HTTPS using a 301 Moved Permanently status code. The $host and $request_uri variables are used to ensure the request is redirected correctly to the same host and URI, but using HTTPS.
+->rewrite ^(/.*)\.html(\?.*)?$ $1$2 redirect;: This removes the .html extension from URLs. For example:
+/about.html will be rewritten as /about.
+Query parameters are preserved (e.g., /about.html?foo=bar becomes /about?foo=bar).
+It performs a permanent redirect (301).
+->rewrite ^/(.*)/$ /$1 redirect;: This removes trailing slashes from URLs. For example:
+/about/ will be rewritten as /about.
+It also performs a permanent redirect (301).
+->This block handles requests for the root and other paths.
+try_files $uri/index.html $uri.html $uri/ $uri =404;:
+It first looks for a file at $uri/index.html, then $uri.html, then $uri/, and finally falls back to a 404 Not Found if none of those are found.
+
+->location = /admin: This block specifically handles requests to /admin.
+auth_basic "Login Required";: This enables basic HTTP authentication for accessing the /admin page, requiring a username and password.
+auth_basic_user_file /etc/nginx/.htpasswd;: This specifies the file where the username and password combinations are stored.
+try_files $uri/index.html $uri.html $uri/ $uri =404;: Similar to the main location block, it tries to serve content for /admin.
+
+-> ssl_session_timeout 1d;
+Purpose: This directive sets the timeout for SSL session caches to 1 day.
+Explanation: SSL sessions are reused to avoid the overhead of full handshakes for each new connection. This directive specifies how long the SSL session information is stored and can be reused.
+In practice: The server will store the session data for up to 1 day, allowing clients to reuse the SSL session for that period without re-handshaking.
+2. ssl_session_cache shared:SSL:50m;
+Purpose: This directive configures a shared cache for SSL session data.
+Explanation: SSL session data (like encryption keys) is stored in this cache to speed up future SSL handshakes. The shared:SSL:50m part means that Nginx will use a shared memory zone named "SSL" with a size of 50 MB for caching these session details.
+In practice: The shared cache improves performance by reducing the overhead of creating new SSL connections. This is especially useful if you have a high volume of traffic or many clients.
+3. ssl_session_tickets off;
+Purpose: Disables SSL session tickets.
+Explanation: SSL session tickets are used for resuming SSL sessions without needing a full handshake. However, they can be vulnerable to attacks if not handled securely. Disabling session tickets increases the security of your server by avoiding some potential risks.
+In practice: By disabling session tickets (off), the server forces clients to establish new handshakes when resuming SSL sessions, which improves security by eliminating the risks associated with session tickets.
+4. ssl_protocols TLSv1.2;
+Purpose: Specifies which SSL/TLS protocols are supported by the server.
+Explanation: The ssl_protocols directive controls which versions of SSL/TLS are allowed for connections. In this case, only TLSv1.2 is enabled.
+In practice: TLSv1.2 is a secure protocol that ensures data confidentiality and integrity during transport. Disabling older protocols like SSLv3 or TLSv1.0/1.1 ensures that only secure connections are allowed.
+5. ssl_ciphers
+Purpose: Specifies the list of allowed SSL/TLS ciphers for encrypted communication.
+Explanation: Ciphers determine the encryption algorithms used during the SSL/TLS handshake. The string you've specified includes strong ciphers that prioritize security and performance:
+ECDHE-ECDSA-AES256-GCM-SHA384, ECDHE-RSA-AES256-GCM-SHA384, etc., are examples of strong ciphers that use Elliptic Curve Diffie-Hellman (ECDHE) for key exchange, AES (Advanced Encryption Standard) with 256-bit keys for encryption, and GCM (Galois/Counter Mode) for authenticated encryption.
+In practice: These ciphers are considered strong and resistant to attacks such as the BEAST, POODLE, and Lucky 13 vulnerabilities. They provide better security and performance.
+6. ssl_prefer_server_cipher on;
+Purpose: This directive forces the server’s cipher preference to be used over the client’s preference.
+Explanation: During the SSL/TLS handshake, the client and server will agree on a cipher to use. By default, Nginx may let the client suggest a cipher, but this directive forces Nginx to use the strongest cipher it supports, regardless of the client's preference.
+In practice: This setting ensures that your server always uses the most secure cipher, enhancing security by preventing weak ciphers from being used even if the client supports them.
+7. add_header Strict-Transport_Security max-age=15768000;
+Purpose: Adds an HTTP Strict Transport Security (HSTS) header to responses.
+Explanation: HSTS tells the browser to always use HTTPS when accessing your website for a specified period. The max-age=15768000 part sets this period to 6 months (15768000 seconds).
+In practice: This header instructs browsers to only communicate with the server over HTTPS, preventing man-in-the-middle attacks that might occur if a user initially connects over HTTP. It's an important security measure for modern web applications.
+8. ssl_stapling on;
+Purpose: Enables OCSP Stapling (Online Certificate Status Protocol).
+Explanation: OCSP stapling is a mechanism that allows the server to send a time-stamped OCSP (certificate revocation status) response along with the SSL/TLS handshake. This allows clients to check the status of the server’s SSL certificate without needing to contact the certificate authority (CA) directly, improving performance and security.
+In practice: By enabling SSL stapling, clients can quickly verify that the server’s SSL certificate is valid and has not been revoked, improving trust in the connection while reducing the load on the CA servers.
+
+->(OCSP & HSTS): Online certificate status protocol and https strict transport security.

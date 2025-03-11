@@ -1,0 +1,50 @@
+Nginx: Micro-caching:
+-First we install loadtesting tool boom and then we are going to work with uwsgi application, proxy_pass or fastcgi_pass can also be used in place of it.
+#pip install boom
+#boom http://localhost/ --header Host:notes.example.com -c 30 -n 3000
+->This will simulate a load of 3000 requests to http://localhost/ with a Host header of notes.example.com using 30 concurrent connections.
+->The server will receive these requests as if they were made to notes.example.com, even though the requests are targeting localhost.
+
+#sudo nano conf.d/notes.example.com.conf
+uwsgi_cache_path /var/cache/nginx/micro levels=1:2
+                  key_zone=micro:10m max_size=1g;
+
+server{
+  listen 80;
+  server_name notes.example.com;
+  
+  uwsgi_cache_key $scheme$request_method$host$request_uri;
+  location /static {
+    root /var/www/notes.example.com;
+ }
+  location / {
+    add_header X-Cache-Status $upstream_cache_status;
+    include uswgi_params;
+    uwsgi_pass unix:/var/run/uwsgi/notes.sock;
+    uwsgi_cache micro;
+    uwsgi_cache_valid 10s;
+  }
+}
+
+__________________________ ___________________________
+-> uwsgi_cache_path: This directive defines the location and settings for storing cached data.
+-> /var/cache/nginx/micro: This is the directory where cached data will be stored.
+-> levels=1:2: This defines the directory structure for caching. It creates a 2-level hierarchy to store cache files in directories, avoiding excessive numbers of files in a single directory.
+-> key_zone=micro:10m: This creates a cache zone named micro with 10MB of shared memory to store cache keys and metadata.
+-> max_size=1g: This sets the maximum cache size to 1GB. After reaching this limit, older cache entries will be evicted.
+->uwsgi_cache_key $scheme$request_method$host$request_uri;: This sets the cache key for each uWSGI request. The cache key is based on:
+$scheme: Protocol (http or https).
+$request_method: HTTP request method (e.g., GET, POST).
+$host: Host (i.e., notes.example.com).
+$request_uri: Full URI, including path and query string
+->location /static: This location block handles requests for static files (e.g., images, CSS, JavaScript).
+root /var/www/notes.example.com;: The static files are served from the /var/www/notes.example.com directory.
+-> location /: This block handles all requests that are not for static files (i.e., dynamic requests served by uWSGI).
+-> add_header X-Cache-Status $upstream_cache_status;: This adds the X-Cache-Status header to the response, which can be used to monitor whether the response was served from the cache (e.g., HIT, MISS, BYPASS).
+-> include uwsgi_params;: This includes the necessary parameters to interact with the uWSGI server (e.g., variables for handling HTTP requests).
+-> uwsgi_pass unix:/var/run/uwsgi/notes.sock;: This passes the request to the uWSGI server through a Unix socket (/var/run/uwsgi/notes.sock), which is configured to run your application.
+-> uwsgi_cache micro;: This tells Nginx to use the micro cache zone for this location (defined earlier with uwsgi_cache_path).
+-> uwsgi_cache_valid 10s;: This specifies that cached content is valid for 10 seconds. After 10 seconds, Nginx will check for new content or re-fetch from uWSGI
+--------------------------------- -----------------------
+#boom http://localhost/ --header Host:notes.example.com -c 30 -n 3000
+-Now the total time to reload and cache handling is reduced.

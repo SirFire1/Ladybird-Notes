@@ -1,0 +1,60 @@
+->IIS SECURITY TIPS:
+->Web Directory isolation ad setting permissions:
+-IIS server manager->Server node->sites->Add website->Physical path: local C: inetpub: is the common path so attacker can easily access and exploit it, therefore it is recommended to create a diff partition with diff path.
+
+->For that: disk management-> Right click : Shrink volume(to create a new drive)->Enter amount of shrink in MB:5000-> Shrink(An unlocated partition will be created):right click new simple volume->Next-> Drive letter (E) ->Format Partition: Volume label: Websites ->Finish.
+-Now try to limit the NTFS permission: 
+-E: ->properties-> security-> Change permission click edit->Enter the object names to select: IUSR (as for normal websites we will be using IUSR) ok-> permission :read and execute-> and remove other user and groups ->OK
+________________________________________
+Ntfs permissions
+NTFS (New Technology File System) permissions are used to manage access to files and folders stored on volumes formatted with the NTFS file system. These permissions control what users can do with files and folders, such as reading, writing, executing, and deleting them.
+
+NTFS permissions can be categorized into basic and advanced permissions. Basic permissions include Full Control, Modify, Read & Execute, List Folder Contents, Read, and Write. Advanced permissions provide more granular control over files and folders, allowing for specific actions like traversing folders, reading attributes, and taking ownership.
+
+NTFS permissions are applied to every file and folder on an NTFS volume and are inherited from a root folder to the files and subfolders beneath it, though this inheritance can be disabled.
+ These permissions take effect regardless of whether a file or folder is accessed locally or remotely.
+
+When NTFS and share permissions are used together, the most restrictive permission wins, ensuring that unauthorized access is prevented.
+
+Full Control: Users can read, write, execute, and delete files and folders, and can also modify permissions and take ownership of them.
+Modify: Users can modify and delete files, file properties, and folders within the directory.
+Read & Execute: Users can read files and run executables and scripts.
+List Folder Contents: Users can view directories and files contained in the folder.
+Read: Users can view files within the directory but cannot modify or delete these files or their properties.
+Write: Users can add new files and folders to the directory and write to existing files.
+__________________________
+->Firewall settings:
+-For windows server 2012-> Search for: windows Firewall And advanced security->Inbound rules: Right click ->Port->Tcp, Specific local port:80 ->Next(3)->Name: Allow web traffic->finish.
+
+->Search for: windows Firewall And advanced security : Here we are going to configure Domain Profile is active, so check for Network and sharing center by searching on windows search bar to check for Domain network in your active network. ->Inbound and outbound Rules: are all the ports and rules allowed on your server, where inbound is for connection coming to your server and outbound is for connection going out. Here you also have to disable ports that you might not listening to prevent hackers to discover it for an entry.
+_____________________
+->Request Filtering:
+-To install request filtering->click on web platform installer-> search for Request Filtering-> Install 
+
+-webserver tab-> Request Filtering(you will find several rules to define in it, here it will provide file extension allowed in URL )->just click on Allow File Name extension or Deny file name extension ( to allow and deny them), or Edit features setting( for maximum allowed content length, Maximum URL length, Maximum query string)->ok, apart from file name extension there is URL section in which we can allow or deny certain url request, apart from file name extension there is URL section in which we can allow or deny certain url request, http verbs like Get, Post, Delete. Headers and query strings.
+________________________
+->IP domain restriction:
+-To stop attackers from brute force attack, DOS attack, we use ip domain restriction. To install this feature:
+-Server manager->Manage-> Add roles and featurs->Server roles-> Web server IIS-> Web server-> Security ->IP and Domain Restriction-> Next ->Install
+
+-Server Node-> IP domain restriction-> edit Dynamic restriction-> deny IP address based on concurrent requests or Deny IP Address based on the number of requests over a period of time-> ok or there is enable logging mode to just log this kind of request.
+-Edit IP and domain restriction Settings: Deny action Type: forbidden.(it is the type of message return to the user when blocked in the server)
+->To block a specific IP address:
+-IP and domain restriction->Add allow entry->specific IP address( for certain users), IP address ranges(for certain countries specific or areas)
+_________________________
+->MIME TYPES:
+-You can set the types of files that can be hosted by your web server or can be downloaded by clients. You can open MIME Types under web server tab, to see list of file types that can be downloaded or hosted by your web server.
+________________________________
+->Error Page:
+-Server node->website->Error pages->Click on any of the status code to customize the page (you can select a certain custom page, or you can select to execute a certain URL when error occurs or respond with 302 or redirect to a certain web page.
+__________________________
+->Final recommendation:
+.Enable logging
+.Always be updated
+.Backup your server
+
+-Server manager->Manage->Add roles and features-> features->window server backup->Install.
+
+-In windows search for windows backup-> Local backup->right click the choose backup schedule or backup once-> full server or custom->Add items-> C: Inetpub ->Ok -> Next-> Schedule backup time-> Specify Destination Type-> Backup to a volume-> E: ->OK-> Finish.
+
+-you can select a certain folder to backup and make this folder synchronized by a certain online drive like google drive.

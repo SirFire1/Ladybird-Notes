@@ -1,0 +1,84 @@
+->Section 10-Advanced Linux permission:
+->Setuid:
+ * It forces a process to start as the owner of file, regardless who executes that file.
+ * When a process is started, it runs using the starting user's UID and GID
+ * setuid = Set User ID upon execution
+ * to check if a file has the setuid bit set you can look at its ls output. You will see a "s" in the execute field of the owner section. 
+ * -rwsr-xr-x 1 root root /usr/bin/passwd
+ * /usr/bin/passwd uses setuid because it needs root privileges to modify the /etc/passwd and/or etc/shadow files when a user change their passwd
+ * other examples:
+  # ping
+  #chsh     (users to change their shell)
+ * etuid files are an attack surface
+ *IN short setuid commands helps other user to use commands that are necessary and under root privileges 
+ * Not honored to setuid on shells scripts only on binary files. If you use setuid on shell scripts it will run as you not as root,this is security measure.
+-> Octal Permissions:
+   setuid      setgid       sticky
+     0           0            0       Value for off 
+     1           1            1       Binary value for on 
+     4           2            1       Base 10 value for on
+ *Adding the Setuid Attribute 
+  #chmod u+s /path/to/file
+  #chmod 4755 /path/to/file ( here 4 represents setuid, to allow owner of the file full permission.)
+ *Removing the setuid Attribute 
+  #chmod u-s /path/to/file
+  #chmod 0755 /path/to/file
+->Finding Setuid Files
+  find / -perm /4000 (start "/" searching from root of the file system)
+  find / -perm /4000 -ls
+  #older style:
+   find / -perm +4000
+-> Setgid 
+   setgid =Set Group ID upon execution
+  *It causes the program to run with group privileges of the file,rather then group privileges of the person executing the file.
+  # -rwxr-sr-x 1 root tty /usr/bin/wall (the wall command displays message to the terminal of users that are logged into the system)
+  # crw--w---- 1 bob tty /dev/pts/0
+  * All the files that represents user terminal are in the tty group, so anyone using the wall command is will be allowed to write like in:/dev/pts/0
+ -> Finding Setgid Files
+   find / -perm /2000 -ls
+  #older style
+ find / -perm +2000 -ls
+->Adding the Setgid Attribute 
+  chmod g+s /path/to/file
+  chmod 2755 /path/to/file
+->Adding Setuid and Setgid Attributes
+  chmod ud+s /path/to/file
+  chmod 6755 /path/to/file
+->Removing the Setgid Attribute 
+  chmod g-s /path/to/file
+  chmod 0755 /path/to/file
+->Setgid on directories
+ * setgid on a directory causes new files to inherit the group of the directory.
+ * setgid causes directories to inherit the setgid bit.
+ * the existing files of the directory permissions will not be changed but the only the one's that are add afterwards.
+ * Great for working with groups
+-> The Sticky Bit
+ * Use on a directory to only allow the owner of the file/directory or root user to delete it.
+ * Used on /tmp
+   drwxrwxrwt  10 root root 4096 Feb 1 09:47 /tmp
+ * Without the sticky bit set on a directory, the user could delete another user's file if the permissions on the dir allow for it
+->Adding the Sticky Bit
+  chmod o+t /path/to/directory
+  chmod 1777 /path/to/directory
+-> Removing the sticky Bit
+   chmod o-t /path/to/directory
+   chmod 0777 /path/to/directory
+->Reading ls output
+  * A capitalized special permission means the underlying permission is not set.
+  * A lowercase special permission means the underlying permission is set.
+  $ ls -l test
+   -rw-r--r-- 1 root root 0 Feb 14 11:21 test
+  $ chmod u+s test
+  $ ls -l test
+   -rwSr--r-- 1 root root 0 Feb 14 11:21 test(Executable permission was nots set)
+  $ chmod u+x test
+  $ ls -l test
+   -rwsr--r-- 1 root root 0 Feb 14 11:21 test
+
+-> Use file Integrity checker:
+  *Tripwire
+  *AIDE(Advanced Intrusion Detection)
+  *OSSEC
+  *Samhain
+  *Package manager
+ 

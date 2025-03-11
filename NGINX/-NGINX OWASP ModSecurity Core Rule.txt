@@ -1,0 +1,101 @@
+->NGINX: OWASP ModSecurity Core Rule Set(CRS)
+
+->To secure our website with mod_security dynamic module:
+#cd /etc/nginx/modsecurity/
+#git clone https://github.com/SpiderLabs/owasp-modsecurity-crs.git
+#cd owasp-modsecrity-crs/
+#ls
+#/rules
+-here you will find .example.conf files
+#cp crs-setup.conf{.example}
+#cp rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf{.example,}
+#cp rules/REQUEST-999-EXCLUSION-RULES-AFTER-CRS.conf{.example,}
+#cd ..
+#nano modsecurity_include.conf
+include modsecurity.conf
+include owasp-modsecurity-crs/crs-setup.conf
+
+#for f in $(ls -l owasp-modsecurity-crs/rules/ | grep -E "^(RESPONSE|REQUEST)-.*\.conf$"); do\
+>echo "include owasp-modsecurity-crs/rules/${f}" >> modsecurity_include.conf; done
+
+#cd ../
+#nano conf.d/blog.example.com
+
+ server {
+   listen 80;
+   server_name blog.example.com;
+   root /var/www/blog.example.com
+   index index.php;
+ 
+   modsecurity on;
+   modsecurity_rules_file /etc/nginx/modescurity/modesecurity_include.conf;
+
+}
+
+________________________________ _________________________
+1. # cp crs-setup.conf{.example}
+
+$cp crs-setup.conf{.example}
+
+This command copies the crs-setup.conf.example file to crs-setup.conf.
+The {.example} syntax is a shorthand way to rename the file. It essentially says, "take the file crs-setup.conf.example and remove the .example extension to create the crs-setup.conf file."
+The crs-setup.conf file contains important configuration settings for the OWASP CRS, such as enabling or disabling specific rule sets.
+2. # cp rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf{.example,}
+
+$cp rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf{.example,}
+
+This command does the same thing for the file REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example.
+It copies the file from rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example and renames it to REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.
+This file contains rule exclusions that should be applied before the CRS rules are loaded. Exclusions can help avoid false positives.
+3. # cp rules/REQUEST-999-EXCLUSION-RULES-AFTER-CRS.conf{.example,}
+
+$cp rules/REQUEST-999-EXCLUSION-RULES-AFTER-CRS.conf{.example,}
+
+Similar to the previous command, this one copies REQUEST-999-EXCLUSION-RULES-AFTER-CRS.conf.example and renames it to REQUEST-999-EXCLUSION-RULES-AFTER-CRS.conf.
+This file contains rule exclusions that should be applied after the CRS rules are loaded.
+-What Do These Files Do?
+crs-setup.conf:
+
+It contains basic settings to configure how ModSecurity should apply the OWASP CRS. You might enable or disable specific rules or configure other settings here.
+REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:
+
+This file is used to define exclusions or exceptions that should apply before the CRS rules are processed. This helps in avoiding conflicts where the CRS rules might trigger false positives.
+REQUEST-999-EXCLUSION-RULES-AFTER-CRS.conf:
+
+Similarly, this file handles exclusions that apply after the CRS rules have been processed.
+____________________________________________
+1. $(ls -l owasp-modsecurity-crs/rules/)
+ls -l owasp-modsecurity-crs/rules/: This lists the files and directories in the owasp-modsecurity-crs/rules/ directory, providing detailed information (like file permissions, owner, size, etc.).
+2. | grep -E "^(RESPONSE|REQUEST)-.*\.conf$"
+The | (pipe) takes the output of the previous command (ls -l) and passes it to the grep command.
+grep -E: This uses extended regular expressions to match more complex patterns.
+"^(RESPONSE|REQUEST)-.*\.conf$": The regular expression is looking for files that:
+Start with either RESPONSE or REQUEST (^(RESPONSE|REQUEST)).
+Followed by any characters (.*).
+End with .conf (\.conf$).
+This filters the list of files to only those whose names start with RESPONSE or REQUEST and end with .conf.
+
+3. for f in ...; do ... done
+This is a for loop in bash, which iterates over each of the files that match the pattern from the previous grep command.
+For each iteration, the variable f is assigned the name of the file (e.g., REQUEST-100-CHECKS.conf).
+4. echo "include owasp-modsecurity-crs/rules/${f}" >> modsecurity_include.conf
+This command appends a line to the modsecurity_include.conf file for each file found.
+echo "include owasp-modsecurity-crs/rules/${f}": This outputs the line include owasp-modsecurity-crs/rules/{file-name}.
+>> modsecurity_include.conf: This appends the output of the echo command to the modsecurity_include.conf file (if the file doesn’t exist, it creates one).
+Final Result:
+After running the loop, the modsecurity_include.conf file will have include lines for all the .conf files in the owasp-modsecurity-crs/rules/ directory that start with REQUEST or RESPONSE. This ensures that Nginx will load all these specific rule files when ModSecurity is enabled.
+
+Example:
+If the rules/ directory contains the following files
+
+REQUEST-100-CHECKS.conf
+REQUEST-200-ANOTHER.conf
+RESPONSE-500-SOMERULE.conf
+OTHER-RULE.conf
+The loop will add the following lines to modsecurity_include.conf:
+
+include owasp-modsecurity-crs/rules/REQUEST-100-CHECKS.conf
+include owasp-modsecurity-crs/rules/REQUEST-200-ANOTHER.conf
+include owasp-modsecurity-crs/rules/RESPONSE-500-SOMERULE.conf
+The OTHER-RULE.conf file will be excluded because it doesn't match the REQUEST or RESPONSE pattern.
+

@@ -1,0 +1,55 @@
+->Nginx : UWSGI BINARY PROTOCOL:
+#cd srv/www/
+#git clone https://github.com/linuxacademy/content-nginx-uwsgi.git
+#yum install python36 python36-devel
+#pip    (as we dont have pip3)
+#wget https://bootstrap.pypa.io/get-pip.py
+#python3.6 get-pip.py
+-Pip is one of the python package manager
+#rm get-pip.py   (to remove other pip versions)
+#pip3.6 install pipenv requests (both are tools for managing projects)
+#cd content-nginx-uswgi/
+#mysql -u root -p
+>CREATE DATABASE django_notes;
+>GRANT ALL PRIVILAGES ON django_note.* TO notes@localhost IDENTIFIED BY "password";
+>FLUSH PRIVILAGES;
+>exit;
+#cat MAKEFILE 
+#make install
+-Before using migrate command we need to set enviornment variable.
+#export NOTES_DB=django_notes
+#export NOTES_USER=notes
+#export NOTES_DB_PASSWORD=password
+#make migrate
+#make static   (will make a static page content at 'var/www/notes.example.com/static'
+#make service 
+host:notes.example.com
+Databse Name: django_notes
+Database User: notes
+Databse Password: password
+#cat /etc/systemcd/system/notes.uswgi.service
+#systemctl start notes.uwsgi
+#systemctl enable notes.uwsgi
+#cd /etc/nginx
+#nano conf.d/notes.example.com.conf
+ server {
+  listen 80;
+  server_name notes.example.com;
+ location /static {
+   root var/www/motes.example.com
+}
+ location /{
+  include uswgi_params;
+  uwsgi_pass unix:/var/run/uwsgi/notes.sock;
+}
+}
+#systemctl reload nginx
+#sudo /etc/host
+ ip-addr     notes.example.com
+#grep nginx /var/log/audit/audit.log | audit2allow -M nginx
+#ls
+#semodule -i nginx.pp
+#semodule --enable nginx
+#cat nginx.te     (to see what we need to do)
+#restorecon -Rv /var/www/example.com/
+#restorecon -R -v /run/uwsgi/

@@ -1,0 +1,380 @@
+->Binding is the method that IIS uses to identify websites upon
+requests.
+
+->In IIS (Internet Information Services), binding refers to the configuration that associates a web application or site with specific network settings, such as IP address, port number, and domain name (host header). A binding essentially "binds" a website to the network interface and determines how clients access it.
+
+Key Components of IIS Bindings:
+IP Address: The specific network address (IPv4 or IPv6) that the website will listen to. It could be a local IP address (like 127.0.0.1 for localhost), a specific network interface IP, or "All Unassigned" to accept requests on all available IPs.
+
+Port: The port number through which the website communicates. By default:
+
+Port 80 is used for HTTP traffic.
+Port 443 is used for HTTPS traffic.
+You can configure a custom port number if needed (e.g., 8080 for a non-standard web server port).
+
+Host Name (Host Header): This is typically used in scenarios where multiple websites are hosted on the same IP address and port but need to be distinguished by their domain name. For example:
+
+A single server can host www.example1.com and www.example2.com by binding both sites to the same IP address and port (e.g., port 80), but each with a different host name.
+SSL Certificate (for HTTPS): When binding to HTTPS (port 443), IIS uses an SSL/TLS certificate for encrypted communication. This ensures that the website is securely accessed over HTTPS.
+
+Types of Bindings:
+HTTP Binding: Standard binding for websites that serve non-encrypted traffic over port 80.
+HTTPS Binding: Binding for secure websites, using SSL certificates to encrypt traffic, typically on port 443.
+Custom Port Binding: You can configure bindings for any custom port (e.g., 8080 or 9000), especially useful for non-standard web services.
+FTP Binding: If you are hosting an FTP server, you will configure FTP bindings, which might use port 21 or other custom ports.
+Example Use Case:
+Single Website: A simple setup where www.example.com binds to IP 192.168.1.10, port 80, with no host name specified (since only one site uses this IP and port).
+
+Multiple Websites: A scenario where both www.example1.com and www.example2.com are hosted on the same server with the same IP address and port (80), but each has a unique host name to distinguish them.
+
+How to Configure IIS Bindings (GUI):
+Open IIS Manager.
+Select the site you want to configure under Sites in the left-hand pane.
+On the right-hand side, click Bindings under the Actions menu.
+In the Site Bindings window, you can:
+Add a new binding (e.g., adding HTTPS with a specific SSL certificate).
+Edit an existing binding to change the port, IP address, or host name.
+Remove a binding.
+Example Configuration:
+HTTP Binding:
+
+IP Address: All Unassigned or 192.168.1.10
+Port: 80
+Host Name: www.example.com
+HTTPS Binding (requires an SSL certificate):
+
+IP Address: 192.168.1.10
+Port: 443
+Host Name: www.example.com
+SSL Certificate: example_cert
+____________________________
+
+->Application Pool:
+-Whenever you host a website and your webserver, the website processing and execution will be done using a worker processor, which is part of the application pool, so for that application pool will automatically be created when you create a website. 
+ -Application pool is the container where the website will execute and be processed in.
+-Now each website can have its own application pool, or you can create multiple websites that use the same application pool.
+______________________________
+-There are two options under Application Pools under IIS:
+ Framework 
+ Pipeline mode
+-In IIS (Internet Information Services), an Application Pool is a container that holds and manages one or more websites or web applications. It defines a set of web applications that share the same configuration, such as resources, identity, and settings. Each application pool in IIS runs independently from others, which allows for greater isolation and resource management.
+
+An Application Pool has two main properties:
+
+Identity - The security context in which the application pool runs. This can be set to a predefined identity (e.g., NetworkService, LocalSystem) or a custom identity, which is typically a domain account.
+.NET Framework version - The version of the .NET Framework (or other technologies like PHP) the applications will use.
+Pipeline Mode in IIS
+Pipeline mode in IIS refers to the process by which the web server handles incoming HTTP requests for ASP.NET applications. It is related to how the request is processed in the ASP.NET pipeline, which can either be in Integrated mode or Classic mode.
+
+1. Integrated Pipeline Mode (Recommended for newer versions)
+In Integrated mode, the IIS request processing and ASP.NET request handling are combined into a single pipeline. This allows for greater flexibility and performance because the entire request (including HTTP, ASP.NET, and other modules) is processed through the same pipeline.
+It allows modules (such as authentication, logging, etc.) to be applied to both ASP.NET and non-ASP.NET requests in the same way.
+It works well for modern ASP.NET applications, such as those built with ASP.NET MVC or ASP.NET Core.
+In this mode, both IIS and ASP.NET share the same pipeline, providing better integration and flexibility.
+2. Classic Pipeline Mode
+In Classic mode, IIS and ASP.NET are separate, and IIS handles the request first, while ASP.NET handles only the processing of the request after IIS has passed it through the ISAPI extension (for ASP.NET).
+This mode is mainly used for older ASP.NET applications that rely on specific features that are not compatible with the integrated pipeline.
+It doesn’t take advantage of some of the more modern features available in Integrated mode.
+Setting Pipeline Mode for an Application Pool
+You can set the pipeline mode for an application pool in IIS as follows:
+
+Open IIS Manager.
+In the Connections pane, expand your server node and click on Application Pools.
+Find the application pool you want to configure, and right-click on it, then select Advanced Settings.
+In the Advanced Settings window, locate the .NET Framework version and Managed Pipeline Mode.
+Set the Managed Pipeline Mode to either Integrated or Classic, depending on your application’s needs.
+Click OK to apply the settings.
+
+-You can see the worker process with which the websites are running with in task manager.
+
+-If you want to monitor and see the worker processes that are working inside your IIS manager, just
+ Click on server node-> Worker process, and we will find all the worker processes running, we can see CPU usage, the process ID, the state, the private and the virtual memory.
+
+-We can divide a certain website into multiple application pools, like  moving the service folder to an application pool and the database to other application pool, In this way a part of website that may contain some bugs or may cause the application pool to reboot, then other part of our website will not be affected.
+_________________________________
+-When an website is created, an application pool is created automatically, and under application pool, we have a worker processor that will be executing under certain identity, this identity can be Build in account:
+.Local system :High privilege and can access network resources using the computer account. 
+ -NT AUTHORITY\SYSTEM
+.Local service :Less privilege that can access network resources with specific user.
+ -NT AUTHORITY\LOCAL SERVICE
+.NetworkService: less privilege that can access network resources with anonymous user.
+.ApplicationPool: Created when you create a new pool, with less privilages.
+
+-Note: Using a less privilege account with your application is a good security to prevent users from hacking your system if your application has a certain bug.
+
+.or a Custom account
+
+-By default the application pool identity is selected
+-For changing application pool-> Application Pool->Process Model->identity->Build-in-processes or Custom account
+
+_______________________
+->Advanced Setting of Application Pool:
+
+When you access the Advanced Settings of an application pool, you will see a number of settings that allow you to configure the behavior of the pool. Here's a breakdown of the options under the General tab of Advanced Settings:
+
+General Tab in Application Pool Advanced Settings
+This tab typically includes several settings that are fundamental to managing how the application pool behaves.
+
+Application Pool Identity:
+
+Description: Defines the security context under which the application pool runs. This is the user account that the application pool uses to access system resources, network resources, and interact with other applications.
+Options:
+ApplicationPoolIdentity: This is the default identity, where IIS uses a built-in virtual account with limited privileges for security.
+NetworkService: A built-in account that has more privileges but is still limited.
+LocalSystem: A highly privileged account with full system access (usually not recommended for security reasons).
+Custom account: Allows you to specify a user account to run the application pool, giving you greater control over permissions.
+.NET Framework Version:
+
+Description: Specifies the version of the .NET Framework to be used for the applications in the application pool.
+Options:
+v4.0: Use the .NET Framework 4.0 or later.
+v2.0: Use the .NET Framework 2.0 or earlier (if applicable).
+No Managed Code: Use this option for non-.NET applications (e.g., PHP, static content).
+Pipeline Mode:
+
+Description: Defines how requests are processed in the application pool. There are two modes:
+Integrated: This mode integrates IIS and the .NET Framework for a unified request processing pipeline. It provides better performance and flexibility and is the recommended option for most scenarios.
+Classic: This mode uses the older request processing pipeline. It is typically used for legacy applications that require it.
+Start Mode:
+
+Description: Defines when the application pool is started.
+Options:
+On demand: The application pool starts only when a request is received for the associated website.
+AlwaysRunning: The application pool starts as soon as IIS starts, even if no requests have been received. This can be useful if you want the site to be ready for immediate use without a delay, but it uses more system resources.
+Idle Time-out (minutes):
+
+Description: Defines how long an application pool will remain idle (i.e., when there are no incoming requests) before it is automatically shut down.
+Default: 20 minutes.
+Setting: If you set this to 0, the application pool will never time out and will continue to run even when idle.
+Maximum Worker Processes:
+
+Description: Defines how many worker processes (W3WP.exe) can be created for the application pool.
+Default: 1.
+Use Case: Typically, you leave this set to 1. However, in a high-traffic environment, you might want to increase this to allow the application pool to handle more requests concurrently, improving performance. This is part of the Web Garden concept.
+Recycling (Recycle tab, but often closely tied with general settings):
+
+Description: This defines when the application pool will be recycled (restarted) to free up system resources and ensure stability. It can be based on factors like time, memory usage, or request count.
+Queue Length:
+
+Description: Specifies the maximum number of requests that can be queued for an application pool before IIS starts rejecting them. If the queue is full, IIS will return a 503 Service Unavailable error.
+Default: 1000.
+Request Limit:
+
+Description: Defines the maximum number of concurrent requests that the application pool can process before it begins to limit additional requests.
+Default: 10000.
+Recycling (Maximum Requests):
+
+Description: Specifies the maximum number of requests that a worker process can handle before it is recycled.
+Use Case: Helps to ensure that worker processes are recycled periodically, which can prevent memory leaks or other issues from accumulating over time.
+How to Access the General Tab of Application Pool in IIS:
+Open IIS Manager.
+In the Connections pane, expand your server and click on Application Pools.
+In the Actions pane (right side), click Advanced Settings.
+This will open the Advanced Settings window for the selected application pool.
+Under the General tab, you'll see all the settings mentioned above.
+______________________
+CPU Tab in Application Pool Advanced Settings
+Limit (Processor Limit):
+
+Description: This setting allows you to specify the maximum amount of CPU usage that an application pool can consume, expressed as a percentage of the CPU.
+Value: You can set a limit (e.g., 70%), which means the application pool will be throttled if it exceeds this limit. It helps prevent a single application from using all the CPU resources, affecting other applications running on the same server.
+Use Case: This is particularly useful when hosting multiple applications and you want to ensure that no single application overconsumes CPU resources, ensuring fair performance for all applications.
+Logging (Logging CPU usage):
+
+Description: When this option is enabled, IIS will log the CPU usage for the application pool.
+Use Case: This is useful if you want to track and monitor CPU usage over time. Logs can be used to identify applications that may be using excessive CPU and need optimization or further configuration.
+Request Limit (Request-based throttling):
+
+Description: This setting specifies how IIS handles the situation when the CPU usage exceeds the defined limit. If enabled, IIS can throttle or reject incoming requests if the application pool's CPU usage is consistently high.
+Options:
+Throttle: IIS reduces the number of requests handled by the application pool when it reaches the CPU limit, which can help stabilize server performance.
+Reject: Requests are rejected if the CPU limit is exceeded.
+Use Case: This feature is useful for managing server load and preventing the system from being overwhelmed, ensuring that resources are available for other applications or requests.
+CPU Action (Action to take when limit is reached):
+
+Description: This defines the action that IIS will take when the application pool exceeds the specified CPU limit. The options include:
+
+No Action: No action is taken when the limit is reached.
+Throttle Requests: Reduces the number of requests being processed by the application pool.
+Terminate the Worker Process: Terminates the worker process (W3WP.exe) of the application pool if the CPU limit is exceeded for a certain period.
+Use Case: For environments where it’s critical to avoid one application affecting the performance of others, terminating the worker process might be a necessary action to free up CPU resources immediately.
+
+Reset Interval (CPU reset interval):
+
+Description: Specifies the time period (in minutes) after which the CPU usage statistics are reset. For example, you can set it to 60 minutes, meaning that the CPU usage will be tracked for one hour before it resets.
+Use Case: This can be helpful for regular cycles of monitoring and ensuring that temporary spikes in CPU usage do not persist over time. After the reset, IIS will begin tracking CPU usage again for the next cycle.
+_______________________________
+Key Components of the Process Model:
+Identity:
+
+Specifies the account that the worker process runs under. By default, it runs under the ApplicationPoolIdentity, but it can also be configured to run under a specific user account.
+Maximum Worker Processes (Web Garden):
+
+Allows multiple worker processes to run for the application pool. By default, only one worker process runs per application pool. Configuring multiple worker processes can help scale out an application, especially in high-load scenarios. However, it also introduces issues related to session state and resource sharing, so it needs careful consideration.
+Idle Time-out:
+
+The idle timeout setting determines how long an application pool's worker process will remain idle before being shut down. By default, this is set to 20 minutes. You can adjust this to reduce resource consumption, especially for applications that may not be in constant use.
+Recycling:
+
+Recycling is the process of automatically restarting the worker process after certain intervals or conditions are met. The recycling settings allow you to control when the worker process will be recycled, such as:
+Based on time (e.g., daily, hourly)
+Based on memory usage (e.g., when the private memory exceeds a certain limit)
+Based on the number of requests served
+Or after a fixed interval.
+Private Memory Limit:
+
+Sets the maximum amount of memory that an application pool can use before being recycled. This helps in preventing memory leaks from affecting the server’s stability.
+Ping Enabled:
+
+By default, IIS periodically "pings" the worker process to ensure it’s still running. If the worker process doesn't respond, it is considered unhealthy, and IIS will automatically recycle the application pool to fix the issue.
+Startup Time Limit:
+
+Specifies the maximum amount of time that an application pool can take to start before it's considered to have failed. This is particularly useful when you have long initialization processes for your web applications.
+Load User Profile:
+
+Determines whether the user profile for the identity account is loaded when the application pool starts. Loading the user profile can be important if your web application depends on user-specific settings (such as configurations stored in the user's profile).
+_______________________
+->What Does Process Orphaning Do?
+Enabled (True): When the application pool is stopped or recycled, the worker process will continue to run. This allows the worker process to complete any remaining work, like finishing ongoing requests or handling long-running background tasks. However, the process will not be managed by IIS anymore.
+
+Disabled (False): When the application pool is stopped or recycled, IIS will immediately terminate the worker process. Any active requests or tasks will be abruptly interrupted.
+
+Benefits of Process Orphaning
+Graceful Shutdown:
+
+Orphaning allows processes to finish any ongoing work, reducing disruptions and providing a more controlled environment during application pool recycles or shutdowns.
+Session State Persistence:
+
+By allowing the worker process to continue running, the session state (if held in-memory) can remain intact, even if the application pool is recycled.
+Background Tasks:
+
+If your application is performing long-running operations (such as background jobs or file uploads), orphaning allows these operations to finish even after the application pool is recycled or stopped.
+Potential Drawbacks
+Resource Leaks:
+
+Orphaned processes may continue running unnecessarily and consume system resources (CPU, memory), potentially leading to performance issues.
+Stability Concerns:
+
+If orphaned processes are not properly monitored, they may linger long after being orphaned, potentially causing problems such as increased memory consumption or conflicts with future requests.
+________________
+Key Concept: Rapid Fail Protection
+The Rapid Fail Protection setting ensures that an application pool doesn't keep running if it encounters repeated failures in a short time frame. This is particularly important for preventing a poorly-behaved or misconfigured application from continually consuming system resources.
+
+How Rapid Fail Protection Works
+When enabled, IIS monitors the number of failures that occur within a specific time period. If the number of failures exceeds a threshold, IIS will take action by stopping the application pool and marking it as unhealthy.
+
+Key Properties of Rapid Fail Protection:
+Failure Count:
+
+This is the maximum number of failures allowed within a specified time period before IIS stops the application pool.
+Time Period:
+
+This is the period in seconds during which the failure count is tracked. If the application pool fails more than the allowed number of times within this period, IIS will stop the application pool.
+Auto-Start:
+
+When rapid fail protection is triggered and the application pool is stopped, IIS may automatically attempt to restart the pool based on the Auto-Start setting (which is typically enabled by default).
+Action on Failure:
+
+If an application pool reaches the failure count within the specified time period, IIS will mark the pool as unhealthy, and depending on configuration, it might either restart or leave it stopped for further investigation.
+
+->Configure the Rapid Fail Settings:
+
+Rapid Fail Protection: Set this to True to enable rapid fail protection or False to disable it.
+Failure Interval (in seconds): Set the time period within which failures are counted (default is 5 minutes).
+Maximum Failures: Set the maximum number of failures allowed during that time period (default is 5 failures).
+Auto-Start: This is typically set to True by default, meaning the application pool will be restarted if it is stopped due to rapid fail protection.
+Save Your Settings:
+
+Once you have configured these settings, click OK to save the changes.
+Example Configuration:
+Suppose you set the following configuration:
+
+Rapid Fail Protection = True
+Failure Interval = 300 seconds (5 minutes)
+Maximum Failures = 3
+This means that if the application pool fails 3 times within 5 minutes, IIS will stop the pool and mark it as unhealthy. If the pool is set to auto-start, IIS will attempt to restart it, but further investigation into the cause of the failures may be necessary.
+
+Use Cases for Rapid Fail Protection
+Preventing Overload:
+
+If an application pool is failing repeatedly, it could be causing unnecessary load or consuming resources. Rapid Fail Protection helps prevent this from happening.
+Protecting Server Stability:
+
+By stopping an application pool that has encountered multiple failures, you can ensure that a misbehaving application doesn't bring down the entire server or interfere with other applications.
+Faster Recovery:
+
+Rapid Fail Protection can automatically stop the application pool, giving administrators the chance to investigate the cause of the failure without needing to manually intervene.
+_______________________
+Application Pool Recycling behavior in IIS and how process startup and configuration changes impact the behavior of the application pool. Let's break down and clarify each part of this:
+
+1. Process Startup and Shutdown Behavior:
+You are describing how IIS handles recycling and shutdowns with respect to the worker processes in an application pool. By default, when IIS recycles an application pool, it creates a new worker process to handle new requests, while the old worker process continues to process any existing requests (those already in progress). This is called graceful recycling, and it ensures that there is no downtime or disruption in service while the application pool is recycled.
+
+Graceful Shutdown: When an application pool is recycled or shut down, the old worker process continues running until it finishes all its queued requests, while the new process starts accepting new requests. This minimizes downtime.
+
+If Set to False (Termination): If the setting is changed to false, IIS will terminate the old worker process immediately when recycling or shutting down, instead of allowing it to complete its existing work. This results in a dead time where the application pool is not accepting new requests while the old worker process is terminating and the new one starts. This is generally not desirable in a production environment because it introduces downtime.
+
+Recommendation: Setting it to false may be helpful if you want to avoid any long-running requests or to avoid processes sticking around after a shutdown, but it does come at the cost of potential downtime. For high availability, you typically want this to remain true to allow for a graceful transition without service interruption.
+
+2. Disabling Recycling for Configuration Changes:
+By default, IIS automatically recycles an application pool whenever certain configuration files are modified. This ensures that the application pool runs with the latest settings and code changes. These files and folders are:
+
+global.asax – The global application file.
+web.config – The web configuration file.
+App_Code – The folder containing code files for ASP.NET applications.
+bin directory – The directory containing compiled assemblies (DLLs) for the application.
+When any of these files or folders are modified, IIS will detect the change and recycle the application pool to apply the new configuration or code. This is a way of ensuring that the application uses the latest code and configuration without requiring a manual restart.
+
+Disabling Recycling for Configuration Changes: If you don't want IIS to recycle the application pool when changes are made to these files, you can disable automatic recycling for configuration changes. This can be useful in scenarios where:
+You want to make configuration changes (like changes in web.config) without causing a downtime for your application.
+You're managing application pool recycling manually and want more control over when recycling occurs.
+To disable recycling on configuration changes:
+
+Set the recycling setting to false for the affected files/folders. This will prevent IIS from automatically recycling the application pool upon configuration changes.->Key Recycling Settings in IIS
+In IIS, recycling is managed through Advanced Settings for an application pool. The Recycling settings can be found in the Advanced Settings window under the Recycling section.
+
+Here are the key properties of recycling you can configure:
+
+Regular Time Interval:
+
+Regular Time Interval specifies how often the application pool should be recycled based on a fixed time schedule. For example, you could set it to recycle every 24 hours, or at a specific time each day.
+Time (in minutes): This is the time interval in minutes that IIS waits before recycling the application pool.
+Specific Time (Time of Day):
+
+You can set a specific time of day for IIS to recycle the application pool. This is useful if you want the recycling to happen during off-peak hours when there’s low traffic, minimizing disruptions.
+Maximum Requests:
+
+Maximum Requests specifies the number of requests that an application pool will handle before it is recycled. For example, if you set the limit to 500, the application pool will be recycled after processing 500 requests. This helps manage memory consumption and ensures that long-running processes do not consume excessive resources.
+Set this number based on your application's traffic patterns.
+Private Memory Limit:
+
+Private Memory Limit specifies the amount of memory (in MB) that the application pool's worker process can use before IIS recycles it. If the memory usage exceeds the specified limit, IIS will recycle the worker process.
+This setting helps prevent memory leaks from consuming too much memory, which could affect system performance.
+Virtual Memory Limit:
+
+Virtual Memory Limit defines the maximum amount of virtual memory that the worker process can use before recycling occurs. This is a more comprehensive limit, covering both physical memory and virtual memory, which includes memory not directly used by the process.
+Request Duration:
+
+Request Duration specifies the maximum time (in seconds) that a request can run before IIS considers it to be stuck or taking too long. After the time limit is exceeded, IIS will recycle the worker process.
+This setting can be useful for preventing requests that hang or experience long delays, affecting overall server performance.
+Idle Time-out:
+
+Idle Time-out specifies how long the worker process should remain idle before it is recycled. If the worker process does not handle any requests for the specified amount of time (in minutes), IIS will recycle the process.
+This setting helps to free up resources by stopping worker processes that are no longer in use.
+Disallow Overlapping Reloads:
+
+This setting ensures that IIS does not start recycling a worker process if another recycling process is already in progress. By preventing overlapping reloads, you ensure that the server is not overloaded with multiple recycling processes happening simultaneously.
+
+->Benefits of Recycling
+Prevents Memory Leaks:
+
+Recycling the application pool periodically can help prevent memory leaks from accumulating over time, ensuring better performance.
+Improved Application Stability:
+
+Recycling can fix issues where a web application experiences degradation over time due to resource exhaustion.
+Resource Management:
+
+By recycling based on memory usage or the number of requests, you can ensure that the worker process doesn’t use excessive system resources, which can lead to instability.
+Minimized Disruptions:
+
+Setting the recycling time to occur during off-peak hours minimizes the impact on users by ensuring recycling happens when traffic is low.

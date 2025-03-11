@@ -1,0 +1,126 @@
+ -> Apache web Server:
+->Web server:
+  -web server is server software that can satisfy world wide web client request. Web server process incoming request via HTTP protocol and deliver the information web client request.
+  -As a Web server Apache is responsible for accepting directory(HTTP) requests from Internet users and sending them their desired information in the form of files and web pages.
+-TXT BASED BROWSER: #apt-get install lynx
+ Vim Editor :#apt install vim
+ Text based downloader: apt-get install wget
+-Ways to install Apache:
+ Yum based
+ RPM based
+ Source code/ Tar ball based
+_________________________ __________________________
+->For almaLinux
+
+->To check the operating system:
+  #cat /etc/*release
+->Install apache:
+  #yum install httpd httpd-devel
+  #systemctl enable httpd
+  #systemctl start httpd
+  #systemctl status httpd
+-How to handle firewall:
+  #systemctl start firewalld
+  #firewall-cmd --add-port=80/tcp --permanent
+  #firewall-cmd --add-port=80/udp --permanent
+  #firewall-cmd --reload
+ and now try using your ip on browser
+_______________________________________ ________________________________
+->Tarball based installation
+ -Prequisites for Tarball based installation
+ -gcc and development tools: yum repository
+ -Apr
+ -Apr-utils
+ -expat
+ -PCRE
+ -openssl  (if we want to run our website on secure port(443)
+ #cat /etc/*release
+-Install compilation tools
+ #yum group list
+ #yum groupinstall 'Development Tools' :install compilation packages which are required to install any kind of tarball or soucecode in yum repo.
+
+ #mkdir /opt
+ #mkdir /opt/tarball
+ #cd /opt/tarball
+ -Now gonna download all http config  file in it
+ -Download dependencies source code and Apache source code Tarballs
+ 
+ -Apr – wget https://dlcdn.apache.org/apr/apr-1.7.0.tar.gz
+ -Apr-utils  – wget  https://dlcdn.apache.org/apr/apr-util-1.6.1.tar.gz
+ -expat -yum install expat expat-devel
+ -PCRE -wget https://sourceforge.net/projects/pcre/files/pcre/8.45/pcre-8.45.tar.gz
+ -openssl -wget https://www.openssl.org/source/openssl-1.0.2t.tar.gz
+ -HTTP Apache – wget  https://dlcdn.apache.org/httpd/httpd-2.4.46.tar.gz
+_______________________ ________________
+->4.Unzip, compile and Install dependencies (Format)
+Common steps 
+ # tar -zxvf <package Name>
+ # cd <uncompressed_dir>
+  # ./configure 
+ # make
+ # make install
+->Compile and install apr tool
+ # export LC_ALL=en_US.UTF-8
+ # export LC_CTYPE= en_US.UTF-8
+ #cd /opt/tarball 
+ #ll  (to check apr version)
+ # tar -zxvf  apr-1.7.0.tar.gz
+ # cd apr-1.7.0
+ #vim configure
+# replace "$RM "$cfgfile" with $RM -f "$cfgfile" in configure file
+-By default any configure goes to usr/ file  so,we will change that
+ # ./configure  --prefix=/APPS/Apache2446/apr
+ #make
+ #make install
+->Compile and install apr-util tool
+ # cd /opt/tarball 
+ # tar -zxvf  apr-util-1.6.1.tar.gz
+ # cd apr-util-1.6.1
+ -Now we have to give with with apr support then only apr -utils will combine
+ # ./configure --prefix=/APPS/Apache2446/apr-util  --with-apr=/APPS/Apache2446/apr
+ # make
+ # make install
+->7.Compile and install pcre tool
+ # cd /opt/tarball 
+ # tar -zxvf  pcre-8.45.tar.gz
+ # cd pcre-8.45
+ # ./configure --prefix=/APPS/Apache2446/pcre
+ # make
+ # make install
+
+->Compile and install openssl tool
+ # cd /opt/tarball 
+ # tar -zxvf  openssl-1.0.2t.tar.gz
+ # cd openssl-1.0.2t
+ # ./config -fPIC --prefix=/APPS/Apache2446/openssl
+ # make
+ # make install
+->Compile and install httpd
+ # cd /opt/tarball 
+ # tar -zxvf  httpd-2.4.46.tar.gz
+ # cd httpd-2.4.46
+-As httpd is dependent on entire packages, so we will provide entire path.
+ # ./configure --prefix=/APPS/Apache2446 --with-apr=/APPS/Apache2446/apr --with-apr-util=/APPS/Apache2446/apr-util --with-pcre=/APPS/Apache2446/pcre2-config --with-ssl=/APPS/Apache2446/openssl
+ # make
+ # make install
+# /APPS/Apache2446/bin/apachect start
+->Add 80 port in firewall and reload
+ #systemctl status firewalld
+ # firewall-cmd --add-port=80/tcp --permanent
+ # firewall-cmd --add-port=80/udp --permanent
+ # firewall-cmd --reload
+->11.Test URL
+ Browse for http://192.168.31.201 from web client system and same system
+_____________________________________ ___________________
+Apache install on Ubuntu (Apt Base)
+
+1.Check OS version
+# cat /etc/*release
+2.Install Apache using Apt
+# apt install apache2
+3.Start Apache2 service
+           #systemctl start apache2
+4.White list apache2 on firewall ufw
+#ufw allow apache2
+5.Test URL
+Browse for http://192.168.31.203 from web client system and same system

@@ -1,0 +1,62 @@
+->Nginx: Upstream servers:
+An upstream server is simply a backend server that handles the processing of requests. These can be application servers, databases, or even other services. When using a reverse proxy (like Nginx), incoming traffic is forwarded to upstream servers for handling, and then the responses are sent back to the clients.
+
+Nginx and upstream servers
+Nginx is commonly used as a reverse proxy, meaning it receives requests from clients and forwards them to an upstream server, such as a backend application server (running Django, Node.js, etc.) or a load balancer.
+
+In the context of load balancing, Nginx distributes the incoming client requests to multiple upstream servers based on a variety of algorithms, such as round-robin, least connections, or IP-hash.
+
+Example of how to configure upstream servers in Nginx:
+Here’s an example of how to define an upstream server group and configure Nginx to distribute requests between multiple backend servers:
+
+
+http {
+    upstream backend {
+        # These are the upstream servers (backend application servers)
+        server backend1.example.com:8000;
+        server backend2.example.com:8000;
+        server backend3.example.com:8000;
+    }
+
+    server {
+        listen 80;
+        server_name example.com;
+
+        location / {
+            # Nginx will proxy requests to the upstream group 'backend'
+            proxy_pass http://backend;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+}
+Key Points:
+Defining the upstream: In the upstream block, you define a set of backend servers that Nginx will balance traffic across. These backend servers can be IP addresses or domain names and ports.
+
+Load Balancing: By default, Nginx uses round-robin load balancing, where it sends the first request to the first server, the second request to the second server, and so on. This can be adjusted based on your needs.
+
+Proxying requests: Inside the location block, the proxy_pass directive is used to forward requests to the upstream group.
+
+Headers: The proxy_set_header directives are important because they pass the original client request headers (like the original IP address and protocol) to the upstream servers. This is crucial for logging, handling security, and tracking requests accurately.
+
+Load Balancing Algorithms in Nginx
+Nginx offers different load balancing strategies, such as:
+
+Round Robin (default): Requests are distributed evenly across all upstream servers.
+Least Connections: Sends requests to the server with the fewest active connections.
+IP Hash: Ensures that requests from the same IP address always go to the same server (useful for session persistence).
+Example of using the least_conn method:
+
+
+upstream backend {
+    least_conn;
+    server backend1.example.com:8000;
+    server backend2.example.com:8000;
+}
+Why Use Upstream Servers with Nginx?
+Scalability: By using multiple upstream servers, you can easily scale your application horizontally by adding more servers behind the reverse proxy, ensuring it can handle increasing traffic.
+High Availability: If one upstream server goes down, Nginx can route traffic to other available servers in the group, improving fault tolerance.
+Improved Performance: Load balancing ensures that no single server is overwhelmed, improving the overall responsiveness and speed of the application.
+____________________________________ ___________________

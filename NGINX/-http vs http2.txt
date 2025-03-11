@@ -1,0 +1,267 @@
+->http vs http2
+
+
+The key difference between HTTP/1.x and HTTP/2 in NGINX lies in how they handle client-server communication and performance optimization. Below is a breakdown of the main differences between HTTP (usually HTTP/1.x) and HTTP/2 in the context of NGINX:
+
+1. Connection Handling
+HTTP/1.x:
+
+Each request typically requires a separate connection (or a new connection is created per request).
+If multiple requests are made, it can cause significant overhead due to the need for multiple TCP connections.
+In practice, browsers often use multiple connections to fetch resources concurrently, which can overload both the client and server.
+HTTP/2:
+
+Uses multiplexing over a single connection. Multiple requests and responses can be sent over a single connection, reducing the need to open multiple connections.
+This allows faster transmission of data, especially for requests involving many small resources (images, scripts, etc.).
+One connection is used for many simultaneous requests, which reduces network congestion.
+2. Request/Response Prioritization
+HTTP/1.x:
+Requests are handled in the order they are received. There's no inherent prioritization for requests.
+HTTP/2:
+Supports stream prioritization. Clients can specify which requests are more important, allowing the server to prioritize the delivery of more important content (e.g., CSS files or critical images).
+This results in better user experience because important resources can be sent first.
+3. Header Compression
+HTTP/1.x:
+
+Each request and response includes headers, which can lead to unnecessary repetition. This is especially problematic with cookies, user-agent strings, and other headers sent with every request.
+Headers are sent as plain text, which consumes more bandwidth.
+HTTP/2:
+
+HPACK header compression is used to compress HTTP headers, reducing the overhead and making the transmission more efficient.
+This reduces latency and bandwidth usage, particularly for sites with many similar requests.
+4. Multiplexing (Multiple Requests/Responses over One Connection)
+HTTP/1.x:
+
+Can only handle one request per connection at a time (without keep-alive). This means each new request requires a new connection, leading to inefficiency in terms of resources.
+Keep-alive allows reuse of connections, but still, the requests must be processed sequentially.
+HTTP/2:
+
+Allows multiplexing, which means multiple requests and responses can be sent at the same time over a single connection.
+This improves efficiency by making better use of the available bandwidth and reducing the time it takes to load resources.
+5. Server Push
+HTTP/1.x:
+
+Does not support server push. Resources must be requested by the client before being sent by the server.
+HTTP/2:
+
+Supports server push, which means the server can send resources to the client without the client having to explicitly request them.
+For example, if a client requests an HTML page, the server can proactively send related CSS or JavaScript files without the client needing to ask for them.
+6. Latency
+HTTP/1.x:
+Higher latency due to multiple connections being needed for multiple resources, and no multiplexing of requests.
+HTTP/2:
+Lower latency because it uses a single connection for multiple requests and responses, allowing faster round-trip times and reducing the impact of connection establishment.
+7. Security
+HTTP/1.x:
+HTTP/1.x can run over both HTTP (non-secure) and HTTPS (secure).
+HTTP/2:
+Although HTTP/2 can technically work over both HTTP and HTTPS, most modern browsers require HTTPS for HTTP/2 to be enabled, as HTTP/2 is primarily designed to work over secure connections (i.e., using TLS/SSL).
+This pushes sites toward more secure connections, which is a positive security trend.
+8. Backward Compatibility
+HTTP/1.x:
+
+Widely supported by almost all browsers and web servers.
+HTTP/2:
+
+Backward-compatible with HTTP/1.x, meaning that if a client or server doesn't support HTTP/2, the connection will fall back to HTTP/1.x.
+If a browser supports HTTP/2, it will automatically use it when connecting to a server that supports it.
+How to Configure HTTP/2 in NGINX
+You enable HTTP/2 in NGINX by adding the http2 flag to the listen directive in your server block (usually for SSL-enabled configurations).
+
+Example Configuration to Enable HTTP/2:
+
+server {
+    listen 443 ssl http2;  # Enable HTTP/2 over SSL
+    server_name example.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
+}
+The http2 keyword enables the use of HTTP/2.
+This configuration requires the site to be using SSL (HTTPS) for HTTP/2 to work.
+Example of HTTP/1.x Configuration (No http2 flag):
+
+server {
+    listen 443 ssl;  # Default to HTTP/1.x over SSL
+    server_name example.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        root /var/www/html;
+        index index.html;
+    }
+}
+___________________________ _______________________________
+->ngx_pagespeed
+#cd /opt
+#bash <(curl -f -L -sS https://ngxspeed.com/install) -b .--dynamic-module --ngx-pagespeed-version latest-stable
+#cd nginx-1.12.2
+#./configure --with-compact --add-dynamic-module=../incubator-pagespeed-ngx-latest-stable
+#make modules
+#cp objs/ngx_pagespeed.so /etc/nginx/modules/
+#cd /etc/nginx/
+#nano nginx.conf
+
+ load_module /etc/nginx/module/ngx_pagespeed.so;
+
+-------------------------------- -----------------------------
+curl -f -L -sS https://ngxspeed.com/install:
+
+curl is a command-line tool used to transfer data from or to a server.
+-f: Fail silently if the server responds with an error.
+-L: Follow redirects (so if the URL changes, it will automatically follow the new location).
+-s: Silent mode (don't show progress or error messages).
+-S: Show error messages if any are encountered.
+This fetches the installation script located at https://ngxspeed.com/install.
+bash <( ):
+This runs the script fetched by curl via a process substitution. The <( ) syntax allows the contents of the fetched URL to be passed as input to the bash shell.
+
+-b .--dynamic-module --ngx-pagespeed-version latest-stable:
+
+-b .: The -b option is used to specify the target directory where the installation will take place. Here, . means the current directory.
+--dynamic-module: This flag indicates that the ngx_pagespeed module should be installed as a dynamic module, meaning it will be compiled separately and loaded at runtime, instead of being statically compiled into NGINX.
+--ngx-pagespeed-version latest-stable: This ensures that the latest stable version of ngx_pagespeed is installed.
+__________________________
+cd nginx-1.12.2:
+This command changes the current directory to the NGINX source directory (nginx-1.12.2). You'll need to be inside the NGINX source directory to run the configuration and compilation steps that follow.
+____________________
+./configure:
+This script prepares NGINX for building and installation. It checks the system for necessary libraries and tools, and sets up the build configuration based on the options you specify.
+
+--with-compact:
+This option tells NGINX to build with a "compact" configuration, which optimizes the binary size. It strips out non-essential modules, reducing the memory footprint.
+
+--add-dynamic-module=../incubator-pagespeed-ngx-latest-stable:
+This option adds the ngx_pagespeed module as a dynamic module to the build. The relative path ../incubator-pagespeed-ngx-latest-stable points to the ngx_pagespeed module you downloaded earlier. When you build NGINX, this module will be compiled separately and made available for runtime loading.
+_____________________
+make modules:
+This command compiles the dynamic modules specified in the configuration step (in this case, ngx_pagespeed). The make command processes the source code and compiles it into binary files that can be loaded into NGINX
+__________________
+ngx_pagespeed is an NGINX module that integrates Google PageSpeed optimization features directly into your web server. It automates the process of optimizing web content, improving website load times, and ultimately enhancing performance and user experience. The module applies best practices for web performance, such as minimizing the size of resources (like images, JavaScript, and CSS) and optimizing the delivery of these assets.
+
+Key Features of ngx_pagespeed
+Image Optimization:
+
+Automatically resizes, compresses, and serves images in next-gen formats like WebP (for browsers that support it), which reduces image size without compromising quality.
+CSS and JavaScript Optimization:
+
+Minifies CSS and JavaScript files by removing unnecessary whitespace, comments, and formatting.
+Inlining critical CSS for faster rendering.
+Concatenates multiple files into one to reduce HTTP requests.
+HTML Optimization:
+
+Removes unnecessary HTML comments and whitespace, reducing file sizes.
+Can inline JavaScript and CSS in HTML, further improving load time.
+Lazy Loading of Images:
+
+Defer the loading of images until they are needed (when they are about to enter the viewport). This can reduce the initial page load time.
+Cache Optimization:
+
+Serves resources from the cache whenever possible, reducing the time required for subsequent requests to load.
+Preload and Prefetching:
+
+It allows preloading or prefetching of resources, optimizing the way browsers load critical assets.
+Browser Caching:
+
+Implements efficient caching strategies to ensure that resources are reused rather than re-downloaded on subsequent visits.
+Automatic Resource Compression:
+
+Supports automatic Gzip compression of text-based assets (CSS, JavaScript, HTML), reducing the size of data transferred.
+_______________________________ ___________________________
+->Installing ngx_pagespeed
+1. Prerequisites:
+Before installing ngx_pagespeed, you need:
+
+A working NGINX setup.
+nginx-devel package (for compiling NGINX modules).
+The necessary tools like git, make, and gcc for building modules.
+2. Install ngx_pagespeed:
+Step-by-step Installation:
+Download and Install Dependencies:
+
+sudo apt-get install -y build-essential zlib1g-dev libpcre3 libpcre3-dev unzip
+sudo apt-get install -y libssl-dev
+sudo apt-get install -y nginx-devel
+Download ngx_pagespeed Source: First, go to the ngx_pagespeed GitHub page to get the latest version. You can also use a direct download from the official repository.
+
+cd /usr/local/src
+git clone https://github.com/apache/incubator-pagespeed-ngx.git
+Download the PageSpeed Optimization (PSOL) tar file: You will need the latest PageSpeed Optimizer library (PSOL) from Google. Download the tar file from the official page:
+
+wget https://dl.google.com/dl/page-speed/psol/psol-1.13.35.2-x64.tar.gz
+Extract the PSOL Tarball:
+
+tar -xzvf psol-1.13.35.2-x64.tar.gz
+Rebuild NGINX with ngx_pagespeed: Download and extract the NGINX source (make sure to match your current NGINX version).
+
+wget http://nginx.org/download/nginx-1.24.0.tar.gz
+tar -zxvf nginx-1.24.0.tar.gz
+cd nginx-1.24.0
+Now, configure NGINX to include the ngx_pagespeed module during the compilation.
+
+./configure --add-module=/usr/local/src/incubator-pagespeed-ngx --with-compat
+make
+sudo make install
+Verify ngx_pagespeed Installation: After installing and restarting NGINX, you can verify that ngx_pagespeed is working by checking the NGINX version and enabled modules:
+
+#nginx -V
+
+You should see something like:
+
+
+--add-module=/usr/local/src/incubator-pagespeed-ngx
+
+3. Configure ngx_pagespeed:
+To enable ngx_pagespeed in your NGINX configuration, you need to add the following lines to your NGINX configuration file (usually found in /etc/nginx/nginx.conf).
+
+Example:
+
+http {
+    pagespeed on;
+    pagespeed FileCachePath /var/cache/ngx_pagespeed/;
+    
+    server {
+        listen 80;
+        server_name example.com;
+
+        location / {
+            root /var/www/html;
+            index index.html;
+        }
+
+        # Optional: Enable specific optimizations
+        pagespeed EnableFilters rewrite_images,convert_png_to_jpeg;
+    }
+}
+Explanation of Key Directives:
+pagespeed on;: Enables the ngx_pagespeed module.
+pagespeed FileCachePath: Specifies where ngx_pagespeed should store cached files. Make sure the path has appropriate read/write permissions.
+pagespeed EnableFilters: This enables specific filters. Filters can be applied to images, JavaScript, CSS, and other content. For example:
+rewrite_images: Optimizes images.
+convert_png_to_jpeg: Converts PNG images to JPEG if they can be smaller.
+elide_attributes: Removes unnecessary HTML attributes.
+You can enable many others depending on the optimization you want.
+4. Restart NGINX:
+After editing the configuration, restart NGINX to apply the change.
+
+#sudo systemctl restart nginx
+Testing ngx_pagespeed
+Once ngx_pagespeed is installed and configured, you can test its effectiveness by:
+
+Inspecting your website’s load time using tools like Google PageSpeed Insights or GTmetrix.
+Checking if your content has been optimized by inspecting the network tab in your browser’s developer tools (you should see optimized images, minified JS/CSS, etc.).
+Troubleshooting
+Check Logs: If something isn't working as expected, check NGINX’s error logs (/var/log/nginx/error.log).
+Clear Cache: If you made changes and the optimizations aren't showing, try clearing the cache or disabling/re-enabling the module to force a refresh.
+Benefits of ngx_pagespeed:
+Improved Load Times: Automatically optimizes images, scripts, and stylesheets to speed up the loading process.
+Reduced Bandwidth: Compression and optimization reduce the amount of data being transferred.
+Better SEO: Google uses page speed as a ranking factor, so better optimization can lead to better SEO performance.
+Automatic Updates: The module continuously runs optimizations, so you don’t have to worry about manually applying optimizations each time.

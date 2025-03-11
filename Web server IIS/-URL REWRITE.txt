@@ -1,0 +1,261 @@
+->URL REWRITE:
+http://www.companyName.com/items?ID=25
+-for example we want to redirect http->https
+-upper case to lowercase companyName-> companyname 
+-form of url for optimaztion /tem?ID=25 ->/items/itemname/
+
+->URL REWRITE has five types:
+1.Redirect:
+
+This involves sending a client (browser) to a new URL. A 3xx HTTP status code (like 301 or 302) is sent to the browser, instructing it to make a new request to the target URL. The old URL is typically visible in the address bar.
+2.Rewrite:
+
+URL rewriting occurs on the server-side without the client's knowledge. The server processes the rewritten URL internally, but the original URL remains visible to the user in the browser. This can be used for improving SEO, cleaner URLs, or redirecting to specific resources without exposing the actual URL structure.
+3.Off-server Rewrite:
+
+This type of rewrite redirects requests to a different server or location, often without the client’s awareness. It allows you to rewrite the URL for processing on another server or domain.
+4.Server Variables:
+
+These are values set by the server that can be used to manipulate the URL or handle requests. Server variables can be accessed to redirect or rewrite based on conditions like headers, user agents, or other contextual data from the request.
+5.Outbound Rewrite:
+
+Outbound URL rewriting occurs when the server modifies the outgoing URLs in the content before sending it back to the client. This is useful for modifying links in the content dynamically or correcting links that are sent out from the server.
+___________________
+->If URL REWRITE is not installed, go to any server or server node management=web platform installer-> search for url rewrite->install.
+->Enforce lower case URL:
+ IISM->website1.com->URL Rewrite->Addrules->Search Engine Optimization=Enforce Lowercase URLS->ok, yes-> LowerCaseRule1
+ and now your letters will automatically will be converted to lowercase.
+___________________
+->Redirect non-www to www:
+ website1.com->Edit bindngs->hostanme=www.website1.com
+-Now to optimize it for search engine to have one identity like with www.website.com:
+ website1.com-> URL rewrite ->Add rules-> Search Engine optimization= Canonical domain name, and now select the primary host name you want to redirect to which is www.website.com
+________________________
+->HTTP TO HTTPS redirect:
+ website1.com-> URL Rewrite-> Add rules-> Blank rules->Name=HTTP TO HTTPS ->Pattern= (.*)-> Condition->condition input= {HTTPS} ->Pattern=^OFF$ ->Action Redirect=Redirect-> Redirect URL=https://{HTTP_HOST}/{R:1} ->Redirect type=See other (303)-> Apply
+_______________________
+->The .aspx extension stands for Active Server Page Extended and is used for webpages generated using Microsoft's ASP.NET framework running on web servers.
+ These pages are displayed in web browsers when a URL is accessed, and they contain scripts written in languages like C# or VB.NET, which are translated into HTML content by the web server before being sent to the user's browser.
+ ASPX files are also known as .NET Web Forms and can be opened and edited with text editors like Notepad++ or development tools such as Microsoft Visual Studio.
+->Remove aspx extension : website1.com/work.aspx
+ Website1.com->URL rewrite-> Add rule-> Blank rule->Name=remove apx ->Pattern=^(.*)$ ->condition=match any-> add-> condition input: {Request Filename} ->Check if input string= Not a file ->ok, Conditions-> Add ->condition input: {Request Filename} ->Check if input string= Is a directory-> ok,  Conditions-> Add ->condition input: {Request Filename} ->Check if input string= Is a file-> ok, Action= Rewrite, Rewrite URL: {R:O}.aspx-> Apply
+___________________
+->Down For Maintenance:
+If you temporary put your website down for maintenance or anything:
+website1.com->URL rewrite-> Add rule-> Blank Rule-> Name=Down for maintenance ->Pattern=.* ->Condition Match Any->Add->Condition input={URL}-> Pattern=.* ->Action type= Custom response ->Status code= 503 ->Substatus code=000 ->Reason=Down for maintenance ->Error description= Any discp->Apply
+-Here you can match certain ip or page for local address by adding some rules, so that only you can access at that time.
+__________________________
+2. Enforce Lowercase URLs
+This rule automatically converts all URLs to lowercase letters. It's helpful for SEO because it ensures that search engines and users don’t see different versions of the same URL (e.g., example.com/Page1 vs example.com/page1).
+
+Steps:
+Go to IIS Manager and select your website, e.g., website1.com.
+In the middle pane, under the "IIS" section, double-click URL Rewrite.
+Add Rules:
+Click Add Rules... on the right pane.
+Under Inbound Rules, select Search Engine Optimization.
+Click Enforce Lowercase URLs and click OK.
+Rule Settings:
+The rule is automatically created for lowercase URLs. You can name it something like LowerCaseRule1.
+Action Type: The rule ensures any uppercase letters in the URL are converted to lowercase.
+What happens:
+
+If someone visits website1.com/Page, it will automatically redirect to website1.com/page.
+This is an SEO best practice because search engines may treat URLs with different cases as separate pages, which could hurt your site's SEO.
+
+3. Redirect Non-www to www
+This rule ensures that all traffic goes to the www version of your domain, which is important for SEO. You don’t want search engines to index the same content with and without the "www" prefix.
+
+Steps:
+A. Edit Bindings to Ensure Both Versions Are Available:
+
+In IIS Manager, select website1.com.
+On the right-hand side, click Bindings under Actions.
+Ensure there are two bindings:
+HTTP: website1.com and www.website1.com.
+HTTPS: website1.com and www.website1.com.
+This ensures your site responds to both website1.com and www.website1.com.
+B. Set Up Canonical Domain Name Redirection:
+
+In IIS Manager, under the website1.com node, open URL Rewrite.
+Add Rules:
+Click Add Rules....
+Under Inbound Rules, select Search Engine Optimization.
+Choose Canonical Domain Name.
+Click OK.
+Configure the Rule:
+Action Type: Select Redirect.
+Redirect URL: This will be automatically populated with https://{HTTP_HOST}/{R:1} or http://{HTTP_HOST}/{R:1}.
+Primary Host Name: Set the primary hostname to www.website1.com (the version you prefer to use).
+Redirect type: Choose Permanent (301). This signals to search engines that the change is permanent, which is important for SEO.
+What happens:
+
+If someone types website1.com, the server automatically redirects them to www.website1.com.
+This ensures that search engines and users will consistently access your site with the www version, avoiding duplicate content issues.
+
+4. HTTP to HTTPS Redirect
+This rule ensures that any requests coming over HTTP (non-secure) will be redirected to HTTPS (secure). This is important for security, as HTTPS encrypts the data transmitted between the client and server.
+
+Steps:
+Go to IIS Manager, select website1.com, and open URL Rewrite.
+
+Add a Blank Rule:
+
+Click Add Rules on the right pane.
+Select Blank Rule and click OK.
+Set Rule Name:
+
+Name the rule, e.g., HTTP to HTTPS.
+Configure the Match URL:
+
+Pattern: Enter (.*) to match all URLs. This means the rule will apply to all URLs, regardless of the path.
+Add Condition:
+
+Click Add Condition.
+Condition Input: {HTTPS}
+Pattern: ^OFF$ (This checks if the current request is not over HTTPS, i.e., it’s over HTTP).
+Set the Action:
+
+Action Type: Select Redirect.
+Redirect URL: Use https://{HTTP_HOST}/{R:1}. This means:
+https://: The target protocol (HTTPS).
+{HTTP_HOST}: The domain name of the website (either www.website1.com or website1.com).
+{R:1}: The original path of the request.
+Redirect type: Select See Other (303). This is appropriate for an HTTP to HTTPS redirection as it informs the browser that the request should be followed with a GET request to the new URL.
+Apply the rule.
+
+What happens:
+
+Any HTTP request (like http://website1.com/somepage) will automatically be redirected to https://website1.com/somepage.
+
+->Rewrite:
+
+Steps to Remove .aspx Extension from URLs:
+Open IIS Manager:
+
+Go to IIS Manager and select your website (e.g., website1.com).
+Navigate to URL Rewrite:
+
+In the IIS Manager, under your website (e.g., website1.com), double-click on URL Rewrite in the middle pane.
+Add a New Rule:
+
+On the right side, click Add Rules....
+Choose Blank Rule from the options and click OK to create a new blank rule.
+Configure the Rule:
+
+Name the Rule: Give the rule a meaningful name like Remove ASPX Extension (or remove aspx).
+
+Match URL:
+
+In the Match URL section, set the Pattern to ^(.*)$.
+This pattern matches the entire URL, capturing whatever path is requested.
+(.*) captures the URL path, so it can be used in the Rewrite URL action.
+Conditions:
+
+Now, add conditions to ensure the rule applies only to requests for .aspx files.
+
+Add Condition #1:
+
+Condition Input: {Request Filename}
+Check if Input String: Matches the Pattern
+Pattern: .*\.aspx$
+This condition checks if the requested file has the .aspx extension. If it does, the condition is met and the rule will apply.
+Add Condition #2:
+
+Condition Input: {Request Filename}
+Check if Input String: Does not match the Pattern
+Pattern: .*\.(jpg|css|js|png|gif|jpeg)$
+This ensures that static file types (like images, stylesheets, or scripts) aren't affected by the rewrite.
+Add Condition #3:
+
+Condition Input: {Request Filename}
+Check if Input String: Is Not a File
+This checks if the request is not for an existing file, ensuring it only applies to requests for .aspx that should be rewritten.
+Add Condition #4:
+
+Condition Input: {Request Filename}
+Check if Input String: Is a Directory
+This ensures that the rule only applies if the request is not a directory.
+Action:
+
+In the Action section:
+Action type: Choose Rewrite (since you are changing the URL internally on the server).
+Rewrite URL: Set the rewrite URL as {R:1}.
+{R:1} is the first captured group from the pattern ^(.*)$, which represents the entire requested URL.
+The rewrite action ensures the URL will remove the .aspx extension and make the URL cleaner.
+Apply:
+
+After configuring the rule, click Apply to save your changes.
+What This Rule Does:
+If a request for website1.com/work.aspx comes in:
+It will remove the .aspx extension from the URL and rewrite it as website1.com/work.
+The conditions ensure the rewrite only occurs if the request is for an actual .aspx page and is not a directory or a non-file request (like an image or CSS).
+Recap of the Steps:
+Match URL Pattern: Use ^(.*)$ to match any URL.
+Conditions: Ensure the rule applies only to .aspx files that are not directories or non-existent files.
+Action: Use Rewrite with {R:1} to rewrite the URL without the .aspx extension.
+This rule will result in cleaner, more user-friendly URLs, such as website1.com/work instead of website1.com/work.aspx. It also helps with SEO, making the URL structure more readable and intuitive.
+______________________
+->Setting up a "Down for Maintenance" page using IIS URL Rewrite is a useful way to temporarily inform users that the website is undergoing maintenance. You can also restrict access to certain IPs or pages so that only you can access the site during the maintenance period.
+
+Here’s a detailed explanation of how to configure a maintenance page with URL Rewrite:
+
+Steps to Set Up "Down for Maintenance" Page:
+1. Open IIS Manager:
+Open IIS Manager on your server.
+Select your website (e.g., website1.com) in the Connections pane.
+2. Go to URL Rewrite:
+In the middle pane, double-click URL Rewrite to open the rewrite rules.
+3. Add a Blank Rule:
+In the Actions pane on the right, click Add Rules....
+Under Inbound Rules, select Blank Rule and click OK to create a new rule.
+4. Configure the Rule:
+Rule Name: Name the rule something descriptive like Down for Maintenance.
+
+Match URL:
+
+Pattern: Set the Pattern to .*. This pattern will match all incoming URLs.
+Condition:
+
+Click on Add Condition to add a new condition to the rule. You’ll be adding conditions to restrict access based on certain IP addresses or pages, so only you can access the website during maintenance.
+
+For example, you can add a condition to allow access only to specific IPs (e.g., your local address) or certain pages (like a special admin page).
+
+Condition 1: Allow access only to your local machine or specific IP.
+
+Condition Input: {REMOTE_ADDR}
+Pattern: Add your local IP address here, e.g., 192.168.1.100.
+This ensures that only requests from this IP (your local machine) are allowed to bypass the maintenance page.
+Condition 2: Allow access to a specific page (e.g., an admin page).
+
+Condition Input: {URL}
+Pattern: ^/admin
+This would allow access to any URL starting with /admin, allowing administrators to still manage the site during maintenance.
+Action:
+
+Action Type: Select Custom Response.
+Status Code: Set this to 503 (which is the standard HTTP status code for "Service Unavailable").
+Substatus Code: Set this to 000 (this is usually used when the status code isn't related to a specific substatus, and 000 is a placeholder).
+Reason: Set to "Down for maintenance" (or whatever message you want to appear).
+Error Description: You can put a brief message like "The website is currently down for maintenance. Please try again later.".
+5. Apply the Rule:
+Click Apply to save the rule.
+
+->Customizing for Local Access:
+If you want to allow only specific IPs or certain pages (e.g., an admin page) to bypass the maintenance page, you can modify the conditions as follows:
+
+IP-based restriction:
+To allow only your local machine to access the site, use {REMOTE_ADDR} in the condition, and enter your local IP (e.g., 192.168.1.100).
+Page-based restriction:
+To allow access to specific pages, use {URL} in the condition and specify the path (e.g., ^/admin).
+Example Condition Configuration:
+Allow access from a specific IP:
+
+Condition Input: {REMOTE_ADDR}
+Pattern: ^192.168.1.100$
+This ensures that only requests from the IP 192.168.1.100 will bypass the maintenance page.
+Allow access to an admin page:
+
+Condition Input: {URL}
+Pattern: ^/admin
+This allows access to any URL that starts with /admin, so your admin page can still be accessed during maintenance.

@@ -1,0 +1,159 @@
+->NGINX CUSTOMIZATION: WHEN THINGS GO WRONG WITH NGINX
+ #curl localhost/fake.html
+ -Now the nginx will display the by default error of 404 of page not found.
+ #nano default.conf  : add error line
+-Now we have to create a 404 page.
+  error_page  404              /404.html;
+  error_page   500 502 503 504  /50x.html;
+#echo "<h1>404 Page Not Found</h1>" > /usr/share/nginx/html/404.html
+# systemctl reload nginx
+# nginx -t
+#curl localhost/fake.html
+_________________________________ ______________________________________
+#vim conf.d/default.com
+   location = /admin.html {
+      auth_basic "Login Required";
+      auth_basic_user_file /etc/nginx/.htpasswd;
+  }
+
+   error_page  404              /404.html;
+  error_page   500 502 503 504  /50x.html;
+  
+->Now we will generate that .htpasswd file
+ #yum install -y httpd-tools   (for ubuntu apache2-utils)
+ #htpasswd -c /etc/nginx/.htpasswd admin
+ #echo "<h1>Admiin page </h1>" > /usr/share/nginx/html/admin.html
+ #nginx -t
+ #curl localhost/admin.html   (will give 404, auth required)
+ #curl -u admin:password localhost/admin.html (admin page)
+_____________________________________ ___________________________________
+->SSL certificates:
+ #mkdir /etc/nginx/ssl
+ #openssl req -x509 -nodes -days 365 \
+  > -newkey rsa:2048 \            (new key with our rsa structure)
+  > -keyout /etc/nginx/ssl/private.key \  (key file to be output at)
+  > -out /etc/nginx/ssl/public.pem (output file for public portion of our certificate)
+ -Where "x509" is structure, "nodes" to not encrypt output key, to set the expiration days.
+ # ls /etc/nginx/ssl/
+ 
+_____________________________________________ ______________________________________
+->-Now we will allow our server to allow https requests:
+->Module ngx_http_ssl_module:
+-where ssl_certificate file;
+ takes the public version
+-where ssl_certificate_key file; is for private version
+# vim /conf.d/default.conf
+  listen 443 ssl;
+  
+   ssl_certificate /etc/nginx/ssl/public.pem;
+   ssl_certificate_key /etc/nginx/ssl/private.key;
+  
+   location = /admin.html {
+      auth_basic "Login Required";
+      auth_basic_user_file /etc/nginx/.htpasswd;
+  }
+
+   error_page  404              /404.html;
+  error_page   500 502 503 504  /50x.html;
+#systemctl reload nginx
+#curl https://localhost
+#curl -k https://localhost
+__________________________________________ _________________________________________
+->Rewrite rule: Used to handle the url request
+  #nano /etc/nginx/conf.d/default.conf
+  -
+    rewrite ^(/.*)\.html(\?.*)?$  $1$2 redirect;
+    rewrite ^/(.*)/$ /$1 redirect;
+    (where ^ is for starting and $ for ending, where "()" for capturing, \.html for escaping the .html request, for (\?.*) will be replaced by "?" which will provide single characters word parameter  for the replacement we have provided $1$2)
+  
+-For eg:
+  /admin.html?debug=true
+  /admin ?debug=true
+  /admin/
+
+#systemctl reload nginx
+ -As our page is now not able to redirect to .html pages as we have not specified path for existing file, so now we are using try_files_modules.
+
+ location / {
+  try_files $uri/index.html $uri.html $uri/ $uri =404;
+   }
+  -This line will search for our root directory for try_files  in the order provided, in which if the uri=index.html uri will provide .html page and for similar uri/dir names that uri will be redirected, if none is applicable then 404 page will be prompted.
+  -Also we need to change the /admin.html  to /admin as we have turned the .html redirect and any dir below admin can be accessed through login.
+  -And at last add the same line of try files below location =/admin
+-It is basically used for pattern matching, to redirect to what we present.
+___________________________________ _______________________________________
+->To redirect all the traffic of http to https:
+ - to create two diff page for http : 404, while for https : traffic to our page.
+ #cd /etc/nginx/conf.d/ ->default.conf
+  server {
+    listen 80 default_server;
+    server_name _;
+  }
+  server {
+    listen 443 ssl;
+-As now virtual host of our port 80 has very simple conf, with nothing available so 404 page will be there.
+->Now to redirect port 80 request to 443 add: (301 is move permanent redirect code)
+
+  return 301 https://$host$request_uri;
+____________________________________ ___________________________________
+-> To see what modules we have available 
+ #nginx -v (for version)
+ #ngin -V (to list the configure arguments)
+ #nginx -V 2>&1 | tr -- - '\n' | grep _module
+->Apart from this modules you can use dynamic modules from load_modules:
+->Add third party module as mod_security_web_applicaion:
+->Need to get some development tools:
+#yum groupinstall 'Development tools'
+#yum install -y geoip-devel libcurl-devel libxml2-devel libxslt-devel libgb-devel lmdb-devel openssl-devel pcre-devel perl-ExtUtils-Embed yajl-devel zlib-devel
+
+->Now we gonna use some of this source code by putting them /opt dir
+#cd /opt/
+#git clone --depth 1 -b v3/master https://github.com/SpiderLabs/ModSecurity.git
+ (--depth 1 : to pull one commit, -b v3/master : to get one branch of v3/master which is Modsecuurity module)
+ #cd ModSecurity/
+->In git the submodules contain the source code, and there is no package manager so, we need to pull it out by initializing  local config for Git submodules. It does not clone the submodules; instead, it sets up the necessary configuration in the .git/config file to allow you to use the git submodule update command later to clone and update the submodules.
+#git submodule init
+#git submodule update
+#./build.sh     (to build in root directory)
+#echo $?   (to see the status of the last executed command)
+#./configure
+-Now here you will see the most of the dependency that we installed and will be required.
+#make     (we have made mod security module for ourself)
+#make install
+->Again move to the opt dir:
+ #cd ..
+ #git clone --depth 1 https://github.com/SpiderLabs/Modsecurity-nginx.git
+-This the wrap layer that help us to build the core module for ModSecurity.
+
+->Now we need to get nginx source code for and point it towards the Modsecurity_module  and to build the module for us
+#wget http://nginx.org/download/nginx-1.27.3.tar.gz
+#tar zxvf nginx-1.27.3.tar.gz
+#cd nginx-1.27.3
+#./configure --add-dynamic-module=../Modsecurity-nginx
+ (where ../ModSecurity-nginx is the path)
+#make modules
+#ls objs/    (you will find modsecurity_module.so file )
+#cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules
+___________________________ ____________________________
+->Now to add mod_security_module
+#cd /etc/nginx/
+#nano nginx.conf
+-And this needs to be put before loading events and http 
+load_module /etc/nginx/modules/ngx_http_modsecurity_module.so;
+->Now we need to enable modsecuirty
+#mkdir /etc/nginx/modsecurity
+#cp /opt/ModSecurity/modsecurity.conf-recommended /etc/nginx/modsecurity/modsecurity.conf
+
+#cp unicode.mapping /etc/nginx/modsecurity/Unicode.mapping
+#nano /etc/nginx/modsecurity/modseurity.conf
+->We need to edit modesc_audit for our web server, so we are going to change  var/log dir, so that we can make changes in our nginx dir, so find 
+SecAuditLog /var/log/modsec_audit.log ---> /var/log/nginx/modsec_audit
+ #nano conf.d/default.conf    (to enable our mod_security in our ssl server)
+  
+modsecurity on;
+modsecurity_rules_file /etc/nginx/modsecurity/modsecuirty.conf;
+
+->Now new directive are needed in our nginx.
+#nginx -t
+#systemctl reload nginx
+______________________________________ _______________________
