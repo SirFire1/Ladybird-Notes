@@ -1,9 +1,9 @@
  Section-2-Installing and connecting to a Linux sysem
 *Linux is an Operating system
-*Linux OS = Linux Distribution(Debian,ubunt,redhat)
+*Linux OS = Linux Distribution(Debian, ubuntu, redhat)
 *Distro/Flavor =Distribution
 *The kernel is the core
- its sits btw the hardware and application like a interface.
+ It sits btw the hardware and application like a interface.
 *Linux Kernal + Apps = Distro
 *Two most popular Linux distros: Redhat and ubuntu
 *RHEL: Redhat Enetrprise Linux
@@ -26,7 +26,7 @@ ___________________________ __________________________
 *Set username and pass
 *you can change font, layout, color by righ clicking on ubuntu terminal bar
 *wsl -l -o (to get list of distro that are available online)
-*wsl --install -d Debian (just like this write any disto name)
+*wsl --install -d Debian (just like this write any distro name)
 *wsl -l ( to list the distro that are available offline)
 ->Access Linux Files and Directories from the file explorer
 *click on file explorer and there you will find below a Linux logo
