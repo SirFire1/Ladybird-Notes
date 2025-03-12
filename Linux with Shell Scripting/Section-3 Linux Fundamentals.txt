@@ -108,7 +108,7 @@ _________________________________ _________________________________
 -> Executing Commands
  * $PATH determines command search path
  * You can specify a command with a full path
-   /bin/cat sales.data            (/bin/cat is path of car command find through which command)
+   /bin/cat sales.data            (/bin/cat is path of cat command find through which command)
  * You can execute command not in $PATH 
    /home/Jason/my-dog/cat     
  *./command = Execute command in this dir.
@@ -124,7 +124,7 @@ _____________________________ _________________________________
 $ ls -l
   -rw-rw-r-- 1 Jason users 10400 SEP 27 08:52 sales.data
   Permissions                       -rw-rw-r--
-  Number of links                      1   (also known as hard links, added by ln, for files 1, and fo dir 2, as one is for subdir inside dir)
+  Number of links                      1   (also known as hard links, added by ln, for files 1, and for dir 2, as one is for subdir inside dir)
   Owner name                         Jason
   Group name                         users
   Number of bytes in the file        10400
@@ -136,7 +136,7 @@ $ ls -l
  *Hidden files are not display by default
  *To show hidden files with ls, use ls -a
  *Command options can be combined.
- - ls -l -a is the same as ls -la and ls -al
+ $ ls -l -a is the same as ls -la and ls -al
 ->Listing Files by type:
  *Use ls -F to reveal file types.
    /   Directory
@@ -318,8 +318,36 @@ _______________________________ ____________________________________
  Easy to laern 
  Not as advanced as vi or emacs
  If nano isn't available,look for pico
- ctrl+x to exit
- ctrl+o to save
+->Basic Commands:
+Ctrl + O: Save the file (Write out).
+Ctrl + X: Exit nano.
+Ctrl + W: Search within the file.
+Ctrl + K: Cut the current line (or selected text).
+Ctrl + U: Paste the cut text.
+Ctrl + J: Justify the current paragraph (align the text).
+Ctrl + C: Show the current cursor position (line number and column).
+->Navigation Commands:
+Ctrl + A: Move the cursor to the beginning of the current line.
+Ctrl + E: Move the cursor to the end of the current line.
+Ctrl + Y: Scroll up one page.
+Ctrl + V: Scroll down one page.
+Ctrl + _ (underscore): Go to a specific line number (after pressing Ctrl + _, enter the line number and press Enter).
+Arrow Keys: Move the cursor up, down, left, or right.
+->Text Manipulation:
+Ctrl + D: Delete the character under the cursor.
+Ctrl + T: Invoke the spell checker (if available).
+Alt + D: Delete the word under the cursor.
+Alt + U: Undo the last action.
+Alt + E: Redo the last undone action.
+->File Management:
+Ctrl + R: Open a file (insert the contents of another file into the current file).
+Ctrl + X: Exit nano, with prompts to save changes if needed.
+->Cut/Copy/Paste:
+Ctrl + Shift + 6: Start selecting text (mark the text).
+Ctrl + K: Cut the selected text.
+Ctrl + U: Paste the selected text.
+->Help:
+Ctrl + G: Display the help menu
 ->Vi editor
   vi [file]    Edit file
   vim [file]   same as vi, but more features
