@@ -1,0 +1,145 @@
+-> Apache-High Availability Load balancing:
+  -High available System which continuously operational as along as desired.
+  -HA / uptime:
+   .Eliminate a single point of failure: failure at certain point doesn't bring down the entire system.
+   .Reliable failover: If one server is down another should take place.
+   .Failure detection at run time.
+ ->Load balancing for HA
+  -keeping a server running 24X7X365 becomes crucial 
+  -OS Patching for server is also Necessary and equally important.
+ ->Two types of load balancer:
+  -Hardware based
+  -Software based
+  
+->Hardware based: A device that is installed in data center and does the job of splitting the traffic.
+ .Generates excellent Statistics
+ .Rely on specific vendors and call for support when need arises
+ .Lower maintenance cost
+->Disadvantages
+ .Not all devices have lower maintenance 
+ .Hardware load balancer are most black boxes
+ .Devices are generally quite costly and needs to have data center that you control.
+
+->Software Load Balancer: are called Application Delivery control. 
+  -Advantage:
+  Flexibility
+  Cost
+  Sizing
+  Application vs Network
+  Elasticity
+
+->Modules for Load balancing
+ .Mod_proxy_balancer with support of mod_proxy
+ .Mod_jk
+ 
+ Apache<---->Mod_Proxy<--->Mod_proxy_balancer---->Tomcat A
+                                         |_______>Tomcat B
+
+->Load Balancing using Mod_proxy_balancer:
+ <VirtualHost *:80>
+ ServerName techienode1.com
+ 
+ <Proxy "balancer://mycluster">
+   BalancerMember http://localhost:8080/myapp route=tc1
+   BalancerMember http://localhost:9090/myapp route=tc2
+ </Proxy>
+ 
+ ProxyPass / balancer://mycluster
+ ProxyPassReverse / balancer://mycluser
+</VirtualHost>
+
+1. <VirtualHost *:80>:
+This directive defines a virtual host that listens on port 80 (the default HTTP port). It serves traffic for the domain techienode1.com.
+2. ServerName techienode1.com:
+The ServerName directive defines the domain name (techienode1.com) for this virtual host. This is the domain clients will access to reach your load-balanced application.
+3. <Proxy "balancer://mycluster">:
+This block defines a proxy balancer named mycluster. The balancer manages the backend servers to which the traffic will be distributed.
+BalancerMember: Each BalancerMember directive defines a backend server in the cluster. In your case:
+http://localhost:8080/myapp is one backend server.
+http://localhost:9090/myapp is another backend server.
+Each of these BalancerMember servers has a route parameter (route=tc1 and route=tc2), which helps the balancer route requests to specific backend servers if needed. This can be useful for sticky sessions or routing based on specific logic.
+4. ProxyPass / balancer://mycluster:
+The ProxyPass directive forwards all incoming requests to the balancer named mycluster. This means that any request to techienode1.com (on port 80) will be handled by the proxy balancer.
+5. ProxyPassReverse / balancer://mycluster:
+The ProxyPassReverse directive is used to rewrite the Location, Content-Location, and URI headers in HTTP responses. This ensures that the client is properly redirected when the backend server sends a response (for example, if the backend sends a redirect to localhost:8080/myapp).
+______________________________ ___________________________________
+
+->Load balancing using Mod_JK
+  This load balancing is tomcat based.
+JkWorkersFile conf/workers.properties
+JKLogFile logs/mod_jk.log
+
+<VirtualHost *:80>
+ ServerName techienode2.com
+ RewriteEngine on
+ RewriteRule ^/$ http://%{SERVER_NAME}/myappforjk/index.jsp [L,R]
+
+ JkMount /myappforjk/* tomcatcluster
+ 
+</VirtualHost>
+
+->Workers.properties
+ worker.list=tomcatcluster
+
+worker.tomcatcluster.type=lb
+worker.tomcatcluster.balance_workers=tc1,tc2
+
+worker.tc1.type=ajp13
+worker.tc1.host=localhost
+worker.tc1.port=8009
+worker.tc1.lbfactor=1
+
+worker.tc2.type=ajp13
+worker.tc2.host=localhost
+worker.tc2.port=9009
+worker.tc2.lbfactor=1
+->For module_jk you need to download apache connector for tomcat
+ #cd /opt/installable
+ #tar -xvf tomcat-connector-1.2.40-src
+ #cd native
+ #ll :your will find conf igure file there
+->Need to download another extension: apxs in apache :is a tool for bulding installing extension for apache.
+ -Then  run:
+ #yum install httpd-devel gcc libtool make
+ #which apxs
+ #.conf igure --with-apx=/bin/apps
+ #make
+ #make install
+ #cd /etc/httpd  :here you will find same module ---> path for mod_jk
+
+_________________________________ _____________________________________
+->Nagios:
+ .Nagios is an opensource computer monitoring System.
+ .This is an php and CGI application which is integrated with Apache for its UI and its operation.
+ .This monitoring software works on server - client technology.
+ .One Nagios server can monitor multiple clients machine which are configured for monitoring like disk space, CPU usage, OS is down, apache etc.
+ .Website -https://www.nagios.org : to go through it.
+
+->Nagios installation steps
+1.Disable selinux if not require
+          #sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+2.Install dependencies
+yum install  php php-cli gcc glibc glibc-common gd gd-devel net-snmp openssl-devel wget
+yum install make gettext autoconf net-snmp-utils epel-release perl-Net-SNMP postfix unzip automake vim
+
+
+3.Download Nagios and compile
+# wget https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.6.tar.gz
+# tar -zxvf /opt/nagios-4.4.6.tar.gz
+# cd nagioscore-nagios-4.4.6
+#./configure --prefix=/APPS/nagios
+#make all
+4.Install all program (php), CGI files and html files
+# make install-groups-users
+#make install
+5.Install init script
+# make install-init
+6.Install sample configuration file of Nagios 
+# make install-config
+
+7.Install apache configuration file
+# make install-webconf 
+8.Configure Apache user to access Nagios
+# htpasswd -c /APPS/nagios/etc/htpasswd.users  nagiosadmin
+9.Access Nagios URL
+Browse https://apache.avminfi.com/nagios

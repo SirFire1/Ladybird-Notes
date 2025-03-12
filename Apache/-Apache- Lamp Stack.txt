@@ -1,0 +1,159 @@
+->Apache- Lamp Stack:
+->What is Stack:
+ -The term stack (derived from "solution stack") refer to a collection of different software programs that "stack" together to create a platform necessary to support application software.
+ -These independent subsystem works together to make up a fully functional environment so that no additional software is needed for an application to work.
+->What is Lmap Stack :
+ -Lmap stack is a set of opensource software used for web application development.
+ -For a web application to work smoothly, it has to include an operating system, a web server, a database, and a programming language.
+ -The anem LAMP is an acronym of the following programs:
+  Linux operating System 
+  Apache HTTP web Server
+  MySQL/MariaDB database management system
+  PHP programming language
+_________________________________
+->LAMP Stack
+LAMP Stack Components:
+Linux (Operating System):
+
+Linux is the operating system that serves as the foundation of the LAMP stack. It is an open-source, Unix-like operating system.
+Role: It provides the environment for the other components to run. Most LAMP deployments use a Linux distribution (e.g., Ubuntu, CentOS, Debian) to manage system resources and provide networking, security, and basic file operations.
+Why Linux?: Linux is stable, secure, highly customizable, and well-supported, which makes it a great choice for web server hosting.
+Apache HTTP Server (Web Server):
+
+Apache HTTP Server (or simply Apache) is one of the most popular open-source web servers in the world. It serves as the interface between the web browser (client) and the server-side application (website or web app).
+Role: It listens for HTTP requests from clients, handles them, and serves the appropriate content (HTML, PHP scripts, etc.) back to the client’s browser.
+Why Apache?: Apache is versatile, robust, supports dynamic content, and has an extensive set of modules for various functionalities like URL rewriting, authentication, SSL encryption, etc.
+MySQL/MariaDB (Database Management System):
+
+MySQL is an open-source relational database management system (RDBMS) used for storing and managing data in a structured format using tables.
+MariaDB is a fork of MySQL, created by the original developers of MySQL. It is fully compatible with MySQL but offers some performance improvements and additional features.
+Role: The database stores dynamic content such as user data, posts, comments, and other application data. It interacts with PHP to retrieve, store, and update data based on user requests.
+Why MySQL/MariaDB?: Both are fast, reliable, and scalable solutions for handling databases in web applications.
+PHP (Programming Language):
+
+PHP is a server-side scripting language used to create dynamic web pages and web applications. It is embedded within HTML code and executed on the server to generate dynamic content.
+Role: PHP handles the logic of web applications, such as interacting with the database (MySQL/MariaDB), processing form data, sending emails, and more. It generates dynamic HTML content that Apache serves to clients.
+Why PHP?: PHP is easy to learn, widely supported, and integrates well with MySQL/MariaDB. It is one of the most popular programming languages for web development.
+How They Work Together in a LAMP Stack:
+Here’s how the four components of the LAMP stack work together when a client makes a request to a server:
+
+Client Request:
+
+A client (usually a browser) sends an HTTP request for a specific resource (e.g., http://example.com/index.php).
+Apache HTTP Server:
+
+The Apache web server receives the HTTP request.
+It checks if the requested file exists (e.g., index.php).
+If the file is a PHP file, Apache passes the request to the PHP interpreter (through the mod_php module).
+PHP Processing:
+
+PHP processes the request. It may query the MySQL/MariaDB database for dynamic content (e.g., retrieving user data or blog posts).
+PHP generates HTML (or other content types like JSON, XML) dynamically based on the request, database results, and any business logic.
+MySQL/MariaDB:
+
+PHP interacts with MySQL/MariaDB to fetch or update data as needed. This could involve querying a database for information or submitting data (such as a form submission).
+MySQL/MariaDB returns the requested data (e.g., a list of blog posts, user profiles, etc.) to PHP.
+Apache HTTP Server (again):
+
+Apache receives the processed HTML output from PHP and sends it back to the client as an HTTP response.
+The client (browser) then renders the HTML content and displays it to the user.
+____________________________________
+LAMP STACK Alternatives:
+ Open source alternatives are:
+   LEMP(Linux, NGINX, MySQL/MariaDB, PHP/Perl/Python)
+   LAPP(Linux,apache,PostgreSQL,PHP)
+   LEAP(Linux,Eucalyptus,AppScale,Phthon)
+   LLMP(Linux,Lighttpd,MySQL/MariaDB,PHP/Perl/Python)
+
+While non-open source alternatives include:
+ WAMP(Windows, apache, MySQL/MariaDB, PHP/Perl/Python)
+ WIMP(Windows, Internet Information Service, MySQL/MariaDB, PHP/Perl/Python)
+ MAMP(MAc OS x, Apache, MySQL/MariaDB, PHP/PERL/python)
+
+
+____________________________
+Ø Install MYSQL(MariaDB)
+# yum install mariadb-server mariadb
+# systemctl start mariadb
+Ø Make you MYSQL secure
+# mysql_secure_installation
+Set root password? [y/n] Y 
+New password: Type in a password you would like to use
+Re-enter new password: Retype the password from the previous field
+Remove anonymous users? [y/n] Y 
+Disallow root login remotely? [y/n] Y 
+Remove test database and access to it? [y/n] Y 
+Reload privilege tables now? [y/n] Y
+# systemctl restart mariadb
+Ø Connect to your MYSQL and set remote access to Remote IP
+# mysql -u root -p 
+Enter password: 
+mysql>GRANT ALL ON . to root@'192.168.31.240' IDENTIFIED BY 'root’; 
+mysql>FLUSH PRIVILEGES; mysql>exit
+Welcome
+SQL + PHP 
+install Steps
+Verify config
+Ø Install PHP
+# yum install php php-mysql
+Ø Create test PHP file and restart Apache
+# vi /var/www/html/info.php
+<?php 
+phpinfo();
+?>
+# systemctl restart httpd
+_____________________________________ _______________________________________
+->What is vulnerability:
+ -Vulnerability is a cyber-security term that refers to a flaw in a system that can leave it open to attack.
+ -A Vulnerability may also refer to any type of weakness in a software or operating system itself, in a set of procedures, or in anything that levaes information security exposed to a threat.
+-> Compliance team recommends to perform Vulnerability Scan
+• If company business is associated with client’s sensitive DATA then data traversing through web server 
+should be secure.
+• Since Web server is the first Application from where attacker gets entry to company Server
+infrastructure, it is necessary make web server vulnerable free
+
+-> Common Vulnerabilities in Default Apache
+• HTTP TRACE/TRACK Methods Enabled
+• HTTProxy Vulnerability
+• Indexable Web Directories
+• No X-FRAME-OPTIONS Header
+• Discovered HTTP Methods
+• Discovered Web Directories
+
+->Steps to mitigate common vulnerabilities
+• Hide the server OS version and Application details 
+Mitigation : Edit the ./conf/httpd.conf file to include (or alter) the following configuration 
+lines and restart Apache
+ServerTokens Prod
+ServerSignature Off
+• Disable HTTP TRACE method
+Mitigation : As with hiding the server version information, just edit httpd.conf with the 
+following configuration line and globally disable the TRACE method
+TraceEnable Off
+• Limit the HTTP method to GET,PUT,HEAD and POST
+Mitigation : As with hiding the server version information, just edit httpd.conf with the 
+following configuration line and globally disable the TRACE method
+<Location />
+<LimitExcept GET HEAD POST>
+Require all denied
+</LimitExcept>
+</Location>
+Welcome
+Prerequisites
+Default Apache
+Vulnerability
+Steps to mitigate common vulnerabilities
+• No indexes except the valid uses like file storages, archives etc.. 
+Mitigation : Disable globally by by editing the httpd.conf and adding these configuration 
+lines before the <Directory> blocks
+Options –Indexes
+Options -Indexes +FollowSymLinks
+AllowOverride All
+• Basic Click Jacking Defense with X-Frame-Options
+Mitigation : Adding this configuration line to Apache’s httpd.conf will make frames 
+available only from the same originating domain
+Header always append X-Frame-Options SAMEORIGIN
+• Basic XSS Protection
+Mitigation : One simple preventative step is to take advantage of forcing XSS Protection for 
+compatible browsers by adding this configuration line to httpd.conf. 
+Header set X-XSS-Protection "1; mode=block"

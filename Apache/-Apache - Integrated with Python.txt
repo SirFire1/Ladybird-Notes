@@ -1,0 +1,119 @@
+->Apache - Integrated with Python:
+ -Interpreted language: You can run each line of code once you have finished writing it, allowing you to immediately check it and make adjustment if needed - a big help to those who are still learning and a time-saver for coders everywhere.
+ -High level, general purpose programming language:
+ -Due to nature of language, it is being extensibility applied in data science, data analysis, machine learning data, data engineering, software development, web software and other field.
+
+->mod_wsgi apache server module:
+ -Provide the way to serve Python application
+ -Module implements the web Server Gateway interface which is a specification that defines how to communicate python based application, allowing to handle HTTP requests and responses.
+
+->How mod_wsgi works:
+ WSGIDaemonProcess:
+
+This directive is used to define a separate, isolated process group for handling requests to the Python application.
+It specifies a name for the daemon process group and can define various settings, such as memory limits, number of processes, and other resource management options.
+This is important because it allows you to isolate the Python application from the Apache web server, improving performance and stability.
+Example usage:
+WSGIDaemonProcess myapp processes=2 threads=15 display-name=%{GROUP}
+WSGIProcessGroup:
+
+This directive tells Apache to map a specific set of requests to a particular daemon process group defined with WSGIDaemonProcess.
+It essentially links the Python application to the process group that was set up earlier, ensuring that the application runs within the defined environment.
+You can use this to associate multiple web applications with different process groups if needed.
+Example usage:
+WSGIProcessGroup myapp
+WSGIScriptAlias:
+
+This directive is used to map a URL path (e.g., /myapp) to the Python application (i.e., the WSGI script) that handles the request.
+When a user accesses the specified URL, the request is passed to the Python application defined by the WSGI script.
+It works similarly to a regular Apache Alias directive, but specifically for routing to WSGI-based applications.
+Example usage:
+WSGIScriptAlias /myapp /path/to/myapp.wsgi
+__________________________________________________
+myapp:
+
+This is the name of the WSGI daemon process group. It is an identifier for the process group. When configuring other directives like WSGIScriptAlias or WSGIProcessGroup, you would use this name to link the specific process group to your web application.
+processes=2:
+
+This specifies the number of worker processes that the daemon will spawn. In this case, Apache will create 2 processes to handle requests to your application.
+Each process will handle a subset of the incoming traffic, providing some degree of concurrency and isolation. This is important for multi-core machines, where multiple processes can take advantage of the hardware.
+
+threads=15:
+
+This defines the number of threads per process. In this case, each of the 2 processes will have 15 threads. Threads are lightweight and share the same memory space, so they are a more efficient way to handle multiple concurrent requests than spawning separate processes.
+Having multiple threads allows each process to handle more requests concurrently. This can be useful for web applications that involve a lot of waiting on I/O (like network or database queries).
+
+display-name=%{GROUP}:
+
+The display-name attribute sets the name that will be shown in the Apache process list (e.g., when using ps or top commands).
+The %{GROUP} is a variable placeholder that will be replaced by the actual group name associated with the process. It allows dynamic naming based on the environment, making it easier to identify the process when monitoring.
+What This Directive Does:
+The WSGIDaemonProcess directive sets up a daemon process group named myapp with 2 processes and 15 threads per process. The daemon group will serve requests for your Python application, and Apache will handle incoming HTTP requests by passing them to the appropriate worker process and thread.
+
+This configuration is useful when you need better performance, scalability, and concurrency for your Python web application. It ensures that multiple processes and threads are available to handle incoming requests, improving the responsiveness and throughput of the application.
+
+Additional Context:
+WSGI Process and Thread Model:
+
+Using multiple processes and threads can be beneficial for handling multiple requests concurrently. However, be mindful of the available system resources (CPU, memory), as each process consumes more memory, and each thread shares the memory within its process.
+Tuning:
+
+You should adjust the processes and threads parameters based on your server's capabilities and the expected load. For instance:
+If your server has more CPU cores and memory, you can increase the number of processes and threads to allow better concurrency.
+If your application is I/O-bound (waiting on database or network responses), using more threads can be beneficial. If it’s CPU-bound, it might be better to focus on more processes rather than threads.
+Resource Management:
+Apache will use the processes and threads as defined in this configuration, but it's important to monitor the resource usage to ensure that you’re not overloading the system with too many processes/threads, especially on a high-traffic site.
+
+->myapp is the name of the daemon process group.
+The process group is defined earlier in the configuration using the WSGIDaemonProcess directive, where you specify parameters such as the number of processes and threads to use. By using WSGIProcessGroup, you're telling Apache to route requests to the specified process group (myapp).
+
+/myapp is the URL path that clients will access to reach your application. Any request to http://yourdomain.com/myapp will be handled by the WSGI application defined in the script file.
+
+/path/to/myapp.wsgi is the path to the WSGI script file that contains the application logic. This file must be a Python file that defines the application object (the WSGI entry point for the web app).
+
+How These Directives Work Together:
+When you combine WSGIProcessGroup and WSGIScriptAlias as you’ve written, you’re setting up Apache to serve a Python web application using mod_wsgi. Here’s what happens:
+
+WSGIScriptAlias /myapp /path/to/myapp.wsgi:
+
+Any incoming request to http://yourdomain.com/myapp will be handled by the Python application defined in the /path/to/myapp.wsgi script.
+This WSGI script is responsible for handling the HTTP request, processing any logic, interacting with databases, and returning an HTTP response.
+WSGIProcessGroup myapp:
+
+Apache will route all requests for /myapp to the myapp process group, which was defined earlier using WSGIDaemonProcess. This ensures that the request is handled by the appropriate set of processes and threads that you have configured to run the application.
+___________________________________________ ___________________________
+->Steps to configure mod_wsgi module for Python
+• Install mod_wsgi module
+# dnf install python3-mod_wsgi python3-pip
+# pip3 install Django
+• Create Python Django App
+# mkdir /var/www/pythonsite/
+# cd /var/www/pythonsite
+# django-admin startproject myproject
+• Configure apache server vhost file
+vim /etc/httpd/conf.d/pythonsite.conf
+<VirtualHost *:80>
+ServerName ServerIP
+ServerAdmin webmaster@ServerIP
+DocumentRoot /var/www/pythonsite
+WSGIDaemonProcess test processes=2 threads=15 display-name=%{GROUP} python- path=/var/www/pythonsite/myproject python-home=/usr
+WSGIProcessGroup test
+WSGIScriptAlias / /var/www/pythonsite/myproject/myproject.wsgi
+<Directory /var/www/pythonsite/myproject>
+Require all granted
+</Directory>
+</VirtualHost>
+Steps to configure mod_wsgi module for Python
+• create your wsgi script
+# cd /var/www/pythonsite/myproject/
+# vim myproject.wsgi
+import os
+import sys
+# Adjust the Python path
+sys.path.append('/var/www/pythonsite/myproject')
+sys.path.append('/var/www/pythonsite/myproject/myapp')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'myproject.settings' from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+• Enable apache module and restart apache
+# sudo systemctl enable httpd
+# sudo systemctl restart httpd

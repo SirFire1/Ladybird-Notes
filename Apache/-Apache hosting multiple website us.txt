@@ -1,0 +1,110 @@
+->Apache hosting multiple website using multiple host derivative
+ -Types of hosting using Virtual Host Directive:
+ .Domain base
+ .IP base
+ .Port base
+
+->Alias and Redirection:
+-configuring alias for URL/page
+ Alias /extra /DATA/aliases/extrapages
+ <Directory "/DATA/aliases/extrapages">
+   Require all granted
+ </Directory>
+
+-Redirect URL on another web server
+  Redirect permanent "/server2pages" "http:/server2.com/test.html"
+
+ -Reverse Proxy :if you dont want to tell user about redirection
+ ProxyPass "/mypages/" "http://server2.com/server2pages/"
+ ProxyPassReverse "/mypages/" "http://server2.com/server2pages/"
+ ProxyPassreverseCookieDomain server2.com
+ ProxyPassReverseCookiePath "/mypages/" "/server2pages/"
+________________________ _________________________________
+->Lab - Test Alias on Apache – Yum Base
+1.Make sure mod_alias module is uncommented in configuration
+#grep mod_alias  /etc/httpd/conf.modules.d/00-base.conf
+2.Locate server1.com website page directory and create subdirectory to put extra pages
+# cd /var/www/html/server1_website
+# mkdir /var/www/html/server1_website/aliastesting
+
+3.Create Index.html under this new directory
+#cat > /var/www/html/server1_website/aliastesting/index.html
+   This is the Alias testing page on Server1.com using mod_alias module
+4.Add Alias configuration in /etc/httpd/conf.d/namebase.conf
+# vi /etc/httpd/conf.d/namebase.conf
+   Alias /extrapages /var/www/html/server1_website/aliastesting
+5.Set the directory permissions
+<Directory /var/www/html/server1_website/aliastesting>
+    Require all granted
+ </Directory>
+6.Test URL
+Browse for http://server1.com/extrapages
+___________________________ ______________________________
+->Lab - Test Redirect on Apache – Yum Base
+1.Make sure mod_alias module is uncommented in configuration on both servers ( 192.168.31.200)
+#grep mod_alias  /etc/httpd/conf.modules.d/00-base.conf
+2.Locate server2.com website page directory and create subdirectory for put extra pages
+# cd /var/www/html/server2_website
+# mkdir /var/www/html/server2_website/redirectesting
+
+3.Create Index.html under this new directory
+#cat > /var/www/html/server2_website/redirecttesting/index.html
+  <h1> This is the Redirect testing page on Server2.com using mod_alias module </h1>
+4.Add Redirect configuration in /etc/httpd/conf.d/namebase.conf on 192.168.31.200 on server1.com Virtualhost
+# vi /etc/httpd/conf.d/namebase.conf
+   Redirect /extrapages2 http://server2.com/extrapages2
+5.Add Alias configuration in /etc/httpd/conf.d/namebase.conf on 192.168.31.200 for server2.com VirtualHost 
+# vi /etc/httpd/conf.d/namebase.conf
+   Alias /extrapages2 /var/www/html/server2_website/redirecttesting/
+6.Set the directory permissions
+<Directory /var/www/html/server2_website/redirecttesting/>
+    Require all granted
+ </Directory>
+7.Test URL
+Browse for http://server1.com/extrapages2
+______________________________ _____________________________
+->Lab - Test ProxyPass on Apache
+1.Make sure mod_proxy and mod_alias module is uncommented in configuration on both servers ( 192.168.31.200)
+#grep mod_proxy  /etc/httpd/conf.modules.d/00-base.conf
+2.Locate server3.com website page directory and create subdirectory for put extra pages
+# cd /var/www/html/server3_website
+# mkdir /var/www/html/server3_website/proxypasstesting
+
+3.Create Index.html under this new directory
+#cat > /var/www/html/server3_website/proxypasstesting/index.html
+   This is the ProxyPass testing page on Server3.com using mod_proxy module
+4.Add Redirect configuration in /etc/httpd/conf.d/namebase.conf on 192.168.31.200 on server1.com Virtualhost
+# vi /etc/httpd/conf.d/namebase.conf
+   ProxyPass /proxypages http://server3.com/proxypages
+  ProxyPassReverse /proxypages http://server3.com/proxypages
+
+5.Add Alias configuration in /etc/httpd/conf.d/namebase.conf on 192.168.31.201 for server3.com VirtualHost 
+# vi /etc/httpd/conf.d/namebase.conf
+   Alias /proxypages /var/www/html/server3_website/proxypasstesting/
+6.Set the directory permissions
+<Directory /var/www/html/server3_website/redirecttesting/>
+    Require all granted
+ </Directory>
+7.Test URL
+Browse for http://server1.com/proxypages
+__________________________ ______________________________
+->Lab – mod_rewrite module configuration testing on Apache – Yum Base:
+1.Make sure mod_rewrite module is uncommented in configuration on server ( 192.168.31.200)
+#grep mod_rewrite  /etc/httpd/conf.modules.d/00-base.conf
+
+2.Create Index_mobile.html under this new directory
+#cat > /var/www/html/server1_website/index_mobile.html
+  <h1> This is the Rewrite Engine testing page on Server1.com using mod_Rewrite module. This page is Mobile user </h1>
+3.Create Index_desktop.html under this new directory
+#cat > /var/www/html/server1_website/index_desktop.html
+  <h1> This is the Rewrite Engine testing page on Server1.com using mod_Rewrite module. This page is Deskop user </h1>
+
+4.Add Rewrite configuration in /etc/httpd/conf.d/namebase.conf on 192.168.31.200 on server1.com Virtualhost
+# vi /etc/httpd/conf.d/namebase.conf
+   RewriteEngine on
+  RewriteCond %{HTTP_USER_AGENT} (iPhone|Blackberry|Android
+  RewriteRule  ^/$ 	/index_mobile.html [L]
+  RewriteRule  ^/$ 	/index_desktop.html [L]
+
+5.Test URL
+Browse for http://server1.com/

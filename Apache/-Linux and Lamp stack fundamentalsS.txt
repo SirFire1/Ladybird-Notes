@@ -1,0 +1,340 @@
+->Linux and Lamp stack fundamentals:Section1
+->DNS: Domain Name Services
+ *computers(servers) on the internet use IP Addresses
+ *similar to a phone book
+   *A database that maps names to numbers
+ *Humans Need Names
+   *FQDN: Fully Qualified Domain Name
+ *DNS uses UDP port 53. Think of a port like a telephone extension
+ *Other important port:
+  80, 443, 22, 25- These are important firewall
+->To own a domain name we need domain registrar
+  We will use : Amazon Route 53  (uses UDP port 53)
+                1and1
+->Owning own domain name is best
+  *No www.example.com/mysite
+  *less likely to have your content censored
+  *Looks professional-use the email too
+  *Do what you want with it
+  *You can sell it
+ ->Suggestions
+  *keep it short
+  *.com, .org, .info -others can be confusing
+  *Use google Adwords to get ideas of popularity (do some research to see what people are searching for)
+  *Don't look like a squatter (registering domain like others)
+  *Register Multiple version of your name .com, .net etc
+  *Register misspelling of your name
+  *Register for multiple years
+    Put a reminder in your calender
+    If you lose your name,you may never get it back!
+ ->Cautions:
+   *Careful with searching for the cheapest registrar
+     They could get bought
+     Hidden fees  
+-> After buying domain names from amazon web services route53 and 1and1
+->Address resolution:
+  *How do users find our website
+  *In users P.C there is a DNS century oftentimes as retrieved form dcp config, by default its typically the domain name server of an ISP a corporate DNS server or sometimes user will change that to google for example 8.8.8 or 4.4.2 or cloudflare for 1.1.1
+  *This avoids using an ISP because ISP can track those types of things and people want to avoid it
+  *So if someone want to go to Ritik.com they will send request to their dns server be at their isp or whatever then the request will flow:
+  -> Root(.) DNS Server
+  -> TLD (.com, .org)etc
+  -> Ritik.com Authoritative DNS server
+  *So if the next user try to get to Ritik.com using same ISP, then it will be simpler as the resolution for that will be in the cache memory.
+ ->TTL :time to live and that's how things long in internet.
+  *So, when a dns server name is changed it takes a long time for cached get updated.
+
+->DNS Record types
+  *A-Record: it maps an IP address to a name
+  *@-So your site is available without the www
+    For search engine optimization
+  *MX-Record: Mail exchanger
+   *So we are going to register a free email account using our domain and we are going to point that email services domain.
+      
+->Assign Authorities DNS Server for the Domain Names we registered
+ *click light sail on aws services console
+ *Instance location inVirginia, Zone A
+ *Pick your instance image: Linux/unix  or Microsoft windows
+ *Select a blueprint: will provide software preinstalled with us.
+ *after installing machine go to managing
+ *In networking set static IP 
+ *Create DNS Zone
+   *There enter your registered domain name
+->DNS records:
+  *there you will have add records
+  subdomain          Resolves to
+  [www].Ritik.com     static-Virginia-1
+   @.Ritik.com     resolves to static-virginia
+ *After setting both if a person now goes to Ritik.com will be redirected to www.ritik.com
+->Then we will be provided several nameservers and we have to plug them into our domain registrar
+-> Go to 1and1.com and then manage your domain and then name servers
+  *then copy amazon name servers to 1and1.com
+->Then it will take 48hours for caching the webserver around the internet.
+_______________________________ __________________________
+->We have other domain names in our Rote53
+ *Registered domains, then add the name servers from light sail section 
+ *In light sail, networking section, DNS zones pick Nameservers
+ *Then we can create DNS records for our another domain and now we linked 2 domain to same server.
+ *While adding record if you choose CNAME INSTEAD OF RECORD will do the same @.Ritik.com.
+ 
+_________________________ ____________________________________
+->Edit host file
+ editing the hosts file associates name to an IP address for that computer only.
+ *Click on notepad, run as administrator
+ *then there chose file option and then open
+ *Local Disk(C:) -->windows-->system32-->drivers-->etc
+ *Then change the file type
+ *Click on host file
+->If that didn't work then old dns might be saved on that ip
+  *to remove that open command prompt as administrator
+   #ipconfig /flushdns
+_______________________ __________________________
+->Host file for mac
+ sudo nano /etc/hosts
+ Similarly just write ip and host name infront of it
+_________________________ _______________________________________
+->Virtual Machines
+  *Type 2 Hypervisor runs on a host operating system:
+   VirtualBox
+   VMware Workstation
+  *Type 1 Hypervisor Install directly on the hardware
+   VMware EXSI
+   Hyper-V
+ ->Installed ubuntu server with mini.iso
+____________________________________ ____________________________________
+->Installing virtual-CD-disk
+  #sudo apt install build-essential dkms linux-headers-$(uname -r) 
+       -dynamic kernel module support
+  #then insert virtual-disk
+  #and enable bi-directional
+___________________________ _______________________________________
+->Apache web server:
+#sudo apt install apache2
+#sudo systemctl start apache2.service
+#top    (to see top usage process in table )
+#ps aux | grep -i apache2
+#use loopback ip on web to see apache2 web page
+_____________________________ _________________________________________
+->Install firewall
+ *There is a utility called uncomplicated firewall
+ #sudo ufw status
+ #sudo ufw enable : to enable it.
+ #sudo ufw status verbose
+ #sudo ufw allow from any port 80 proto tcp
+ #sudo ufw allow from any port 443 proto tcp
+ #sudo ufw status verbose numbered (to see their order)
+ #sudo ufw delete 1   (if we want to delete any rule)
+ #sudo ufw allow 32000:32900/tcp  (for range )
+ #sudo ufw to disable firewall
+ #sudo ufw reset (for default setup)
+______________________________ ______________________________________
+->Lightsail Server:
+  *Snapshot do Not replace backups
+  *How to connect to the lightsail server
+   *Web tool
+   *PuTTY
+   *WinSCP
+ ---------------------
+ *Login to aws light sail console, on instance ubuntu server click on terminal
+ *For copy paste click on right keyboard, then on terminal 
+ *Now for using putty or WinSCP, we need SSH keys, you have to download them from lightsail 
+ *Go to puttygen and load the SSH key files to it
+ *key paraphrase is for password
+ *And then click on save private key
+ *Now open PuTTY for ip open lightsail instances, click on three dots of ubuntu server and then manage and copy the public ip.
+ *Then at PuTTY -> ssh->auth and choose the lightsail.puttyprivatekey and save in session
+ *then just open, type username and your are logged in to server.
+__________________________ ___________________________
+->for WinSCP
+ *The very first thing is File protocol: SCP
+ *Host name :static IP address of server machine, Port 22
+ *Click on advanced, then SSH-> Auth, then again insert lightsail.private-key
+ *Save by entering a site name, like lightsail, then click on login
+ *Enter username : Ubuntu
+ *And now you can transfer file from window to ubuntu and viceversa
+_____________________ ________________________________
+->Click on server manage option, then go to snapshots
+ *There you can create snapshots of the system database
+ *Click on stop and click on snapshot
+_________________________________ ____________________________
+->Configure host DNS on Linux:
+ #sudo nano /etc/hosts and add hostaddress infront of ip
+  127.0.0.1         Ritik.com
+____________________________ ____________________________________
+->Apache web server:
+ *Install Apache
+  #sudo apt apache2
+  #sudo systemctl start apache2
+ *Configure Virtual Hosts
+  -To make subdir for virtual host on apache server(-p for sub dir)
+  #sudo mkdir -p /var/www/html/Ritik.com/public_html
+  -To host 2 domains on 1 server
+   #sudo mkdir -p /var/www/html/sharma.com/public_html
+  -To change owner to current user:    (R stands for rights)
+   #sudo chown -R $USER:$USER /var/www/html/Ritik.com/public_html 
+   #sudo chown -R $USER:$USER /var/www/html/sharma.com/public_html
+  -Change mod for apache to read it:
+   # sudo chmod -R 755 /var/www/html/  
+
+ *Create test web pages
+  #sudo nano /var/www/html/Ritik.com/public_html/index.html
+  #And here add html for content
+  #sudo cp /var/www/html/Ritik.com/public_html/index.html /var/www/html/sharma.com/public_html/
+  #sudo nano /var/www/html/sharma.com/public_html/index.html
+ *Tweaks for wordpress
+ *Configure SSL for HTTPS://
+  #cd /etc/apache2/sites-available
+  #ls
+  #sudo cp 000-default.conf Ritik.com.conf
+  #sudo nano Ritik.com.conf
+  -Comment out www.example to Ritik.com
+  -Create an alias :#ServerAlias www.Ritik.com  (so our site also response to www.Ritik.com)
+  -Change ServerAdmin webmaster@localhost -> webmaster@Ritik.com
+  -Change documentRoot /var/www/html ->/var/www/html/Ritik.com/public_html
+  -Add :<Directory /var/www/html/Ritik.com/public_html>
+         AllowOverride All
+        </Directory>
+  #sudo cp Ritik.com.conf sharma.com.conf
+  #sudo nano sharma.com.conf: to change name Ritik->sharma
+  #sudo a2emod rewrite (apache2 enable mod read-write)
+  #sudo a2ensite Ritik.com.conf (enable apache2 site)
+  #sudo a2ensite sharma.com.conf (enable apache2 site)
+  #sudo systemctl reload apache2
+  -If webpages are working fine:
+   #sudo a2dissite 000-default.conf  (to remove apache webpage)
+  -for wordpress index.php needs to be load in load order
+  #sudo nano /etc/apache2/mods-enable/dir.conf
+    and bring php order before html
+  #sudo systemctl reload apache2 
+_____________________________ ___________________________________
+ ->To ensure file https: is working
+  *Go to lightsail ubuntu server->networking->Firewall->add another
+    HTTPS      TCP     443
+  #sudo add-apt-repository ppa:certbot/certbot  (to create repo for working SSL)
+  #sudo apt install python-certbot-apache     (to install package)
+  #sudo systemctl reload apache2
+  #sudo certbot --apache -d Ritik.com -d www.Ritik.com
+  -It will ask for emailaddress
+     :ritik@Ritik.com
+   -Then agree and no
+  -For redirect of traffic from http->https, press 2
+ Similarly for second website
+  #sudo certbot --apache -d sharma.com -d www.sharma.com
+ #sudo certbot renew --dry--run  (to check for certificate been provided)
+ #sudo systemctl reload apache
+->To verify our ssl cert
+  Go to www.sslabs.com->there put your hostname
+-> To see what changes the certbot has done:
+   #cd /etc/apache2/sites-available : there ssl named files will be available.
+
+   
+ ->Configure SWAP File (not really an apache thing)
+   *To create swap files
+    #sudo swapon -s (if no response is given then that means no swap files yet)
+    #sudo fallocate -l 4g /swapfile
+    #sudo chmod 600 /swapfile
+    #sudo mkswap /swapfile
+    #sudo swapon /swapfile
+    #sudo swapon -s          (To see if file was build)
+->Now to make sure this this file is used as machine gets rebooted:
+    #sudo nano /etc/fstab
+         /swapfile      none    swap    sw 0 0
+___________________________ ___________________________________________
+->Introduction to Mysql/PHP
+ ->MySQL: is a relational database
+  *PhP: runs scripts on the server
+ #sudo apt install php
+ #sudo apt install php-curl php-gd php-intl php-mbstring php-mysql php-soap php-xml php-xmlrpc php-zip
+ #sudo systemctl reload apache2
+ #sudo nano /var/www/html/Ritik.com/public_html/info.php
+  <?php
+   phpinfo();
+   ?>
+ #sudo apt restart apache2
+ -Now visit the website: https://ritik.com/info.php :will open the php page
+ -So, that no one see that info we will remove it:
+  #sudo rm info.php
+_______________________________ _____________________________________
+->PHP-Mail:
+ #sudo apt install -y mailutils
+-Postfix Configuration prompt:
+-General type of mail configuration: Internet site
+-system mail name : Ritik.com
+-sudo nano /etc/postfix/main.cf
+-Change inet_inetrfaces = all :loopback-only
+ #sudo systemctl restart postfix
+ #echo "this is a test" | mail -s "the message" ritik@ritik.com
+_________________________________ _______________________________________
+->To install MySQL:
+  #sudo apt install mysql-server
+  #sudo mysql_secure_insallation
+ -It will ask for secure password :(No recommended for testing pass)
+ -Then enter the New password: 
+ -Remove anonymous user:Y
+ -Disallow root login remotely: Y
+ -Remove test data base: y
+ -Reload privilege tables now: Y
+->Now make some Databases
+ #sudo mysql -u root -p
+  >SHOW DATABASES;
+  >CRAETE DATABASE Ritik_wp;
+  >CRAETE DATABASE sharma_wp;   (second database)
+  >GRANT ALL PRIVILEGES ON Ritik_wp.* TO 'ritik'@localhost' IDENTIFIED BY 'Ritik@123';
+  >GRANT ALL PRIVILEGES ON sharma_wp.* TO 'sharma'@localhost' IDENTIFIED BY 'Ritik@123';
+  >FLUSH PRIVILEGES;
+  >exit
+______________________________________ __________________________________
+->Another way to handle Mysql databse:
+ #sudo apt update
+ #sudo apt install phpmyadmin php-mbstring php-gettext
+ -Configuring phpMyAdmin prompt: press spacebar and insert"*" in apache2
+ -Configuring phpMyAdmin prompt: yes
+ -password prompt :Ritik@321 and yes
+ -connect method for MySQL database for phpadmin: Unix socket   (tcp/ip for remote databases)
+  #sudo phpenmod mbstring
+  #sudo systemctl restart apache2
+  #sudo mysql
+  >SELECT user,authentication_string,plugin,host FROM mysql.user;
+  -for setting password for root user in place of auth_socket to native_pass like for other localhost:
+  >Alter USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'Ritik@321';
+  >FLUSH PRIVILIGES    (to see the privileges we just assigned)
+  >SELECT user,authentication_string,plugin,host FROM mysql.user;
+ ->Now on browser type 127.0.0.1/phpMyAdmin/
+    -To see the phpadmin page associated with mysql
+    -Login with username:root and pass Ritik@321
+    -and now you can add user in gui and give permissions and then try login with that user.
+_____________________________________ ___________________________________
+->AWS MULTI Factor Auth:
+  *Cell phone App TOTP Standard-$0
+  *SMS-$0
+  *Universal 2nd Factor(U2F) Security key-$40
+  *Hardware Key fob MFA Device-$12.99
+  *Hardware Display Card MFA Device-$19.99
+->AWS Monitoring:
+  *CloudWatch
+    *Monitoring and Observation System
+    *Limited for Lightsail
+  *Simple Notification Service(SNS)
+    *Messaging Service
+  *Billing & Costing Management Dashboard
+    *View bills
+    *Budget
+    *Cost Explorer
+ -In AWS console type or find iam(Identity and Access Management) 
+  *there you can find multifactor auth for root, create an iam user, group to assign permission
+  -For MFA, go to your profile name on right top and choose my security crednetials
+   *then click on activate MFA
+   *An Virtual MFA option will be provided and a scanner will be provided install the MFA app
+   *You have to enter 6 digits code 2 times after 30 sec.
+  -And a secret key will be provided, just save that key, and click assign.
+  -So, now if you logout and try to login through your cache memory and another MFA key will be needed.
+->Billing Allert:
+ will provide us the billing amount of our aws account for certain limit. 
+-type billing in search bar->billing preferences:
+ there you will find Receive invoice and billing alerts option
+->Cloud Watch->Alarms->Billing->Create alarm
+  Then for threshold value set $value ->Next
+ -Notification: Select an SNS topic: select existing or create new: tehn type name and address and click on create topic.
+ -Next, add a description
+ -Next, Create the alarm 
+ -Now, you have to confirm the confirmation on MAIL for billing alarm.

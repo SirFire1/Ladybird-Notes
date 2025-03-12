@@ -1,0 +1,220 @@
+->Securing Apache:
+->HTTP Web Server Securing:
+  -secure your web server with SSL
+  -basic authenticate/ Digest authentication and access control
+  -Mitigate dos attacks 
+  -Geographical filtering
+  -Install and configure Antivirus
+  -Other security tips
+->Configure HTTPS for server1.com – Yum Base
+1.Restart apache Install package mod_ssl
+#yum install mod_ssl
+2.Locate new file ssl.conf in /etc/httpd/conf.d
+# cd /etc/httpd/conf.d/
+# cat ssl.conf
+
+3.Add mod_ssl configuration in /etc/httpd/conf.d/namebase.conf on 192.168.31.200 on server1.com Virtualhost for 443 port
+# vi /etc/httpd/conf.d/namebase.conf
+ <VirtualHost *:443>
+    ServerAdmin admin@server1.com
+    DocumentRoot "/var/www/html/server1_website"
+    ServerName server1.com
+    ErrorLog "logs/server3_website-error_log"
+    CustomLog "logs/server3_website-access_log" common
+
+  SSLEngine on
+ SSLCertificateFile /etc/httpd/certs/server1.com.crt
+ SSLCertificateKeyFile /etc/httpd/certs/server1.com.key
+<Directory /var/www/html/server1_website>
+        Require all granted
+</Directory>
+</VirtualHost>
+4.
+Systemctl restart httpd
+5.Test URL
+Browse for https://server1.com
+________________________________ ____________________________
+->Lab – How to enable authentication for some pages using mod_auth_basic module – Yum Base:
+
+1.Make sure mod_auth_basic is uncommented in configuration on server ( 192.168.31.200)
+#grep mod_auth_basic  /etc/httpd/conf.modules.d/00-base.conf
+2.Create new directory basicauthtesting under website directory
+# mkdir /var/www/html/server3_website/basicauthtesting
+3.Create Index.html under this new directory
+# cat > /var/www/html/server3_website/basicauthtesting/index.html
+  <h1> This is the authentication testing page on Server3.com using mod_auth_basic module.  </h1>
+
+4.Add access related configuration in /etc/httpd/conf.d/namebase.conf on 192.168.31.200 on server3.com Virtualhost
+# vi /etc/httpd/conf.d/namebase.conf
+   Alias /basicauthtest    /var/www/html/server3_website/basicauthtesting
+<Directory /var/www/html/server3_website/basicauthtesting/ >
+     AuthType Basic
+     AuthName "Restricted content"
+     AuthUserFile "conf.d/htpasswd.user"  
+     Require valid-user    (to access the page you should be a valid user)
+</Directory>
+5.Create authentication user and store it in /etc/httpd/conf.d/htpasswd.user
+#htpasswd -c /etc/httpd/conf.d/htpasswd.user testuser
+New Password : test
+Re-type New password : test
+6.Restart httpd service and Test URL
+#systemctl reload httpd
+Browse for http://server3.com/basicauthtest
+__________________________ ________________________________
+->Defence against DOS and DDOS- mod_evasive module
+ -The mod_evasive module is an Apache web service module that helps your server stay running in the event of an attack.
+ -The mod_evasive Apache utility works by monitoring incoming server requests. Also, it watches for suspicious requests such as:
+  Several requests for the same page in one second
+  More than 50 simultaneous requests per second
+  Requests made while temporarily blacklisted
+ -The module sends a 403 error if any of these thing happen. By default, this also include a 10- second waiting period on the blacklist. If the IP address making the request tries to request again in that 10-scond window, the waitlist is extended.
+_______________________ ______________________
+->Lab – Installation of mod_evasive on Apache to protect against Dos and DDos attack– Yum Base
+1.Install epel-release repository on ( 192.168.31.200)
+#yum install epel-release
+2.Install new module mod_evasive
+# yum install mod_evasive
+
+3.Uncomment all configuration line of /etc/httpd/conf.d/mod_evasive.conf
+DOSHashTableSize 3097
+DOSPageCount 2
+DOSSiteCount 50
+DOSPageInterval 1
+DOSSiteInterval 1
+DOSBlockingPeriod 10
+DOSEmailNotify email@server1.com
+DOSLogDir "/var/log/httpd/"
+
+4.Install mailx package to receive an email
+Yum install mailx
+5.Restart Apache
+Systemctl reload httpd
+6.Test your mod_evasive
+/usr/share/doc/mod_evasive-1.10.1/test.pl
+---------------------------- ------------------------------
+->LetsEncrypt Certificate for HTTPS website
+Valid domain – apache.avminfi.com
+IP – 139.59.27.104
+1.Install Apache using Yum
+#yum install httpd httpd-devel
+
+2.Configure VirtualHost configuration
+<VirtualHost *:80>
+ ServerName	apache.avminfi.com
+ </VirtualHost>
+
+3.Make sure URL is up
+# systemctl start httpd
+Browse URL http://apache.avminfi.com
+4.Install HTTPS module in Apache
+#yum install mod_ssl
+5.Install Certbot
+#yum install epel-release certbot python-certbot-apache’
+6.Run cerbot and get certificate 
+#Certbot --apache
+_______________________ ______________________________
+->What is LetsEncrypt:
+ -Letsencrypt is CA(Certified authority) which works as nonprofit organization.
+ -Website-https://letsencrypt.org/
+ -As per this website, this organization have provided free SSL certificates to 20 million websites as of year 2020
+ -Many web hosting companies gives the flexibility to use this free LetsEncrypt certificate for their website accessing securely.
+->Eligibility to get free SSL certificate from LetsEncrypt 
+ -The one should have own valid domain 
+ -Domain should point to your valid web server on 80 port. example -Apache server
+ -80 port should be open while generating SSL certificate for your website.
+______________________________ __________________________
+->Lab – Server-status page configuration on Apache – Yum Base
+ 1.Make sure mod_status module is uncommented in configuration on server ( 192.168.31.200)
+#grep mod_status  /etc/httpd/conf.modules.d/00-base.conf
+2.Add status configuration in /etc/httpd/conf/httpd.conf
+# vi /etc/httpd/conf/httpd.conf
+   <Location /server-status>
+  SetHandler server-status
+  Require ip 192.168.31.0/24
+</Location>
+3.Restart and Load your apache status
+#systemctl restart apache
+Browse for http://server1.com/server-status
+____________________________________ _________________________
+->GeoIP module
+ -This module helps to deny access to a complete country or continent to your website.
+ -This module has their geographical database which this module refers and take the action according to your apache configuration done for this module.
+ -This module is not available in Linux base repository.
+ -This has been introduced in EPEL(extra package enterprise library) repository and you will have to download and configure if your company have yum base apache installed on the server.
+ -Tarball base installation can be done by download the tar file from"http://dev.maxmind.com/geoip/legacy/mod_geoip2/"
+_________________________ _______________________
+->Geo-IP module installati on and configurati on Steps
+#yum install GeoIP GeoIP-devel GeoIP-data zlib-devel
+#ls -al /usr/share/GeoIP
+#vi /etc/htt pd/conf.d/geoip.conf
+<IfModule mod_geoip.c>
+GeoIPEnable On
+GeoIPDBFile /usr/local/share/GeoIP/GeoIP.dat
+MemoryChache
+SetEnvIf GEOIP_COUNTRY_CODE CN BlockCountry  (cn for china)
+Deny from env=BlockCountry
+</IfModule>
+Restart Apache - “systemctl restart httpd"
+_____________________________________________________ ______________________
+->Create Macros to reduce redundant configuration work:
+ -To host multiple websites on multiple server names and those will have multiple document roots
+->Macro module
+ LoadModule macro_module modules/mod_macro.so
+ <Macro CommonVHost $sername $adminid $DCRoot $errlog $CSlog>
+ <VirtualHost *:80>
+   ServerName $sername
+   ServerAdmin $adminid
+   DocumentRoot "var/log/httpd/$CSlog common
+     <Directory "/var/www/html/$DCRoot">
+      Require all granted
+     </Directory>
+   </VirtualHost>
+   </Macro>
+   use CommonVHost server1.com admin@server1.com server1_websites server1_websites-error_log server1_websites-access_log
+   use CommonVHost server2.com admin@server1.com server1_websites server2_websites-error_log server2_websites-access_log
+   use CommonVHost server3.com admin@server1.com server1_websites server3_websites-error_log server3_websites-access_log
+   use CommonVHost server4.com admin@server1.com server1_websites server4_websites-error_log server4_websites-access_log
+____________________________________ _____________________________________
+->User directory wise Web site hosting. Why?
+• Per user/department require web site on single company site domain
+• Unique pages under each web site under every user directory
+Example : http://techienode1.com/~finance
+http://techienode1.com/~hr
+http://techienode1.com/~admin
+
+->Mod_userdir
+By using this module you are allowing multiple users to host content within the same origin. 
+Directive: UserDir
+Description: Location of the user-specific directories
+Syntax: UserDir directory-filename [directory-filename] ...
+Context: server config, virtual host
+Status: Base
+Module: mod_userdir
+
+->Configuration File
+• Yum / RPM base installation : /etc/httpd/conf.d/userdir.conf
+• Tar ball base installation : apache24/conf/extra/httpd-userdir.conf
+1. /home/finance/webpages/index.html
+2. /home/hr/webpages/index.html
+3. /home/admin/webpages/index.html
+
+->Load Module in httpd.conf
+  LoadModule userdir_module modules/mod_userdir.so
+
+Userdir Module 
+directive declaration----------- <IfModule mod_userdir.c>
+                                  UserDir enabled hr admin finance
+                                 <IfModule>
+
+Core Module 
+directives for 
+access limiting---------<Directory “/home/*/webpages”>
+                    AllowOverride Fileinfo Authconfig Limit Indexes
+               Options Multiviews Indexes SymLinksIfOwnerMatch IncludesNoExec
+               Require method GET POST OPTIONS
+               </Directory>
+-The GET method is used to retrieve information from the given server using a given URI. 
+Requests using GET should only retrieve data and should have no other effect on the dat
+-A POST request is used to send data to the server, for example, customer information, file 
+upload, etc. using HTML forms.
+-options: Describes the communication options for the target resource.
