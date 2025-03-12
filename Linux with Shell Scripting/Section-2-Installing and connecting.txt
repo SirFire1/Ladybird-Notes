@@ -5,6 +5,7 @@
 *The kernel is the core
  It sits btw the hardware and application like a interface.
 *Linux Kernal + Apps = Distro
+-A kernel is the core component of a computer's operating system, responsible for managing hardware resources and facilitating interactions between hardware and software components.
 *Two most popular Linux distros: Redhat and ubuntu
 *RHEL: Redhat Enetrprise Linux
 *Almalinux, Rocky Linux are free redhat Linux deravatives 
