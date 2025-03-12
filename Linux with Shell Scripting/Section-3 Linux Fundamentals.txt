@@ -455,8 +455,8 @@ Nano Editor: In Nano, you can search for text using the Ctrl+w command. This wil
   v       be verbose
   z       use compression
   f file  use this file
- E.G: tar cf tps.tar tpsreports (tps.tar will be the file name)
-                      (dir)
+ E.G: tar cf tps.tar tpsreports (tps.tar will be the output file name,tpsreport: The file or directory to be archived.)
+                      
       tar tf tps.tar   (to see the dir there)
       tar xf /home/fire/tps.tar (to extract the files from tar)
 ->Compressing Files to Save Space:
