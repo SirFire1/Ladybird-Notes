@@ -449,16 +449,16 @@ Nano Editor: In Nano, you can search for text using the Ctrl+w command. This wil
   To bundle agroup of files or dir in archive.
   tar [-] c|x|t f tarfile [pattern]
   create,extract or list contents of a tar archive using pattern, if supplied
-  c      create a tar archive
-  x      extract files from the archive
-  t      display the table of contents
-  v      be verbose
-  z      use compression
+  c       create a tar archive
+  x       extract files from the archive
+  t       display the table of contents
+  v       be verbose
+  z       use compression
   f file  use this file
  E.G: tar cf tps.tar tpsreports (tps.tar will be the file name)
                       (dir)
       tar tf tps.tar   (to see the dir there)
-      tar xf /home/fir/tps.tar 9to extract the files from tar)
+      tar xf /home/fire/tps.tar (to extract the files from tar)
 ->Compressing Files to Save Space:
   gzip           Compress files
   gunzip         Uncompress files
