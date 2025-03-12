@@ -82,6 +82,7 @@ _______________________ _____________________________________
 ->Environment variables
  *storage location that has a name and a value
  *Typically uppercase 
+-Open a terminal and type "printenv" or "env" to list all environment variables
  *Access the contents by executing: echo $VAR_NAME
 ->PATH:
  *AN environment variable
