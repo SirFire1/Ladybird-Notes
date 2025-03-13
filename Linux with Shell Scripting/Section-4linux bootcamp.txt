@@ -231,6 +231,10 @@ __________________________________ __________________________________
    pstree            display processes in a tree format
    top               Interactive process viewer
    htop              Interactive process viewer
+* ps aux:
+  a: Shows processes for all users, not just the current user. This is useful for viewing processes from other users as well.
+  u: Displays the processes with a user-friendly format, including the user name and additional details like the start time and CPU/Memory usage.
+  x: Shows processes that are not associated with a terminal (i.e., processes running in the background or daemons).
 ->Background and Foreground Processes:
   command &    start command in background.
   Ctrl-c       Kill the foreground process
@@ -306,7 +310,7 @@ ______________________________ _______________________________________
         su - Ritik
         echo $TEST      :   (test environment is not set in -)
  *E.G:$ su -c 'echo $ORACLE_HOME' - oracle
-       It will first switch user to oracle then then run echo command, for ORACLE_HOME variable path
+       It will first switch user to oracle then run echo command, for ORACLE_HOME variable path
   *sudo: execute a command as another user, typically the superuser.
 ->Using sudo
   sudo -l                list available commands
