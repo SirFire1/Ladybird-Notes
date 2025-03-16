@@ -9,7 +9,7 @@
  * other examples:
   # ping
   #chsh     (users to change their shell)
- * etuid files are an attack surface
+ * Setuid files are an attack surface
  *IN short setuid commands helps other user to use commands that are necessary and under root privileges 
  * Not honored to setuid on shells scripts only on binary files. If you use setuid on shell scripts it will run as you not as root,this is security measure.
 -> Octal Permissions:
@@ -42,7 +42,7 @@
   chmod g+s /path/to/file
   chmod 2755 /path/to/file
 ->Adding Setuid and Setgid Attributes
-  chmod ud+s /path/to/file
+  chmod ug+s /path/to/file
   chmod 6755 /path/to/file
 ->Removing the Setgid Attribute 
   chmod g-s /path/to/file
