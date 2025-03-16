@@ -2,7 +2,7 @@
 -> Scripts:
   *contains a series of command
   *An interpreter executes commands in the scripts 
-  *Anything you can type at the command line, you can pt in a script.
+  *Anything you can type at the command line, you can put in a script.
   *Great for automating tasks
  *Format:script.sh
   #!/bin/bash
