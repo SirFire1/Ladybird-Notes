@@ -1,0 +1,15 @@
+HSET user:john name "John Doe"
+HGET user:john name
+HMSET user:kate name "Kate Smith" email "kate@gmail.com" age "30"
+HGET user:kate age
+HGET user:kate email
+HGET user:kate name
+HMGET user:kate name age
+HGETALL user:kate
+HKEYS user:kate
+HVALS user:kate
+HINCRBY user:kate age
+HVALS user:kate
+HDEL user:kate age
+HGETALL user:kate
+HLEN user:kate

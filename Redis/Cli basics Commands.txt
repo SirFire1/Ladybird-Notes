@@ -1,0 +1,26 @@
+PING
+ECHO hello
+SET foo 100
+GET foo
+INCR foo
+INCR foo
+DECR foo
+SET bar 200
+EXISTS bar
+EXISTS bar2
+DEL bar
+EXISTS bar
+$ redis-cli ECHO Hello
+$ redis-cli GET foo
+$ redis-cli INCR foo > commands.txt
+INCR foo
+FLUSHALL
+GET foo
+SET server:name myserver
+GET server:name
+SET server:port 6379
+GET server:port
+SET resource:foo hello
+EXPIRE resource:foo 120
+TTL resource:foo
+

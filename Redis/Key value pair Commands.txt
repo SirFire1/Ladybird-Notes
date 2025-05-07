@@ -1,0 +1,31 @@
+MSET key1 "Hello" key2 "World"
+MGET key1 key2
+MSETNX key3 "hi"
+MSETNX key3 "hello" key4 "there"
+SET greeting "Hello"
+GET greeting
+APPEND greeting " World"
+GET greeting
+APPEND foo "bar"
+GET foo
+RENAME greeting greet
+GET greet
+RENAMENX greet greeting
+RENAMENX key1 greting
+SET mystring "This is my string"
+GETRANGE mystr 0 -1
+GETRANGE mystr 0 5
+GETRANGE mystr 3 8
+GETSET foo
+GET foo
+SET mykey "hello"
+EXPIRE mykey 10
+TTL mykey
+SETEX mykey 10 "hello"
+PSETEX mykey 1000 "hello"
+PTTL mykey
+SETEX mykey 120 "hello"
+PERSIST mykey
+SETNX newkey "foobar"
+GET foobar
+SETNX newkey "barfoo"

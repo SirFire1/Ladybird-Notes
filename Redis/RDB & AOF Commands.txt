@@ -1,0 +1,46 @@
+sudo locate *rdb
+redis-cli
+SET user:john "John Doe"
+SET user:mary "Mary Williams"
+SET user:jill "Jill Jackson"
+SET user:paul "Paul Harris"
+SET user:mike "Mike SMith"
+SET user:derek "Derek Hanlon"
+SAVE
+exit
+
+sudo cp /var/lib/redis/dump.rdb /home/YOURUSER/redis-backup
+sudo nano /home/brad/redis/redis-backup
+
+sudo apt-get install -y rdiff-backup
+sudo rdiff-backup --preserve-numerical-ids /var/lib/redis /home/YOURUSER/redis
+sudo crontab -e
+2
+
+//SETUP DAILY BACKUP
+0 0 * * * rdiff-backup --preserve-numerical-ids --no-file-statistics /var/lib/redis /home/YOURUSER/redis
+
+redis-cli
+SET user:mike "Mike Wells"
+exit
+sudo rdiff-backup --preserve-numerical-ids /var/lib/redis /home/YOURUSER/redis
+sudo nano /home/brad/redis/dump.rdb
+
+//ENABLE AOF
+BGREWRITEAOF
+info
+//Scroll to the Persistence section, and check that the aof entries match what's shown here. If aof_rewrite_in_progress is 0, then the recreation of the AOF file has completed
+exit
+ls /var/lib/redis
+sudo service redis-server stop
+sudo nano /etc/redis/redis.conf
+appendonly yes
+sudo service redis-server start
+sudo rdiff-backup --preserve-numerical-ids /var/lib/redis /home/YOURUSER/redis
+redis-cli
+SET user:tom "Tom Doe"
+exit
+sudo rdiff-backup --preserve-numerical-ids /var/lib/redis /home/YOURUSER/redis
+
+
+

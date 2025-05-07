@@ -1,0 +1,16 @@
+SADD carmakes "Toyota"
+SADD carmakes "Ford"
+SADD carmakes "Chevy"
+SADD carmakes "Honda"
+SISMEMBER carmakes "Honda"
+SISMEMBER carmakes "Hondas"
+SMEMBERS carmakes
+SADD carmakes "Honda"
+SMEMBERS carmakes
+SCARD carmakes
+SADD mycars "Acura"
+SMOVE carmakes mycars "Toyota"
+SMEMBERS mycars
+SMEMBERS carmakes
+SRANDMEMBER carmakes
+SPOP carmakes
